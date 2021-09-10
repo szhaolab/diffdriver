@@ -4,13 +4,15 @@ library(foreach)
 library(doParallel)
 library(diffdriver)
 
+#' bmrpars need to be in log scale
 power_compare <- function(Niter=200, sgdata, bmrpars, ...){
   m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <-
-  m5.pvalue <- m6.pvalue <- m7.pvalue <- rep(1,Niter)
+  m5.pvalue <- m6.pvalue <- rep(1,Niter)
 
   for (iter in 1:Niter) {
+    print(paste0("Iteration: ",  iter))
     simdata <- simulate_1funcv(sgdata, bmrpars, ...)
-    mut <- do.call(rbind, simdata$mdlist)
+    mut <- do.call(rbind, simdata$mutlist)
     bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
     e <- simdata$pheno
     if (sum(mut) ==0) {next}
@@ -19,23 +21,20 @@ power_compare <- function(Niter=200, sgdata, bmrpars, ...){
     res.m3 <- genebinom(mut,e)
     res.m4 <- genelr(mut,e)
     funcv <- unlist(lapply(sgdata, "[[", "functypecode"))
-    fe1 <- c(simdata$avbetaf0, simdata$avbetaf0 + simdata$avbetaf1)[as.factor(funcv)]
+    ef <- simdata$efsize
+    fe1 <- c(ef$avbetaf0, ef$avbetaf0 + ef$avbetaf1)[as.factor(funcv)]
     res.m5 <-  ddmodel(mut,e, bmrmtx, fe1)
-    fe2 <- rep(simdata$avbetaf0f1, length(funcv))
+    fe2 <- rep(ef$avbetaf0f1, length(funcv))
     res.m6 <-  ddmodel(mut,e, bmrmtx, fe2)
-    # use a lower betaf0 to test if it is sensitive to betaf0 estimation
-    fe3 <- c(simdata$betaf0, simdata$betaf0 + simdata$avbetaf1)[as.factor(funcv)]
-    res.m7 <-  ddmodel(mut,e, bmrmtx, fe3)
-    m1.pvalue[iter] <-  res.m1$coefficients[2,4]
-    m2.pvalue[iter] <-  res.m2
-    m3.pvalue[iter] <-  res.m3
-    m4.pvalue[iter] <-  res.m4$coefficients[2,4]
+    m1.pvalue[iter] <-  res.m1$pvalue
+    m2.pvalue[iter] <-  res.m2$pvalue
+    m3.pvalue[iter] <-  res.m3$pvalue
+    m4.pvalue[iter] <-  res.m4$pvalue
     m5.pvalue[iter] <-  res.m5$pvalue
     m6.pvalue[iter] <-  res.m6$pvalue
-    m7.pvalue[iter] <-  res.m7$pvalue
   }
   return(list( "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue,"m3.pvalue" =m3.pvalue,"m4.pvalue" =m4.pvalue,
-               "m5.pvalue" =m5.pvalue,"m6.pvalue" =m6.pvalue,"m7.pvalue" =m7.pvalue))
+               "m5.pvalue" =m5.pvalue,"m6.pvalue" =m6.pvalue))
 }
 
 Nsim=500
@@ -53,7 +52,7 @@ foreach(i1=c(0, 1),.packages = c("Matrix", "data.table")) %:%
   foreach(i2=c(0, 1.2),.packages = "Matrix") %:%
     foreach(i3=c(400,800,1600),.packages = "Matrix")  %dopar% {
       print(c(i1,i2,i3))
-      simures <- power_compare(Nsim, sgdata, BMR, betaf0=i1, Nsample=i3, beta_gc=c(i2,Fe), fracc=0.8, fracn=0.2)
+      simures <- power_compare(Nsim, sgdata, log(BMR), betaf0=i1, Nsample=i3, beta_gc=c(i2,Fe), fracc=0.8, fracn=0.2)
       save(simures, file=paste0("power_betaf0=",i1,"_betagc=",i2, "_sample",i3,".Rd"))
     }
 print("end parallel computing...")

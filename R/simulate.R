@@ -20,7 +20,7 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c
   Nsample.ps <- Nsamplec.ps + Nsamplen.ps
   Nsample.neu <- Nsample - Nsample.ps
 
-  mdlist <- list()
+  mutlist <- list()
   countlist <- list()
   annodata <- list()
   bmrmtxlist <- list()
@@ -38,9 +38,9 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c
     mutc.out <- cbind(mutc[, 1:Nsamplec.ps], mutn[, 1:(Nsamplec-Nsamplec.ps)])
     mutn.out <- cbind(mutc[, (Nsamplec.ps + 1):Nsample.ps], mutn[, (Nsamplec-Nsamplec.ps+1):Nsample.neu])
 
-    mdlist[[t]] <- cbind(mutc.out,mutn.out)
+    mutlist[[t]] <- cbind(mutc.out,mutn.out)
     countlist[[t]] <- c(tnpos1, tnpos2,sum(mutc1),sum(mutc2),sum(mutn1), sum(mutn2), sum(mutc.out), sum(mutn.out), sum(mutc.out[1:tnpos1,]), sum(mutn.out[1:tnpos1,]))
-    bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mdlist[[t]]), nrow = nrow(mdlist[[t]]))
+    bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]]))
   }
 
   avbetaf0 <- log(exp(betaf0) * (exp(beta_gc[1]) * Nsample.ps/Nsample + Nsample.neu/Nsample))
@@ -48,6 +48,6 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c
   pos1pos2ratio <- colSums(do.call(rbind, countlist))[1]/colSums(do.call(rbind, countlist))[2]
   avbetaf0f1 <- avbetaf0 + log((pos1pos2ratio + exp(avbetaf1))/(pos1pos2ratio+1))
 
-  simdata <- list("mutbyt"= mdlist, "pheno" = edata, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "fracc" = fracc, "fracn" = fracn, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf0" = avbetaf0, "avbetaf1" = avbetaf1, "avbetaf0f1" = avbetaf0f1))
+  simdata <- list("mutlist"= mutlist, "pheno" = edata, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "fracc" = fracc, "fracn" = fracn, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf0" = avbetaf0, "avbetaf1" = avbetaf1, "avbetaf0f1" = avbetaf0f1))
   return(simdata)
 }
