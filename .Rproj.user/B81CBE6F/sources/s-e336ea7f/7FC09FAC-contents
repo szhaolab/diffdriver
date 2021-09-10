@@ -1,0 +1,13 @@
+load_drivermaps_func <- function(drivermapsdir){
+  source(paste0(drivermapsdir,'/scripts/R00_tools.r'))
+  source(paste0(drivermapsdir,'/scripts/R00_myfunc.R', sep=""))
+  source(paste0(drivermapsdir,'/scripts/R01_prep_data.R'))
+  source(paste0(drivermapsdir,'/scripts/R02_BMR_gsQC.R'))
+  source(paste0(drivermapsdir,'/scripts/R03_model_GMR.R'))
+  source(paste0(drivermapsdir,'/scripts/R03_model_GMR_HMM.R'))
+  source(paste0(drivermapsdir,'/scripts/R04_multiT_FDR_siggene.R'))
+  source(paste0(drivermapsdir,'/scripts/R05_multiT_ASH.R'))
+  source(paste0(drivermapsdir,'/scripts/R06_multiT_pi0.R'))
+  source(paste0(drivermapsdir,'/scripts/R00_multiT_get.R'))
+
+}

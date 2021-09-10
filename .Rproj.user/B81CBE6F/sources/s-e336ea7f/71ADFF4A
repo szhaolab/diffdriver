@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1631072595651.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "71ADFF4A",
+    "lastKnownWriteTime" : 1631288007,
+    "last_content_update" : 1631288007471,
+    "path" : "~/cancer_pheno/diffdriver/R/diffdriver.R",
+    "project_path" : "R/diffdriver.R",
+    "properties" : {
+        "cursorPosition" : "7,17",
+        "scrollLine" : "0",
+        "source_window_id" : ""
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

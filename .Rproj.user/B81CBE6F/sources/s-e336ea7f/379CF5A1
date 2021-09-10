@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1631284258732.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "379CF5A1",
+    "lastKnownWriteTime" : 1631284284,
+    "last_content_update" : 1631284284518,
+    "path" : "~/cancer_pheno/diffdriver/R/plots.R",
+    "project_path" : "R/plots.R",
+    "properties" : {
+        "cursorPosition" : "7,36",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
