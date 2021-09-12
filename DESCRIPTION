@@ -1,7 +1,7 @@
 Package: diffdriver
 Type: Package
 Title: Identify differential selection
-Version: 0.1.0
+Version: 0.1.1
 Author: Siming Zhao
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: This package implements a statistical method to detect differential selection of somatic mutations under different environments
@@ -15,5 +15,6 @@ Imports:
   matrixStats
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    logging
 RoxygenNote: 6.1.1

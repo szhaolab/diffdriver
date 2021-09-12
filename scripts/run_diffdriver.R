@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 library(diffdriver)
+library(logging)
 # You need first download and install drivermaps and run drivermaps for your data before running diffdriver
 Drivermapsdir <- "~/cancer_somatic/maps/"
 
@@ -12,10 +13,9 @@ Genef <- system.file("extdata/genes.txt", package = "diffdriver")
 Mutf <- system.file("extdata/mutations.txt", package = "diffdriver")
 Phenof <- system.file("extdata/phenotypes.txt", package = "diffdriver")
 
-log <- file(paste0(Outputdir,"/", Outputname, ".log"), open="wt")
-sink(log)
-sink(log, type="message")
-print(paste0("Started running diffDriver at ",Sys.time()))
+logfile <- file(paste0(Outputdir,"/", Outputname, ".log"), open="wt")
+addHandler(writeToFile, file= logfile, level='DEBUG')
+loginfo("Started running diffdriver ...")
 
 res <- diffdriver(Genef, Mutf, Phenof, drivermapsdir = Drivermapsdir, outputdir = Outputdir, outputname = Outputname)
 
@@ -25,10 +25,10 @@ colnames(resdf) <- paste0(meth,".p")
 resdf[ , paste0(meth,".fdr")] <- apply(resdf,2,p.adjust, method = "fdr")
 resdf[,c("mut.E1", "mut.E0", "E1", "E0")] <- do.call(rbind, lapply(lapply(res, '[[', "fisher"), '[[',"count"))
 
-save(res, file = paste0(Outputdir, "/", Outputname,,".Rd"))
+save(res, file = paste0(Outputdir, "/", Outputname,".Rd"))
 write.table(resdf, file= paste0(Outputdir,"/", Outputname, ".txt") , row.names=T, col.names=T, sep="\t", quote = F)
 warnings()
-print(paste0("Finished at ", Sys.time()))
+loginfo("diffdriver finished.")
 
 
 

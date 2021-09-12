@@ -1,3 +1,4 @@
+# Global variable Totalnttype, Outputdir
 #' @import data.table
 ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
   # genesubset is a file containing genenames, each line has one gene name
@@ -236,6 +237,14 @@ matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s,
   glmdt[,colnames(chrposdt):= chrposdt]
   glmdtsorted <- glmdt[order(chrom,genename,start)]
   glmdt <- glmdtsorted[,selectcol,with = F]
-  glmdtchrpos <- glmdtsorted[,c("chrom","genename","start"), with =F]
+  glmdtchrpos <- glmdtsorted[,c("chrom","genename","start", colnames(chrposdt)), with =F]
   return(list(glmdt,glmdtchrpos))
+}
+
+#'
+convertbeta <- function(j, vbeta){
+  tbeta <- vbeta[j]
+  ibeta <- vbeta[-c(1:Totalnttype)]
+  vbetasub <- c(tbeta,ibeta)
+  return(vbetasub)
 }
