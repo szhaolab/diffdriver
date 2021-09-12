@@ -7,14 +7,23 @@
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
 #' @import Matrix data.table
 #' @export
-diffDriver <- function(genef, mutf, phenof){
-  # prep data
-  # column index (ci): sampleID
-  # row index (ri): chr pos ref alt
-  #
-  # 1. background mutation rate (bmrdt): data.table, each column correponds to one BMR label
-  # 2. functional annotation (fanno):data.table, each row has functional annotation for each possible mutation
-  # 3. sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
+diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
+  # ------- read position level information (same as in drivermaps) ----------
+  Adirbase <-paste0(drivermapsdir, "/data/")
+  Afileinfo <- list(file = paste(Adirbase, "nttypeXXX_annodata.txt", sep=""),
+                    header = c("chrom","start","end","ref","alt","genename","functypecode","nttypecode","expr","repl","hic","mycons","sift","phylop100","MA","ssp","wggerp"),
+                    coltype = c("character","numeric","numeric","character","character","character","character","factor","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
+  Totalnttype <- 9
+  BMvars <- c("nttypecode", "expr", "repl", "hic")
+  BMmuttype <- "functypecode == 6 & ssp == 0"
+  Funcvars <- c("functypecode", "mycons", "sift", "phylop100", "MA")
+  Functypecodelevel <- "7"
+  Funcvmuttype <- "functypecode == 7 | functypecode == 8"
+  Readinvars <- c("genename", "ssp", BMvars, Funcvars) # This is optional, if not given, then will read all columns
+  Qnvars = c("expr","repl","hic") # all the rest will be normalized, except for nttypecode
+  Outputbase <- paste0(outputdir, "/", outputname)
+  paramdir <- paste0(drivermapsdir, "param/")
+  Fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
   allg <- read.table(genef, stringsAsFactors = F)[,1]
   matrixlist <- readmodeldata(Afileinfo, Yfileinfo, c(BMvars,Funcvars), Funcvmuttype, Readinvars , Qnvars, Functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=Fixmusdfile)
@@ -26,7 +35,9 @@ diffDriver <- function(genef, mutf, phenof){
     b2 <- which(sapply(chrposmatrixlist[[t]][[3]], grepl, pattern="[;,|]"))
     chrposmatrixlist[[t]][[3]][b2,] <- unlist(lapply(sapply(matrixlist[[t]][[3]][b2,], strsplit, split="[;,|]"), function(x) intersect(x,allg)[1]))
   }
+  #------------------------------------------------------------------------------
 
+  # background mutation rate (bmrdt): data.table, each column correponds to one BMR label
   bmrdt <- data.table()
 
   for (label in names(BMRlist)) {
@@ -41,17 +52,24 @@ diffDriver <- function(genef, mutf, phenof){
     rm(matrixlisttemp,chrposmatrixlisttemp); gc()
   }
 
+  # functional annotation (fanno):data.table, each row has functional annotation for each possible mutation
   fanno <- glmdtall[[1]]
 
+  # row index (ri): chr pos ref alt
   ri <- glmdtall[[2]]
 
+  # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
   canno <- fread(phenof, header = T)
+
+  # column index (ci): sampleID
   ci <- canno[,"SampleID"]
   ci[,"cidx" := 1:dim(canno)[1]]
+
   for (l in names(BMRlist)) {
     BMRlist[[l]][["nsyn"]] <- sum(canno$Nsyn[canno$BMRlabel == l])
   }
 
+  # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
   muts <- fread(mutf, header = T)
   if (!grepl('chr', muts$Chromosome[1], fixed = T)) {muts$Chromosome <- paste0("chr",muts$Chromosome)}
 
@@ -70,7 +88,8 @@ diffDriver <- function(genef, mutf, phenof){
     mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
     if (sum(mutmtx) ==0) {next}
 
-    bmrsc <- log(canno$Nsyn/unlist(lapply(BMRlist[canno$BMRlabel],'[[',"nsyn"))) # normalize BMR for each sample
+    # normalize BMR for each sample
+    bmrsc <- log(canno$Nsyn/unlist(lapply(BMRlist[canno$BMRlabel],'[[',"nsyn")))
     # bmrmtx is matrix, rows are positions, columns are for each samples
     bmrmtx <-sweep(as.matrix(bmrallg[[g]][,canno$BMRlabel,with=F]), 2, bmrsc, "+")
 

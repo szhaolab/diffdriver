@@ -2,7 +2,6 @@
 
 library(diffdriver)
 drivermapsdir <- "~/cancer_somatic/maps/"
-load_drivermaps_func(drivermapsdir)
 
 sg <- "ERBB3"
 Totalnttype <- 9
