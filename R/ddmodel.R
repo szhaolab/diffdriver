@@ -26,7 +26,7 @@ ddmodel <- function(mut, e, bmr, fe){
     b.pi <- exp(eta)/(1+exp(eta))
     b.pi[b.pi <= 0] <- 1e-8
     b.pi[b.pi >= 1] <- 1 - 1e-8
-    llmtx = log(exp(-bmr*fe)*fe*bmr*b.pi*e + exp(-bmr)*(1-b.pi*e))
+    llmtx = (1- mut) * log(1 - b.pi) + mut * log(b.pi)
     ll <- sum(llmtx)
     return(ll)
   }
@@ -39,7 +39,7 @@ ddmodel <- function(mut, e, bmr, fe){
     b.pi <-  exp(eta0+eta1*e)/(1+exp(eta0+eta1*e))
     b.pi[b.pi <= 0] <- 1e-8
     b.pi[b.pi >= 1] <- 1 - 1e-8
-    llmtx = log((exp(-bmr*fe)*fe*bmr*b.pi*e) + exp(-bmr)*(1-b.pi*e))
+    llmtx = (1- mut.t) * log(1- b.pi) + mut.t * log(b.pi)
     ll <- sum(llmtx)
     return(ll)
   }
@@ -47,15 +47,6 @@ ddmodel <- function(mut, e, bmr, fe){
   resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
   resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
   
-  teststat<- -2*(resn$value-resa$value)
-  pvalue <- pchisq(teststat,df=1,lower.tail=FALSE)
-  res <- list("pvalue"=pvalue, "null.eta0" = resn$par, "alt.eta"=resa$par, "null.ll"= resn$value, "alt.ll" = resa$value)
-  return(res)
-}
-
-  resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
-  resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
-
   teststat<- -2*(resn$value-resa$value)
   pvalue <- pchisq(teststat,df=1,lower.tail=FALSE)
   res <- list("pvalue"=pvalue, "null.eta0" = resn$par, "alt.eta"=resa$par, "null.ll"= resn$value, "alt.ll" = resa$value)
