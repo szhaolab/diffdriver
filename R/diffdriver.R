@@ -71,7 +71,6 @@ diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outpu
 
   # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
   muts <- fread(mutf, header = T)
-  setnames(muts, c("Chromosome","Position","Alt","Ref", "SampleID")
   if (!grepl('chr', muts$Chromosome[1], fixed = T)) {muts$Chromosome <- paste0("chr",muts$Chromosome)}
 
   # split based on gene
