@@ -71,6 +71,7 @@ diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outpu
 
   # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
   muts <- fread(mutf, header = T)
+  setnames(muts, c("Chromosome","Position","Alt","Ref", "SampleID")
   if (!grepl('chr', muts$Chromosome[1], fixed = T)) {muts$Chromosome <- paste0("chr",muts$Chromosome)}
 
   # split based on gene
@@ -103,7 +104,7 @@ diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outpu
     fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
 
     resg <- list()
-    resg[["dd"]] <- ddmodel(mutmtx, canno$Phenotype, bmrmtx, fe[,1])
+#   resg[["dd"]] <- ddmodel(mutmtx, canno$Phenotype, bmrmtx, fe[,1])
     resg[["mlr"]] <- mlr(mutmtx, canno$Phenotype)
     resg[["mlr.v2"]] <- mlr.v2(mutmtx, canno$Phenotype, canno$Nsyn)
     resg[["fisher"]] <- genefisher(mutmtx, canno$Phenotype)
