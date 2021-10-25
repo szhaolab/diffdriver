@@ -108,7 +108,7 @@ diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outpu
     resg[["mlr.v2"]] <- mlr.v2(mutmtx, canno$Phenotype, canno$Nsyn)
     resg[["fisher"]] <- genefisher(mutmtx, canno$Phenotype)
 #    resg[["binom"]] <- genebinom(mutmtx, canno$Phenotype)
-    resg[["lr"]] <- genelr(mutmtx, canno$Phenotype)
+#    resg[["lr"]] <- genelr(mutmtx, canno$Phenotype)
     res[[g]] <- resg
 
     save(mutmtx, canno, bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(Outputbase,".", g, ".Rd")))
