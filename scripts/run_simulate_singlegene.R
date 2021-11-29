@@ -22,10 +22,11 @@ power_compare <- function(Niter=200, sgdata, bmrpars, ...){
     res.m4 <- genelr(mut,e)
     funcv <- unlist(lapply(sgdata, "[[", "functypecode"))
     ef <- simdata$efsize
-    fe1 <- c(ef$avbetaf0, ef$avbetaf0 + ef$avbetaf1)[as.factor(funcv)]
-    res.m5 <-  ddmodel(mut,e, bmrmtx, fe1)
-    fe2 <- rep(ef$avbetaf0f1, length(funcv))
-    res.m6 <-  ddmodel(mut,e, bmrmtx, fe2)
+    fe1 <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]
+    mr <- bmrmtx + ef$betaf0
+    res.m5 <-  ddmodel(mut,e, mr, fe1)
+    fe2 <- rep(ef$avbetaf1f2, length(funcv))
+    res.m6 <-  ddmodel(mut,e, mr, fe2)
     m1.pvalue[iter] <-  res.m1$pvalue
     m2.pvalue[iter] <-  res.m2$pvalue
     m3.pvalue[iter] <-  res.m3$pvalue
