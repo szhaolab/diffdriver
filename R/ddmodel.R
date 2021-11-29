@@ -19,9 +19,9 @@ ddmodel <- function(mut, e, mr, fe){
     # log likelihood under null
     # Under H0 (null hypothesis), i.e. there is no differential selection, α1=0. The parameter we want to estimate is α0.
     alpha <- param[1]
-    fe0 <- param[2]
+    #fe0 <- param[2]
 
-    rate.s <-  fe * mr * fe0
+    rate.s <-  fe * mr
     rate.n <-  mr
 
     rate.s[rate.s <= 0] <- 1e-8
@@ -47,9 +47,9 @@ ddmodel <- function(mut, e, mr, fe){
 
     alpha0 <- param[1]
     alpha1 <- param[2]
-    fe0 <- param[3]
+    # fe0 <- param[3]
 
-    rate.s <-  fe * mr * fe0
+    rate.s <-  fe * mr
     rate.n <-  mr
 
     rate.s[rate.s <= 0] <- 1e-8
@@ -69,8 +69,8 @@ ddmodel <- function(mut, e, mr, fe){
     return(ll)
   }
 
-  resn <- optim(c(0,1), lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
-  resa <- optim(c(0,0,1), lla, method="Nelder-Mead", control=list(fnscale=-1))
+  resn <- optim(c(0), lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
+  resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
 
   teststat<- -2*(resn$value-resa$value)
   pvalue <- pchisq(teststat,df=1,lower.tail=FALSE)
