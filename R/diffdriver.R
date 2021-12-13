@@ -60,7 +60,8 @@ diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outpu
 
   # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
   canno <- fread(phenof, header = "auto")
-
+  #Debugging
+  head(canno$Phenotype)
   # column index (ci): sampleID
   ci <- canno[,"SampleID"]
   ci[,"cidx" := 1:dim(canno)[1]]
