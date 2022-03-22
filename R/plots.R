@@ -7,7 +7,7 @@ plot_mut <- function(mutmtx, canno, bmrmtx, ganno){
   rownames(df) <- c("Phenotype", "Nonsyn", "LoF", "Cons.", "BMR")
   df <- df[,order(df["Phenotype",])]
   par(mfrow=c(dim(df)[1],1), mar=c(0.5,5,0.5,1))
-  if (unique(df[1,])==2) {
+  if (length(unique(df[1,]))==2) {
     # binary phenotype
     df <- df[,order(df["BMR",])]
     barplot(rep(1,length(df[1,])), col=c("white", "salmon")[as.factor(df[1,])], xaxt='n', yaxt = 'n', ylab= rownames(df)[1], border=NA)
