@@ -1,6 +1,6 @@
 #' @title plot mutations
 #' @export
-plot_mut <- function(mutmtx, canno, bmrmtx, ganno){
+plot_mut <- function(mutmtx, canno, bmrmtx, ganno, ...){
   mycolorsori <- c("#FF3D2E","#2b8cbe","#fdae61","#41ab5d","pink","#8C2DA6","#a65628")
 
   df <- rbind(canno$Phenotype,colSums(mutmtx), colSums(mutmtx[ganno$functypecode8>0,]), colSums(mutmtx[ganno$mycons>0,]),colSums(exp(bmrmtx)))
@@ -10,9 +10,9 @@ plot_mut <- function(mutmtx, canno, bmrmtx, ganno){
   if (length(unique(df[1,]))==2) {
     # binary phenotype
     df <- df[,order(df["BMR",])]
-    barplot(rep(1,length(df[1,])), col=c("white", "salmon")[as.factor(df[1,])], xaxt='n', yaxt = 'n', ylab= rownames(df)[1], border=NA)
+    barplot(rep(1,length(df[1,])), col=c("white", "salmon")[as.factor(df[1,])], xaxt='n', yaxt = 'n', ylab= rownames(df)[1], border=NA, ...)
   } else {
-    barplot(df[1,], xaxt='n', yaxt = 'n', ylab= rownames(df)[1], border=NA)
+    barplot(df[1,], xaxt='n', yaxt = 'n', ylab= rownames(df)[1], border=NA, ...)
   }
   for (i in 2:4){
     barplot(df[i,], col=mycolorsori[i], xaxt='n', yaxt = 'n', ylab= rownames(df)[i], border = mycolorsori[i])
