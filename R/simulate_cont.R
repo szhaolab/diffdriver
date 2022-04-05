@@ -57,7 +57,4 @@ bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mutlist[[t]]), nrow = nrow(mut
 }
 
 
-i1=1
-i2=1.2
-a=simulate_2funcv(sgdata, bmrpars=log(BMR), betaf0=i1, Nsample=1000, beta_gc=c(i2,Fe), par=c(0,5,0.1,1))
-a$efsize
+
