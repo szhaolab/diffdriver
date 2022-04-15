@@ -11,7 +11,7 @@
 #' @export
 power_compare <- function(family="binary", Niter=200, sgdata, bmrpars, ...){
   m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <-
-    m5.pvalue <- m6.pvalue <- rep(1,Niter)
+    m5.pvalue <- m6.pvalue <- m7.pvalue <- m8.pvalue <-rep(1,Niter)
   a=c()
   for (iter in 1:Niter) {
     print(paste0("Iteration: ",  iter))
