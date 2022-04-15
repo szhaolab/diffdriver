@@ -10,8 +10,7 @@ simulate_1funcv(
   betaf0 = 0.5,
   Nsample = 1000,
   beta_gc = c(0, 1),
-  fracc = 0.8,
-  fracn = 0.2
+  par = c(0.8, 0.2)
 )
 }
 \arguments{

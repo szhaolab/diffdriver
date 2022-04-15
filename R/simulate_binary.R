@@ -10,13 +10,13 @@
 #' @param fracn, fraction of positively selected samples in group E=0
 #' @import Matrix data.table
 #' @export
-simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c(0,1), fracc=0.8, fracn=0.2){
+simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c(0,1), par=c(0.8,0.2)){
   Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
   Nsamplen <- Nsample-Nsamplec
   edata <- c(rep(1,Nsamplec),rep(0,Nsamplen))
 
-  Nsamplec.ps <- rbinom(1, Nsamplec, fracc) # number of positively selected samples in group E=1
-  Nsamplen.ps <- rbinom(1, Nsamplen, fracn) # number of positively selected samples in group E=0
+  Nsamplec.ps <- rbinom(1, Nsamplec, par[1]) # number of positively selected samples in group E=1
+  Nsamplen.ps <- rbinom(1, Nsamplen, par[2]) # number of positively selected samples in group E=0
   Nsample.ps <- Nsamplec.ps + Nsamplen.ps
   Nsample.neu <- Nsample - Nsample.ps
 
@@ -48,6 +48,6 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c
   pos1pos2ratio <- colSums(do.call(rbind, countlist))[1]/colSums(do.call(rbind, countlist))[2]
   avbetaf1f2 <- log((pos1pos2ratio*exp(avbetaf1) + exp(avbetaf2))/(pos1pos2ratio+1))
   betaf1f2 <- log((pos1pos2ratio*exp(beta_gc[1]) + exp(beta_gc[2]))/(pos1pos2ratio+1))
-  simdata <- list("mutlist"= mutlist, "pheno" = edata, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "fracc" = fracc, "fracn" = fracn, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf1" = avbetaf1, "avbetaf2" = avbetaf2, "avbetaf1f2" = avbetaf1f2,"betaf1f2"=betaf1f2))
+  simdata <- list("mutlist"= mutlist, "pheno" = edata, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "par" = par, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf1" = avbetaf1, "avbetaf2" = avbetaf2, "avbetaf1f2" = avbetaf1f2,"betaf1f2"=betaf1f2))
   return(simdata)
 }

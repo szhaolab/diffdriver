@@ -4,7 +4,15 @@
 \alias{power_compare}
 \title{Simulation function}
 \usage{
-power_compare(family = "binary", Niter = 200, sgdata, bmrpars, ...)
+power_compare(
+  family = "binary",
+  Niter = 200,
+  sgdata,
+  bmrpars,
+  betaf0,
+  Nsample,
+  par
+)
 }
 \arguments{
 \item{family}{indicates the type of E variable}
