@@ -1,4 +1,4 @@
-#' Title
+#' @title Simulation function
 #'
 #' @param family indicates the type of E variable
 #' @param Niter is the number of replication in simulation
@@ -8,6 +8,7 @@
 #'
 #' @return A list composed of the p-values for 8 models
 #'        and the parameters used in these models.
+#' @export
 power_compare <- function(family="binary", Niter=200, sgdata, bmrpars, ...){
   m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <-
     m5.pvalue <- m6.pvalue <- rep(1,Niter)

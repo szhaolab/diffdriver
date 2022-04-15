@@ -4,18 +4,18 @@
 \alias{ddmodel}
 \title{diffDriver model}
 \usage{
-ddmodel(mut, e, bmr, fe)
+ddmodel(mut, e, mr, fe)
 }
 \arguments{
-\item{mut}{a matrix of mutation status 0 or 1}
+\item{mut}{a matrix of mutation status 0 or 1, rows positions, columns are samples.}
 
 \item{e}{a vector,phenotype of each sample,
-should match the columns of \code{mut} and \code{bmr}}
+should match the columns of \code{mut} and \code{mr}}
 
-\item{bmr}{a matrix, background mutation rate of each sample at each mutation (log scale)}
+\item{mr}{a matrix, mutation rate of each sample at each mutation (log scale) that is not dependent on sample level factor}
 
-\item{fe, }{a vector, increased mutation rate at each mutation, due to functional effect (log scale),
-should match the rows of \code{mut} and \code{bmr}}
+\item{fe, }{a vector, increased mutation rate at each position, depending on e (log scale),
+should match the rows of \code{mut} and \code{mr}}
 }
 \description{
 This function uses the model as cmodel.frac,

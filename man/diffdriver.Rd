@@ -4,8 +4,14 @@
 \alias{diffdriver}
 \title{Run diffDriver given input files}
 \usage{
-diffdriver(genef, mutf, phenof, drivermapsdir, outputdir = ".",
-  outputname = "diffdriver_results")
+diffdriver(
+  genef,
+  mutf,
+  phenof,
+  drivermapsdir,
+  outputdir = ".",
+  outputname = "diffdriver_results"
+)
 }
 \arguments{
 \item{genef}{file for name of genes to be included in the analysis}
