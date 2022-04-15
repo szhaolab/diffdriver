@@ -4,13 +4,15 @@
 #' @param Niter is the number of replication in simulation
 #' @param sgdata is the annotation data
 #' @param bmrpars is the background mutation rate.
-#' @param ... other parameters
+#' @param betaf0 gene effect mutation
+#' @param Nsample sample size of simulation
+#' @param beta_gc the effects of missense and nonsense
+#' @param par parameters for the simuation
 #'
 #' @return A list composed of the p-values for 8 models
 #'        and the parameters used in these models.
 #' @export
-power_compare <- function(family="binary", Niter=200, sgdata, bmrpars, betaf0,
-                          Nsample,par){
+power_compare <- function(family="binary", Niter=200, sgdata, bmrpars, betaf0=0,Nsample=1000,beta_gc=c(0,1.2),par){
   m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <-
     m5.pvalue <- m6.pvalue <- m7.pvalue <- m8.pvalue <-rep(1,Niter)
   a=c()

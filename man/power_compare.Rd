@@ -9,8 +9,9 @@ power_compare(
   Niter = 200,
   sgdata,
   bmrpars,
-  betaf0,
-  Nsample,
+  betaf0 = 0,
+  Nsample = 1000,
+  beta_gc = c(0, 1.2),
   par
 )
 }
@@ -23,7 +24,13 @@ power_compare(
 
 \item{bmrpars}{is the background mutation rate.}
 
-\item{...}{other parameters}
+\item{betaf0}{gene effect mutation}
+
+\item{Nsample}{sample size of simulation}
+
+\item{beta_gc}{the effects of missense and nonsense}
+
+\item{par}{parameters for the simuation}
 }
 \value{
 A list composed of the p-values for 8 models
