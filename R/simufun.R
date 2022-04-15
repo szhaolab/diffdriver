@@ -16,9 +16,10 @@ power_compare <- function(family="binary", Niter=200, sgdata, bmrpars, ...){
   for (iter in 1:Niter) {
     print(paste0("Iteration: ",  iter))
     if (family=="binary"){
-      simdata <- simulate_1funcv(sgdata, bmrpars, ...)
-    }else{
-      simdata <- simulate_2funcv(sgdata, bmrpars, ...)
+      simdata <- simulate_1funcv(sgdata, bmrpars, betaf0, Nsample, beta_gc, fracc,fracn)
+    }
+    if (family=="cont"){
+      simdata <- simulate_2funcv(sgdata, bmrpars, betaf0, Nsample, beta_gc, par)
     }
     ssgdata=simdata$annodata
     mut <- do.call(rbind, simdata$mutlist)
@@ -29,7 +30,7 @@ power_compare <- function(family="binary", Niter=200, sgdata, bmrpars, ...){
     res.m1 <- mlr(mut,e)
     res.m2 <- genefisher(mut,e_bisect)
     res.m3 <- genebinom(mut,e_bisect)
-    res.m4 <- genelr(mut,e)
+    res.m4 <- genelr(mut,e_bisect)
     funcv <- unlist(lapply(ssgdata, "[[", "functypecode"))
     ef <- simdata$efsize
     fe1 <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]
