@@ -31,7 +31,7 @@ power_compare <- function(family="binary", Niter=200, sgdata, bmrpars, betaf0=0,
     mut <- do.call(rbind, simdata$mutlist)
     bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
     e <- simdata$pheno
-    e_bisect=ifelse(e>median(e),1,0)
+    e_bisect=ifelse(e>mean(e),1,0)
     if (sum(mut) ==0) {next}
     res.m1 <- mlr(mut,e)
     res.m2 <- genefisher(mut,e_bisect)
