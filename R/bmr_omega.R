@@ -1,5 +1,5 @@
 #' Estimate the effect of sample level variables on background mutation rate
-#' @param Y is a vector indicating the number of the silence mutations for every subject
+#' @param Y is a vector indicating the number of the silence mutations for every sample
 #' @param lambda A vector giving  gene effects
 #' @param l A vector indicating the lengths of the genes involved
 #' @param beta A vector giving the coefficients of position level variables
@@ -8,6 +8,7 @@
 #' @return A list giving all the information in the model
 bmr_omega=function(Y,lambda,l,beta,X,S){
 m=length(lambda)
+n=length(Y)
 Z=exp(X%*%beta)
 U=c()
 ll=cumsum(l)
@@ -16,8 +17,22 @@ for (i in 2:m) {
 U[i]=sum(Z[(ll[i-1]+1):ll[i]])
 }
 offset=log(sum(U*lambda))
-preg=glm(Y~S,offset = offset)
+preg=glm(Y~S,offset = offset,family = "poisson")
 logmu=pref$coefficients[1,]
 omega=preg$coefficients[2,]
-return(list(logmu,omega))
+muij=vector("list",n)
+
+for (i in 1:n) {
+  muij[[i]]=c()
+  for (j in 1:ll[1]) {
+    muij[[i]]=c(muij[[i]],exp(logmu[1])*exp(X[j,]%*%beta))
+  }
+for (g in 2:m) {
+  for (j in ll[g-1]:ll[g]) {
+muij[[i]]=c(muij[[i]],exp(logmu[1])*exp(X[j,]%*%beta))
+  }
 }
+}
+return(list(logmu,omega,muij))
+}
+
