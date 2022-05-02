@@ -25,11 +25,11 @@ muij=vector("list",n)
 for (i in 1:n) {
   muij[[i]]=c()
   for (j in 1:ll[1]) {
-    muij[[i]]=c(muij[[i]],exp(logmu[1])*exp(X[j,]%*%beta))
+    muij[[i]]=c(muij[[i]],exp(logmu[1])*exp(X[j,]%*%beta)*exp(S[i,]%*%omega))
   }
 for (g in 2:m) {
   for (j in ll[g-1]:ll[g]) {
-muij[[i]]=c(muij[[i]],exp(logmu[1])*exp(X[j,]%*%beta))
+muij[[i]]=c(muij[[i]],exp(logmu[1])*exp(X[j,]%*%beta)*exp(S[i,]%*%omega))
   }
 }
 }
