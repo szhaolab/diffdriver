@@ -17,6 +17,7 @@ U[i]=sum(Z[(ll[i-1]+1):ll[i]])
 }
 offset=log(sum(U*lambda))
 preg=glm(Y~S,offset = offset)
+logmu=pref$coefficients[1,]
 omega=preg$coefficients[2,]
-return(omega)
+return(list(logmu,omega))
 }
