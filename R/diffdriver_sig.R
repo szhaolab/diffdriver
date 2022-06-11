@@ -1,13 +1,13 @@
 # TODO: mutation hotspot, quantitative phenotype
 # Notes: syn data prepared from direct join of mutation list to annodata is different from used in driverMAPS BMR estimation: 1. 5% syn are ssp are included. 2. BMR estimation from old driverMAPS run has different annodata. 3. genes without expr/hic/rep were removed in BMR driverMAPS estimation.
-#' @title Run diffDriver given input files
+#' @title Run diffDriver given input files mutation signature type
 #' @description This is the function to run diffDriver. We first need to set up: run driverMAPS for groups with potential different BMR, assign BMR labels for each sample. then BMR for each sample will be scaled based on driverMAPS results.
 #' @param genef file for name of genes to be included in the analysis
 #' @param mutf mutation list file, use the driverMAPS mutation input format
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
 #' @import Matrix data.table
 #' @export
-diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
+diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-paste0(drivermapsdir, "/data/")
   afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
@@ -54,7 +54,7 @@ names(target)<- names(BMRlist)
     y_g_s[is.na(y_g_s)] <- 0
     mu_g_s <- BMRlist[[label]]$Mu_g_s_all[allg][,1:2, with=F]
     mu_g_s[is.na(mu_g_s)] <- 0
-    glmdtall <- matrixlistToGLM(matrixlisttemp, chrposmatrixlisttemp, BMRlist[[label]]$BMpars, mu_g_s, y_g_s, fixpars=NULL)
+    glmdtall <- matrixlistToGLM_sig(matrixlisttemp, chrposmatrixlisttemp, BMRlist[[label]]$BMpars, mu_g_s, y_g_s, fixpars=NULL)
     bmrdt[,eval(label):= glmdtall[[1]]$baseline]
     target[[label]]=cbind(glmdtall[[2]][,.(chrom,genename,start,nttypecode)],glmdtall[[1]][,.(expr,repl,hic)])
     rm(matrixlisttemp,chrposmatrixlisttemp); gc()

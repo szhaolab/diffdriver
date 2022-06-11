@@ -208,7 +208,7 @@ readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readi
 
 #' @import data.table
 #' @export
-matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
+matrixlistToGLM_sig <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
   GLMlist <- list()
   chrposlist <- list()
   BMcol <- names(BMpars$fullpars)[-c(1:totalnttype,length(BMpars$fullpars)-1,length(BMpars$fullpars))]
@@ -217,7 +217,7 @@ matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s,
   lambdaPM_g_s <- data.table(agg_var = mu_g_s$agg_var, lambdaPE = log((y_g_s$y + alpha)/(mu_g_s$V1 + alpha)), key = "agg_var")
   BMvbeta <- BMpars$fullpars[1:(length(BMpars$fullpars)-2)]
   for (j in seq(1:totalnttype)){
-    BMvbetasub <- convertbeta(j, BMvbeta)
+    BMvbetasub <- convertbeta_sig(j, BMvbeta)
     #BManno  <- matrixlist[[j]][[1]][,c("(Intercept)",BMcol), with=F]
     BManno  <- matrixlist[[j]][[1]][,BMcol, with=F]
     fixanno <- matrixlist[[j]][[1]][,fixcol, with =F]
@@ -247,11 +247,59 @@ matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s,
 }
 
 #'
+convertbeta_sig <- function(j, vbeta){
+  tbeta <- vbeta[j]
+  ibeta <- vbeta[-c(1:totalnttype)]
+  vbetasub <- c(tbeta,ibeta)
+  return(ibeta)
+}
+
+
+
+#' @import data.table
+#' @export
+matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
+  GLMlist <- list()
+  chrposlist <- list()
+  BMcol <- names(BMpars$fullpars)[-c(1:totalnttype,length(BMpars$fullpars)-1,length(BMpars$fullpars))]
+  fixcol <- names(fixpars)
+  alpha <- BMpars$fullpars["alpha"]
+  lambdaPM_g_s <- data.table(agg_var = mu_g_s$agg_var, lambdaPE = log((y_g_s$y + alpha)/(mu_g_s$V1 + alpha)), key = "agg_var")
+  BMvbeta <- BMpars$fullpars[1:(length(BMpars$fullpars)-2)]
+  for (j in seq(1:totalnttype)){
+    BMvbetasub <- convertbeta(j, BMvbeta)
+    BManno  <- matrixlist[[j]][[1]][,c("(Intercept)",BMcol), with=F]
+    fixanno <- matrixlist[[j]][[1]][,fixcol, with =F]
+    chrposanno <- cbind(chrposmatrixlist[[j]][[1]],chrposmatrixlist[[j]][[4]])
+    genename <- matrixlist[[j]][[3]]
+    genename2 <- chrposmatrixlist[[j]][[3]]
+    if (!identical(genename,genename2)) stop("matrixlist and chrpos not matching!")
+    chrposanno[,"genename" := genename]
+    lambdaPMit <- lambdaPM_g_s[genename]
+    muit <- as.matrix(BManno) %*% BMvbetasub
+    fixit <- as.numeric(as.matrix(fixanno) %*% as.numeric(fixpars))
+    out <- matrixlist[[j]][[1]]
+    out[, baseline:= rowSums(cbind(muit, lambdaPMit$lambdaPE, fixit))]
+    out[, y:= matrixlist[[j]][[2]]]
+    #out[, c("(Intercept)",BMcol,fixcol):= NULL]
+    GLMlist[[j]] <- out
+    chrposlist[[j]] <- chrposanno
+  }
+  glmdt <- do.call(rbind,GLMlist)
+  chrposdt <- do.call(rbind,chrposlist)
+  selectcol <- copy(colnames(glmdt))
+  glmdt[,colnames(chrposdt):= chrposdt]
+  glmdtsorted <- glmdt[order(chrom,genename,start)]
+  glmdt <- glmdtsorted[,selectcol,with = F]
+  glmdtchrpos <- glmdtsorted[,c("chrom","genename","start", colnames(chrposdt)), with =F]
+  return(list(glmdt,glmdtchrpos))
+}
+
+
+#'
 convertbeta <- function(j, vbeta){
   tbeta <- vbeta[j]
   ibeta <- vbeta[-c(1:totalnttype)]
   vbetasub <- c(tbeta,ibeta)
-  #return(vbetasub)
-  return(ibeta)
+  return(vbetasub)
 }
-

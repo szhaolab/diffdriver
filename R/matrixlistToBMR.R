@@ -1,5 +1,16 @@
 
 
+#' @title Compute the bmr based on mutation signature
+#'
+#' @param adirbase The path to annotation files
+#' @param mutf The path to the mutation files
+#' @param BMRlist The parameters from drivermaps
+#' @param target The target positions where the bmr's are computed
+#'
+#' @return
+#' @export
+#'
+#' @examples
 matrixlistToBMR=function(adirbase,mutf,BMRlist,target){
 annolist=vector("list",96)
 for (i in 1:96) {
