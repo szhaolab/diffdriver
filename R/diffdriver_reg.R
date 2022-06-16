@@ -1,6 +1,6 @@
 # TODO: mutation hotspot, quantitative phenotype
 # Notes: syn data prepared from direct join of mutation list to annodata is different from used in driverMAPS BMR estimation: 1. 5% syn are ssp are included. 2. BMR estimation from old driverMAPS run has different annodata. 3. genes without expr/hic/rep were removed in BMR driverMAPS estimation.
-#' @title Run diffDriver given input files for regular nttype
+#' @title Run diffDriver given input files
 #' @description This is the function to run diffDriver. We first need to set up: run driverMAPS for groups with potential different BMR, assign BMR labels for each sample. then BMR for each sample will be scaled based on driverMAPS results.
 #' @param genef file for name of genes to be included in the analysis
 #' @param mutf mutation list file, use the driverMAPS mutation input format
@@ -26,8 +26,12 @@ diffdriver_reg <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", o
   fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
   allg <- read.table(genef, stringsAsFactors = F)[,1]
-  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
-  chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
+  #matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
+  #chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
+  load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/matrixlist0.Rd")
+load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/chrposmatrixlist0.Rd")
+
+
 
 
 for (t in 1:length(matrixlist)){

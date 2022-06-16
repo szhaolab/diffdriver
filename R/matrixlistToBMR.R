@@ -1,6 +1,6 @@
 
 
-#' @title Compute the bmr based on mutation signature
+#' Title
 #'
 #' @param adirbase The path to annotation files
 #' @param mutf The path to the mutation files
@@ -11,12 +11,13 @@
 #' @export
 #'
 #' @examples
-matrixlistToBMR=function(adirbase,mutf,BMRlist,target){
+matrixlistToBMR=function(adirbase,mutf,BMRlist){
 annolist=vector("list",96)
 for (i in 1:96) {
-  print(i)
+  print(paste0("read annotation file: ",i))
 annoi=fread(paste0(adirbase,"/TCGA-UCS_nttype",i,"_annodata.txt"))
-annolist[[i]]=annoi[functypecode==6 & ssp==0]
+#annolist[[i]]=annoi[functypecode==6 & ssp==0]
+annolist[[i]]=annoi[functypecode==6]
 rm(annoi)
 }
 anno=do.call(rbind,annolist)
@@ -76,7 +77,7 @@ genebmr=data.table(genename=BMRlist$Y_g_s_all$agg_var,lambda=(BMRlist$Y_g_s_all$
 ##position level bmr
 coe=BMRlist$BMpars$fullpars[c("expr","repl","hic")]
 alpha=BMRlist$BMpars$fullpars[c("alpha")]
-covariate=target[,.(chrom,start,genename,nttypecode,expr,repl,hic)]
+covariate=anno[,.(chrom,start,genename,nttypecode,expr,repl,hic)]
 covariate=covariate[expr!="." & repl!="." & hic!=".",]
 covariate$expr=as.numeric(covariate$expr)
 covariate$repl=as.numeric(covariate$repl)
@@ -92,24 +93,20 @@ for (i in 1:length(genes)) {
   lambda=c(lambda,aa)
 }
 subgenebmr=data.table(genename= genes,lambda)
-#shared=intersect( covariate$genename,genebmr$genename)
-#covariate=covariate[genename %in% shared,]
-#genebmr=genebmr[genename %in% shared,]
-#genebmr=genebmr[genename %in% covariate$genename]
-ee=join(covariate,subgenebmr)
-ee=merge(covariate,subgenebmr,by="genename")
-ee=cbind(ee,explinec=exp(ee$linec))
-ee=cbind(ee,weight=(ee$explinec)*(ee$lambda)/mean((ee$explinec)*ee$lambda))
-rm(anno)
+ccovariate=join(covariate,subgenebmr)
+normconstant=mean(exp(ccovariate$linec)*ccovariate$lambda)
+# ee=cbind(ee,explinec=exp(ee$linec))
+# ee=cbind(ee,weight=(ee$explinec)*(ee$lambda)/mean((ee$explinec)*ee$lambda))
+#rm(anno)
 ##sample level
-bmrsig=data.table()
-for (i in 1:nsample) {
-  print(paste0("bmr for sampel",i,""))
-  aa=wsm[i,ee$nttypecode]
-  subject=log(ee$weight*aa)
-  bmrsig=cbind(bmrsig,subject)
-}
-return(list(bmrsig,fit.multinom))
+# bmrsig=data.table()
+# for (i in 1:nsample) {
+#   print(paste0("bmr for sampel",i,""))
+#   aa=wsm[i,ee$nttypecode]
+#   subject=log(ee$weight*aa)
+#   bmrsig=cbind(bmrsig,subject)
+# }
+return(list(sampelsig=wsm,normconstant=normconstant,lambda=genebmr))
 }
 
 

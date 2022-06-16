@@ -1,6 +1,6 @@
 # TODO: mutation hotspot, quantitative phenotype
 # Notes: syn data prepared from direct join of mutation list to annodata is different from used in driverMAPS BMR estimation: 1. 5% syn are ssp are included. 2. BMR estimation from old driverMAPS run has different annodata. 3. genes without expr/hic/rep were removed in BMR driverMAPS estimation.
-#' @title Run diffDriver given input files mutation signature type
+#' @title Run diffDriver given input files
 #' @description This is the function to run diffDriver. We first need to set up: run driverMAPS for groups with potential different BMR, assign BMR labels for each sample. then BMR for each sample will be scaled based on driverMAPS results.
 #' @param genef file for name of genes to be included in the analysis
 #' @param mutf mutation list file, use the driverMAPS mutation input format
@@ -9,8 +9,8 @@
 #' @export
 diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
-  adirbase <-paste0(drivermapsdir, "/data/")
-  afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
+  adirbase <-drivermapsdir
+  afileinfo <- list(file = paste(adirbase, "/TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
                     header = c("chrom","start","end","ref","alt","genename","functypecode","nttypecode","expr","repl","hic","mycons","sift","phylop100","MA","ssp","wggerp"),
                     coltype = c("character","numeric","numeric","character","character","character","character","factor","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
   totalnttype <<- 96
@@ -29,6 +29,7 @@ diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", o
   allg <- read.table(genef, stringsAsFactors = F)[,1]
   matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
   chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
+  BMRlist=BMRlist$UCS
 
 
   for (t in 1:length(matrixlist)){
@@ -41,28 +42,27 @@ diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", o
   #------------------------------------------------------------------------------
 
   # background mutation rate (bmrdt): data.table, each column correponds to one BMR label
-  bmrdt <- data.table()
-target=vector("list",length(BMRlist))
-names(target)<- names(BMRlist)
-  for (label in names(BMRlist)) {
+#target=vector("list",length(BMRlist))
+#names(target)<- names(BMRlist)
+
     matrixlisttemp <- copy(matrixlist)
     chrposmatrixlisttemp <- copy(chrposmatrixlist)
-    y_g_s <- BMRlist[[label]]$Y_g_s_all[allg][,1:2, with=F]
+    y_g_s <- BMRlist$Y_g_s_all[allg][,1:2, with=F]
     y_g_s[is.na(y_g_s)] <- 0
-    mu_g_s <- BMRlist[[label]]$Mu_g_s_all[allg][,1:2, with=F]
+    mu_g_s <- BMRlist$Mu_g_s_all[allg][,1:2, with=F]
     mu_g_s[is.na(mu_g_s)] <- 0
-    glmdtall <- matrixlistToGLM_sig(matrixlisttemp, chrposmatrixlisttemp, BMRlist[[label]]$BMpars, mu_g_s, y_g_s, fixpars=NULL)
-    bmrdt[,eval(label):= glmdtall[[1]]$baseline]
-    target[[label]]=cbind(glmdtall[[2]][,.(chrom,genename,start,nttypecode)],glmdtall[[1]][,.(expr,repl,hic)])
-    rm(matrixlisttemp,chrposmatrixlisttemp); gc()
-  }
+    glmdtall <- matrixlistToGLM(matrixlisttemp, chrposmatrixlisttemp, BMRlist$BMpars, mu_g_s, y_g_s, fixpars=NULL)
+    #bmrdt[,eval(label):= glmdtall[[1]]$baseline]
+    #target=cbind(glmdtall[[2]][,.(chrom,genename,start,nttypecode)],glmdtall[[1]][,.(expr,repl,hic)])
+    rm(matrixlisttemp,chrposmatrixlisttemp,matrixlist,chrposmatrixlist); gc()
 
 
 
 
-  for (label in names(BMRlist)) {
-    bmrallg <- matrixlistToBMR(adirbase, mutf,BMRlist[[label]],target[[label]])[[1]]
-  }
+
+
+    bmrsig <- matrixlistToBMR(adirbase, mutf,BMRlist)
+
 
 
 
@@ -70,7 +70,12 @@ names(target)<- names(BMRlist)
   fanno <- glmdtall[[1]]
 
   # row index (ri): chr pos ref alt
-  ri <- glmdtall[[2]]
+  ri <- glmdtall[[2]][,.(chrom,genename,start,ref,alt,nttypecode)]
+  lambda_pe=bmrsig$lambda
+ri=join(ri,lambda_pe)
+
+
+
 
   # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
   canno <- fread(phenof, header = "auto")
@@ -79,21 +84,32 @@ names(target)<- names(BMRlist)
   ci <- canno[,"SampleID"]
   ci[,"cidx" := 1:dim(canno)[1]]
 
-  for (l in names(BMRlist)) {
-    BMRlist[[l]][["nsyn"]] <- sum(canno$Nsyn[canno$BMRlabel == l])
-  }
+  # for (l in names(BMRlist)) {
+  #   BMRlist[[l]][["nsyn"]] <- sum(canno$Nsyn[canno$BMRlabel == l])
+  # }
 
   # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
   muts <- fread(mutf, header = T)
   if (!grepl('chr', muts$Chromosome[1], fixed = T)) {muts$Chromosome <- paste0("chr",muts$Chromosome)}
-
+sampleid=unique(muts$SampleID)
+##estimate bmr mu_ij
+mutation=data.table()
+  coe=BMRlist$BMpars$fullpars[c("expr","repl","hic")]
+  numerator=exp(fanno$expr*coe[1]+fanno$repl*coe[2]+fanno$hic*coe[3])
+coef= (ri$lambda)*numerator/(bmrsig$normconstant)
+for (i in 1:length(sampleid)) {
+  print(paste("bmr for sample",i,sep=" "))
+mui=coef*(bmrsig$sampelsig[i,ri$nttypecode])
+ mutation=cbind(mutation,mui)
+}
 
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
-bmrmtx <- split(bmrallg,target[[1]]$genename)
+bmrmtx <- split(mutation,ri$genename)
+rm(ri,fanno,mutation)
   # run diffdriver for each gene
   res <- list()
-  for (g in unique(glmdtall[[2]]$genename)) {
+  for (g in names(bmrmtx)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
