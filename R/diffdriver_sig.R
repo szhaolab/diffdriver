@@ -30,14 +30,7 @@ diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", o
   allg <- read.table(genef, stringsAsFactors = F)[,1]
   matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
   chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
-save(matrixlist,file="matrixlist.Rd")
-save(chrposmatrixlist,file="chrposmatrixlist.Rd")
   BMRlist=BMRlist$UCS
-save(allg,file="allg.Rd")
-matrixgenes=unique(matrixlist[[1]][[3]])
-save(matrixgenes,file="matrixgenes.Rd")
-chrgenes=unique(chrposmatrixlist[[1]][[3]])
-save(chrgenes,file="chrgenes.Rd")
   for (t in 1:length(matrixlist)){
     b1 <- which(sapply(matrixlist[[t]][[3]], grepl, pattern="[;,|]"))
     matrixlist[[t]][[3]][b1,] <- unlist(lapply(sapply(matrixlist[[t]][[3]][b1,], strsplit, split="[;,|]"), function(x) intersect(x,allg)[1]))
@@ -82,7 +75,6 @@ ri=join(ri,lambda_pe)
 index=unique(which(is.na(ri),arr.ind = T)[,1])
 fanno=fanno[-index,]
 ri=ri[-index,]
-save(ri,file="ri.Rd")
 
 
 
@@ -109,7 +101,6 @@ coef= (ri$lambda)*numerator/(bmrsig$normconstant)
 for (i in 1:length(sampleid)) {
   print(paste("bmr for sample",i,sep=" "))
 mui=coef*(bmrsig$sampelsig[i,ri$nttypecode])
-print(length(mui))
  mutation=cbind(mutation,mui)
 }
 
@@ -158,5 +149,5 @@ rm(ri,fanno,mutation)
     #dev.off()
   }
 
-  return(res)
+  return(res=res,sigature=mutation)
 }
