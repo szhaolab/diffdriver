@@ -9,12 +9,13 @@
 #' @export
 diffdriver_reg <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
-  adirbase <-paste0(drivermapsdir, "/data/")
-  afileinfo <- list(file = paste(adirbase, "nttypeXXX_annodata.txt", sep=""),
+  adirbase <-drivermapsdir
+  afileinfo <- list(file = paste(adirbase, "/nttypeXXX_annodata.txt", sep=""),
                     header = c("chrom","start","end","ref","alt","genename","functypecode","nttypecode","expr","repl","hic","mycons","sift","phylop100","MA","ssp","wggerp"),
                     coltype = c("character","numeric","numeric","character","character","character","character","factor","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
   totalnttype <<- 9
-  bmvars <- c("nttypecode", "expr", "repl", "hic")
+  Totalnttype <<- 9
+ bmvars <- c("nttypecode", "expr", "repl", "hic")
   bmmuttype <- "functypecode == 6 & ssp == 0"
   funcvars <- c("functypecode", "mycons", "sift", "phylop100", "MA")
   functypecodelevel <- "7"
@@ -26,12 +27,10 @@ diffdriver_reg <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", o
   fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
   allg <- read.table(genef, stringsAsFactors = F)[,1]
-  #matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
-  #chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
-  load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/matrixlist0.Rd")
-load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/chrposmatrixlist0.Rd")
+  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
+  chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
 
-
+save(matrixlist,file="matrixlist.Rd")
 
 
 for (t in 1:length(matrixlist)){

@@ -78,6 +78,7 @@ genebmr=data.table(genename=BMRlist$Y_g_s_all$agg_var,lambda=(BMRlist$Y_g_s_all$
 coe=BMRlist$BMpars$fullpars[c("expr","repl","hic")]
 alpha=BMRlist$BMpars$fullpars[c("alpha")]
 covariate=anno[,.(chrom,start,genename,nttypecode,expr,repl,hic)]
+rm(anno)
 covariate=covariate[expr!="." & repl!="." & hic!=".",]
 covariate$expr=as.numeric(covariate$expr)
 covariate$repl=as.numeric(covariate$repl)

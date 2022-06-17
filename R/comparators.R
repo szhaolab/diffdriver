@@ -17,7 +17,7 @@ mlr.v2 <- function(mut, e, nmut){
   # nmut is number of mutations per sample
   dstatus <- colSums(mut)
   dstatus[which(dstatus>0)] <- 1
-  #dstatus <- as.factor(dstatus)
+  dstatus <- as.factor(dstatus)
   mlrfit <- lm(e ~ dstatus + nmut)
   mlrres <- summary(mlrfit)
   res <- list("res" = mlrres, "pvalue" = mlrres$coefficients[2,4])
