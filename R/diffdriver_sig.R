@@ -149,5 +149,5 @@ rm(ri,fanno,mutation)
     #dev.off()
   }
 
-  return(res=res,sigature=mutation)
+  return(res=res,sigature=bmrmtx)
 }
