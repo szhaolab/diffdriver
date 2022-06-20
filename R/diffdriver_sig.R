@@ -135,11 +135,11 @@ rm(ri,fanno,mutation)
 
     resg <- list()
     resg <- ddmodel(as.matrix(mutmtx), canno$Phenotype, as.matrix(bmrmtx[[g]]), fe[,1])
-    #resg[["mlr"]] <- mlr(mutmtx, canno$Phenotype)
-    #resg[["mlr.v2"]] <- mlr.v2(mutmtx, canno$Phenotype, canno$Nsyn)
-    #   resg[["fisher"]] <- genefisher(mutmtx, canno$Phenotype)
-    #    resg[["binom"]] <- genebinom(mutmtx, canno$Phenotype)
-    #    resg[["lr"]] <- genelr(mutmtx, canno$Phenotype)
+    resg[["mlr"]] <- mlr(mutmtx, canno$Phenotype)
+    resg[["mlr.v2"]] <- mlr.v2(mutmtx, canno$Phenotype, canno$Nsyn)
+      resg[["fisher"]] <- genefisher(mutmtx, canno$Phenotype)
+       resg[["binom"]] <- genebinom(mutmtx, canno$Phenotype)
+       resg[["lr"]] <- genelr(mutmtx, canno$Phenotype)
     res[[g]] <- resg
 
     save(mutmtx, canno, bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,".", g, ".Rd")))

@@ -16,7 +16,7 @@ Imports:
   plyr,
   fastTopics,
   resample,
-  logging
+  logging,
 Suggests: 
     knitr,
     rmarkdown,
