@@ -12,9 +12,12 @@ Imports:
   data.table (>= 1.10.0),
   Matrix,
   stats,
-  matrixStats
+  matrixStats,
+  plyr,
+  fastTopics,
+  resample,
+  logging
 Suggests: 
     knitr,
     rmarkdown,
-    logging
 RoxygenNote: 6.1.1

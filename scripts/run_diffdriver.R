@@ -1,13 +1,13 @@
 #!/usr/bin/env Rscript
 
-#library(diffdriver)
-library(logging)
-library(data.table)
-library(resample)
-library(Matrix)
-library(fastTopics)
-library(plyr)
-library(diffdriver)
+# #library(diffdriver)
+# library(logging)
+# library(data.table)
+# library(resample)
+# library(Matrix)
+# library(fastTopics)
+# library(plyr)
+# library(diffdriver)
 
 Drivermapsdir <- "~/cancer_somatic/maps/"
 Outputdir <- "~/temp/"
@@ -22,7 +22,7 @@ Phenof <- system.file("extdata/phenotypes.txt", package = "diffdriver")
 logfile <- file(paste0(Outputdir,"/", Outputname, ".log"), open="wt")
 addHandler(writeToFile, file= logfile, level='DEBUG')
 loginfo("Started running diffdriver ...")
-res <- diffdriver(genef, mutf, phenof, drivermapsdir = drivermapsdir, outputdir = outputdir, outputname = outputname)
+res <- diffdriver(genef, mutf, phenof, drivermapsdir = drivermapsdir,mode=2, outputdir = outputdir, outputname = outputname)
 
 # meth <- c("dd", "mlr", "mlr.v2", "fisher", "binom", "lr")
 # resdf <- data.frame(sapply(meth, function(x)unlist(lapply(lapply(res,'[[',x),'[[','pvalue'))))
