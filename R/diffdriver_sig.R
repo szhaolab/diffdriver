@@ -71,7 +71,7 @@ diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", o
   # row index (ri): chr pos ref alt
   ri <- glmdtall[[2]][,.(chrom,genename,start,ref,alt,nttypecode)]
   lambda_pe=bmrsig$lambda
-ri=join(ri,lambda_pe)
+ri=plyr::join(ri,lambda_pe)
 index=unique(which(is.na(ri),arr.ind = T)[,1])
 fanno=fanno[-index,]
 ri=ri[-index,]

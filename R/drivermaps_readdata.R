@@ -391,11 +391,11 @@ matrixlistToBMR=function(adirbase,mutf,BMRlist){
   #the proportion of silent mutation
   #sum(ymatrix)/nrow(mutfile)
   #save(ymatrix,file = "signature.Rd")
-  fit1 = fit_poisson_nmf(ymatrix,k = 5,numiter = 100,verbose = "none")
+  fit1 = fastTopics::fit_poisson_nmf(ymatrix,k = 5,numiter = 100,verbose = "none")
   #quickplot(x = 1:100,y = fit1$progress$loglik,geom = c("point","line"),
   #         xlab = "iteration",ylab = "loglik") + theme_cowplot(12)
 
-  fit.multinom <- poisson2multinom(fit1)
+  fit.multinom <- fastTopics::poisson2multinom(fit1)
   ## smoothing
   #sm=fit.multinom$L%*%t(fit1$F)
   sm=fit1$L%*%t(fit1$F)
@@ -434,7 +434,7 @@ matrixlistToBMR=function(adirbase,mutf,BMRlist){
     lambda=c(lambda,aa)
   }
   subgenebmr=data.table(genename= genes,lambda)
-  ccovariate=join(covariate,subgenebmr)
+  ccovariate=plyr::join(covariate,subgenebmr)
   normconstant=mean(exp(ccovariate$linec)*ccovariate$lambda)
   # ee=cbind(ee,explinec=exp(ee$linec))
   # ee=cbind(ee,weight=(ee$explinec)*(ee$lambda)/mean((ee$explinec)*ee$lambda))
