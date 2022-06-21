@@ -9,14 +9,15 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports:
-   Matrix,
+  data.table (>= 1.10.0),
+  Matrix,
   stats,
   matrixStats,
   plyr,
   fastTopics,
-  resample,
-  logging
+  resample
 Suggests: 
     knitr,
     rmarkdown,
+    logging
 RoxygenNote: 6.1.1
