@@ -13,10 +13,10 @@ Imports:
   Matrix,
   stats,
   matrixStats,
-  plyr,
+  plyr (>= 1.8.7),
   fastTopics,
   resample,
-  logging
+  logging (>= 0.10-108)
 Suggests: 
     knitr,
     rmarkdown,
