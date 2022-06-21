@@ -16,8 +16,16 @@ Imports:
   plyr,
   fastTopics,
   resample,
-  logging,
+  logging
 Suggests: 
     knitr,
     rmarkdown,
+      data.table (>= 1.10.0),
+  Matrix,
+  stats,
+  matrixStats,
+  plyr,
+  fastTopics,
+  resample,
+  logging
 RoxygenNote: 6.1.1
