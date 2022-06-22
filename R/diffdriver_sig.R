@@ -73,6 +73,8 @@ diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir,k=k, outputdir =".
   lambda_pe=bmrsig$lambda
   ll=bmrsig$ll
   ff=bmrsig$ff
+  save(ll,file=paste0(outputbase,"_loadings.Rd"))
+  save(ff,file=paste0(outputbase,"_factors.Rd"))
 ri=plyr::join(ri,lambda_pe)
 index=unique(which(is.na(ri),arr.ind = T)[,1])
 fanno=fanno[-index,]
@@ -139,7 +141,7 @@ rm(ri,mutation,fanno)
     resg[["lr"]] <- genelr(mutmtx, canno$Phenotype)
     res[[g]] <- resg
 
-    save(mutmtx, canno, bmrmtx, fe, ganno, betaf, betaf0, resg, load=ff,factor=ff, file=paste0(paste0(outputbase,".", g, ".Rd")))
+    save(mutmtx, canno, bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,".", g, ".Rd")))
     #setEPS()
     #postscript(file=paste0(outputbase,".", g, "mut_status.eps"), width=9, height=4)
     #plot_mut(mutmtx, canno, bmrmtx, ganno)
