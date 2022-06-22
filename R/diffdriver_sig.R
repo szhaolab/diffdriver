@@ -9,7 +9,7 @@
 #' @export
 diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
-  adirbase <-paste0(drivermapsdir, "/data/")
+  adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
                     header = c("chrom","start","end","ref","alt","genename","functypecode","nttypecode","expr","repl","hic","mycons","sift","phylop100","MA","ssp","wggerp"),
                     coltype = c("character","numeric","numeric","character","character","character","character","factor","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
