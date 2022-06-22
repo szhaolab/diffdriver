@@ -27,10 +27,10 @@ diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir,k=k, outputdir =".
   fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
   allg <- read.table(genef, stringsAsFactors = F)[,1]
- # matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
-  #chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
-  load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/matrixlist.Rd")
-  load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/chrposmatrixlist.Rd")
+  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
+  chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
+  #load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/matrixlist.Rd")
+  #load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/chrposmatrixlist.Rd")
   BMRlist=BMRlist$UCS
 
 
