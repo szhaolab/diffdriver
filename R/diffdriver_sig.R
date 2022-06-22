@@ -30,9 +30,7 @@ diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir,k=k, outputdir =".
   allg <- read.table(genef, stringsAsFactors = F)[,1]
   matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
   chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
-  #load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/matrixlist.Rd")
-  #load("C:/Users/Jie Zhou/Documents/paper02052022/siming_lab/chrposmatrixlist.Rd")
-  BMRlist=BMRlist$UCS
+ BMRlist=BMRlist$UCS
 
 
   for (t in 1:length(matrixlist)){
@@ -118,12 +116,9 @@ rm(ri,mutation,fanno)
     rig$ridx <- 1:dim(rig)[1]
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
     mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
-    a=0
     if (sum(mutmtx) ==0) {
-      print(paste0("the number of mutation in gene", g, "is zero."))
-      print(a)
-      a=a+1
-      next}
+      next
+      }
 
 
     betaf <- Fpars[[g]][names(Fpars[[g]]) != "beta_f0"]
@@ -144,7 +139,7 @@ rm(ri,mutation,fanno)
        resg[["lr"]] <- genelr(mutmtx, canno$Phenotype)
     res[[g]] <- resg
 
-    save(mutmtx, canno, bmrmtx, fe, ganno, betaf, betaf0, resg, ll,ff, file=paste0(paste0(outputbase,".", g, ".Rd")))
+    save(mutmtx, canno, bmrmtx, fe, ganno, betaf, betaf0, resg, load=ff,factor=ff, file=paste0(paste0(outputbase,".", g, ".Rd")))
     #setEPS()
     #postscript(file=paste0(outputbase,".", g, "mut_status.eps"), width=9, height=4)
     #plot_mut(mutmtx, canno, bmrmtx, ganno)
