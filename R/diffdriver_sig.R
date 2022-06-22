@@ -14,6 +14,7 @@ diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir,k=k, outputdir =".
                     header = c("chrom","start","end","ref","alt","genename","functypecode","nttypecode","expr","repl","hic","mycons","sift","phylop100","MA","ssp","wggerp"),
                     coltype = c("character","numeric","numeric","character","character","character","character","factor","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
   totalnttype <<- 96
+  Totalnttype <<- 96
   bmvars <- c("nttypecode", "expr", "repl", "hic")
   bmmuttype <- "functypecode == 6"
   funcvars <- c("functypecode", "mycons", "sift", "phylop100", "MA")

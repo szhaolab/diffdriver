@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 # #library(diffdriver)
-# library(logging)
+ library(logging)
 # library(data.table)
 # library(resample)
 # library(Matrix)
@@ -9,17 +9,17 @@
 # library(plyr)
 # library(diffdriver)
 
-Drivermapsdir <- "~/cancer_somatic/maps/"
-Outputdir <- "~/temp/"
-Outputname <- "diffDriver_demo"
+drivermapsdir <- "~/cancer_somatic/maps"
+outputdir <- "~/temp"
+outputname <- "diffDriver_demo"
 data(Fpars)  # see data-raw folder for how to generate Fpars from drivermaps results
 data(BMRlist) # see data-raw folder for how to generate BMRlist from drivermaps results
 
-Genef <- system.file("extdata/genes.txt", package = "diffdriver")
-Mutf <- system.file("extdata/mutations.txt", package = "diffdriver")
-Phenof <- system.file("extdata/phenotypes.txt", package = "diffdriver")
+genef <- system.file("extdata/genes.txt", package = "diffdriver")
+mutf <- system.file("extdata/mutations.txt", package = "diffdriver")
+phenof <- system.file("extdata/phenotypes.txt", package = "diffdriver")
 
-logfile <- file(paste0(Outputdir,"/", Outputname, ".log"), open="wt")
+logfile <- file(paste0(outputdir,"/", outputname, ".log"), open="wt")
 addHandler(writeToFile, file= logfile, level='DEBUG')
 loginfo("Started running diffdriver ...")
 res <- diffdriver(genef, mutf, phenof, drivermapsdir = drivermapsdir,mode=2, outputdir = outputdir, outputname = outputname)
