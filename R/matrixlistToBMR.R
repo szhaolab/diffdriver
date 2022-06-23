@@ -62,7 +62,23 @@ ll=fit1$L
 colnames(ll)=paste("weight",1:k, sep = "")
 ff=fit1$F
 colnames(ff)=paste("factor",1:k,sep="")
-sm=ll%*%t(ff)
+##
+sigmapping=fread(paste0(adirbase,"config_annotation.txt"))[,-2]
+v11=strsplit(sigmapping[,1],split = ",")
+muttype=data.table()
+for (i in 1:length(v11)) {
+  a=v11[[i]]
+  aa=paste(substr(a[[1]],1,1),a[[2]],substr(a[[1]],3,3),sep = "")
+  bb=paste(a[[2]],">",substr(a[[1]],2,2), sep = "")
+  cc=data.table(Type=bb,Subtype=aa)
+  muttype=rbind(muttype,cc)
+}
+sigmapping=cbind(muttype,sigmapping[,2])
+sigmapping=sigmapping[substr(Subtype,2,2)=="C" | substr(Subtype,2,2)=="T",]
+sigmapping=sigmapping[order(V2),]
+colnames(sigmapping)=c("context","alt_allele","index")
+ff=cbind(sigmapping[,c("contex","alt_allele")],ff)
+sm=ll%*%t(ff[,-c(1,2)])
 ## compute the number of silent mutation for each of 96 mutation types.
 N=c()
 for (i in 1:96) {
