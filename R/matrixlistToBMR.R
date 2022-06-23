@@ -64,6 +64,7 @@ ff=fit1$F
 colnames(ff)=paste("factor",1:k,sep="")
 ##
 sigmapping=fread(paste0(adirbase,"config_annotation.txt"))[,-2]
+sigmapping[1:10,]
 v11=strsplit(sigmapping[,1],split = ",")
 muttype=data.table()
 for (i in 1:length(v11)) {
