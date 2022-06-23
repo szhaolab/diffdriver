@@ -15,7 +15,7 @@ logfile <- file(paste0(outputdir,"/", outputname, ".log"), open="wt")
 addHandler(writeToFile, file= logfile, level='DEBUG')
 loginfo("Started running diffdriver ...")
 
-res <- diffdriver(genef, mutf, phenof, drivermapsdir = drivermapsdir,mode=2, outputdir = outputdir, outputname = outputname)
+res <- diffdriver(genef, mutf, phenof, drivermapsdir = drivermapsdir,mode=2, k=6,outputdir = outputdir, outputname = outputname)
 
 save(res,file="res.Rd")
 
