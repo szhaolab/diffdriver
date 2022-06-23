@@ -77,7 +77,7 @@ sigmapping=cbind(muttype,sigmapping[,2])
 sigmapping=sigmapping[substr(Subtype,2,2)=="C" | substr(Subtype,2,2)=="T",]
 sigmapping=sigmapping[order(V2),]
 colnames(sigmapping)=c("context","alt_allele","index")
-ff=cbind(sigmapping[,c("contex","alt_allele")],ff)
+ff=cbind(sigmapping[,c("context","alt_allele")],ff)
 sm=ll%*%t(ff[,-c(1,2)])
 ## compute the number of silent mutation for each of 96 mutation types.
 N=c()
