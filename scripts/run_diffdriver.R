@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 library(diffdriver)
 library(logging)
+<<<<<<< HEAD
 # You need first download and install drivermaps and run drivermaps for your data before running diffdriver
 Drivermapsdir <- "~/cancer_somatic/maps/"
 
@@ -31,5 +32,24 @@ warnings()
 loginfo("diffdriver finished.")
 
 
+=======
+drivermapsdir<- "~/SimingLab/library/diffdriver_anno/"
+outputdir <- "~/temp/"
+outputname <- "diffDriver_demo"
+load(paste0(drivermapsdir,"/mapsparameters/Fpars.rda"))  # see data-raw folder for how to generate Fpars from drivermaps results
+load(paste0(drivermapsdir,"/mapsparameters/BMRlist.rda")) # see data-raw folder for how to generate BMRlist from drivermaps results
+
+genef <- system.file("extdata/genes.txt", package = "diffdriver")
+mutf <- system.file("extdata/mutations.txt", package = "diffdriver")
+phenof <- system.file("extdata/phenotypes.txt", package = "diffdriver")
+
+logfile <- file(paste0(outputdir,"/", outputname, ".log"), open="wt")
+addHandler(writeToFile, file= logfile, level='DEBUG')
+loginfo("Started running diffdriver ...")
+
+res <- diffdriver(genef, mutf, phenof, drivermapsdir = drivermapsdir,mode=2, k=6,outputdir = outputdir, outputname = outputname)
+
+save(res,file="res.Rd")
+>>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
 
 
