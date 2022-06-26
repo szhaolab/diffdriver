@@ -5,59 +5,81 @@
 #' @param genef file for name of genes to be included in the analysis
 #' @param mutf mutation list file, use the driverMAPS mutation input format
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
-<<<<<<< HEAD
 #' @import Matrix data.table
 #' @export
-diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
+diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
-  Adirbase <-paste0(drivermapsdir, "/data/")
-  Afileinfo <- list(file = paste(Adirbase, "nttypeXXX_annodata.txt", sep=""),
+  adirbase <-drivermapsdir
+  afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
                     header = c("chrom","start","end","ref","alt","genename","functypecode","nttypecode","expr","repl","hic","mycons","sift","phylop100","MA","ssp","wggerp"),
                     coltype = c("character","numeric","numeric","character","character","character","character","factor","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
-  Totalnttype <<- 9
-  BMvars <- c("nttypecode", "expr", "repl", "hic")
-  BMmuttype <- "functypecode == 6 & ssp == 0"
-  Funcvars <- c("functypecode", "mycons", "sift", "phylop100", "MA")
-  Functypecodelevel <- "7"
-  Funcvmuttype <- "functypecode == 7 | functypecode == 8"
-  Readinvars <- c("genename", "ssp", BMvars, Funcvars) # This is optional, if not given, then will read all columns
-  Qnvars = c("expr","repl","hic") # all the rest will be normalized, except for nttypecode
-  Outputbase <<- paste0(outputdir, "/", outputname)
-  paramdir <- paste0(drivermapsdir, "param/")
-  Fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
+  totalnttype <<- 96
+  Totalnttype <<- 96
+  bmvars <- c("nttypecode", "expr", "repl", "hic")
+  bmmuttype <- "functypecode == 6"
+  funcvars <- c("functypecode", "mycons", "sift", "phylop100", "MA")
+  functypecodelevel <- "7"
+  funcvmuttype <- "functypecode == 7 | functypecode == 8"
+  readinvars <- c("genename", "ssp", bmvars, funcvars) # This is optional, if not given, then will read all columns
+  bmreadinvars <- c("genename", "ssp","nttypecode",bmvars, funcvars)
+  qnvars = c("expr","repl","hic") # all the rest will be normalized, except for nttypecode
+  outputbase <<- paste0(outputdir, "/", outputname)
+  paramdir <- paste0(drivermapsdir, "/param/")
+  fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
   allg <- read.table(genef, stringsAsFactors = F)[,1]
-  matrixlist <- readmodeldata(Afileinfo, yfileinfo = NULL, c(BMvars,Funcvars), Funcvmuttype, Readinvars , Qnvars, Functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=Fixmusdfile)
-  chrposmatrixlist <- ddmread(Afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt"), Funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
+  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
+  chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
+ BMRlist=BMRlist$UCS
+
 
   for (t in 1:length(matrixlist)){
     b1 <- which(sapply(matrixlist[[t]][[3]], grepl, pattern="[;,|]"))
     matrixlist[[t]][[3]][b1,] <- unlist(lapply(sapply(matrixlist[[t]][[3]][b1,], strsplit, split="[;,|]"), function(x) intersect(x,allg)[1]))
     b2 <- which(sapply(chrposmatrixlist[[t]][[3]], grepl, pattern="[;,|]"))
     chrposmatrixlist[[t]][[3]][b2,] <- unlist(lapply(sapply(matrixlist[[t]][[3]][b2,], strsplit, split="[;,|]"), function(x) intersect(x,allg)[1]))
+
   }
   #------------------------------------------------------------------------------
 
   # background mutation rate (bmrdt): data.table, each column correponds to one BMR label
-  bmrdt <- data.table()
+#target=vector("list",length(BMRlist))
+#names(target)<- names(BMRlist)
 
-  for (label in names(BMRlist)) {
     matrixlisttemp <- copy(matrixlist)
     chrposmatrixlisttemp <- copy(chrposmatrixlist)
-    y_g_s <- BMRlist[[label]]$Y_g_s_all[allg][,1:2, with=F]
+    y_g_s <- BMRlist$Y_g_s_all[allg][,1:2, with=F]
     y_g_s[is.na(y_g_s)] <- 0
-    mu_g_s <- BMRlist[[label]]$Mu_g_s_all[allg][,1:2, with=F]
+    mu_g_s <- BMRlist$Mu_g_s_all[allg][,1:2, with=F]
     mu_g_s[is.na(mu_g_s)] <- 0
-    glmdtall <- matrixlistToGLM(matrixlisttemp, chrposmatrixlisttemp, BMRlist[[label]]$BMpars, mu_g_s, y_g_s, fixpars=NULL)
-    bmrdt[,eval(label):= glmdtall[[1]]$baseline]
-    rm(matrixlisttemp,chrposmatrixlisttemp); gc()
-  }
+    glmdtall <- matrixlistToGLM(matrixlisttemp, chrposmatrixlisttemp, BMRlist$BMpars, mu_g_s, y_g_s, fixpars=NULL)
+    #bmrdt[,eval(label):= glmdtall[[1]]$baseline]
+    #target=cbind(glmdtall[[2]][,.(chrom,genename,start,nttypecode)],glmdtall[[1]][,.(expr,repl,hic)])
+    rm(matrixlisttemp,chrposmatrixlisttemp,matrixlist,chrposmatrixlist); gc()
+
+
+
+
+    bmrsig <- matrixlistToBMR(adirbase, mutf,BMRlist,k=k)
+
+
+
 
   # functional annotation (fanno):data.table, each row has functional annotation for each possible mutation
   fanno <- glmdtall[[1]]
 
   # row index (ri): chr pos ref alt
-  ri <- glmdtall[[2]]
+  ri <- glmdtall[[2]][,.(chrom,genename,start,ref,alt,nttypecode)]
+  lambda_pe=bmrsig$lambda
+  ll=bmrsig$ll
+  ff=bmrsig$ff
+  save(ll,file=paste0(outputbase,"_loadings.Rd"))
+  save(ff,file=paste0(outputbase,"_factors.Rd"))
+ri=plyr::join(ri,lambda_pe)
+index=unique(which(is.na(ri),arr.ind = T)[,1])
+fanno=fanno[-index,]
+ri=ri[-index,]
+
 
   # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
   canno <- fread(phenof, header = "auto")
@@ -66,33 +88,40 @@ diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outpu
   ci <- canno[,"SampleID"]
   ci[,"cidx" := 1:dim(canno)[1]]
 
-  for (l in names(BMRlist)) {
-    BMRlist[[l]][["nsyn"]] <- sum(canno$Nsyn[canno$BMRlabel == l])
-  }
+  # for (l in names(BMRlist)) {
+  #   BMRlist[[l]][["nsyn"]] <- sum(canno$Nsyn[canno$BMRlabel == l])
+  # }
 
   # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
   muts <- fread(mutf, header = T)
   if (!grepl('chr', muts$Chromosome[1], fixed = T)) {muts$Chromosome <- paste0("chr",muts$Chromosome)}
+sampleid=unique(muts$SampleID)
+##estimate bmr mu_ij
+mutation=data.table()
+coe=BMRlist$BMpars$fullpars[c("expr","repl","hic")]
+numerator=exp(fanno$expr*coe[1]+fanno$repl*coe[2]+fanno$hic*coe[3])
+for (i in 1:length(sampleid)) {
+  print(paste("bmr for sample",i,sep=" "))
+  mui=(ri$lambda)*numerator*(bmrsig$sampelsig[i,ri$nttypecode])/bmrsig$normconstant
+  mutation=cbind(mutation,mui)
+    }
 
-  # split based on gene
-  bmrallg <- split(bmrdt, ri$genename)
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
-
+bmrmtx <- split(mutation,ri$genename)
+rm(ri,mutation,fanno)
   # run diffdriver for each gene
   res <- list()
-  for (g in names(bmrallg)) {
+  for (g in names(bmrmtx)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
     mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
-    if (sum(mutmtx) ==0) {next}
+    if (sum(mutmtx) ==0) {
+      next
+      }
 
-    # normalize BMR for each sample
-    bmrsc <- log(canno$Nsyn/unlist(lapply(BMRlist[canno$BMRlabel],'[[',"nsyn")))
-    # bmrmtx is matrix, rows are positions, columns are for each samples
-    bmrmtx <-sweep(as.matrix(bmrallg[[g]][,canno$BMRlabel,with=F]), 2, bmrsc, "+")
 
     betaf <- Fpars[[g]][names(Fpars[[g]]) != "beta_f0"]
     betaf0 <- Fpars[[g]]["beta_f0"]
@@ -104,32 +133,20 @@ diffdriver <- function(genef, mutf, phenof, drivermapsdir, outputdir =".", outpu
     fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
 
     resg <- list()
-    resg[["dd"]] <- ddmodel(mutmtx, canno$Phenotype, bmrmtx, fe[,1])
+    resg <- ddmodel(as.matrix(mutmtx), canno$Phenotype, as.matrix(bmrmtx[[g]]), fe[,1])
     resg[["mlr"]] <- mlr(mutmtx, canno$Phenotype)
     resg[["mlr.v2"]] <- mlr.v2(mutmtx, canno$Phenotype, canno$Nsyn)
-#   resg[["fisher"]] <- genefisher(mutmtx, canno$Phenotype)
-#    resg[["binom"]] <- genebinom(mutmtx, canno$Phenotype)
-#    resg[["lr"]] <- genelr(mutmtx, canno$Phenotype)
+    resg[["fisher"]] <- genefisher(mutmtx, canno$Phenotype)
+    resg[["binom"]] <- genebinom(mutmtx, canno$Phenotype)
+    resg[["lr"]] <- genelr(mutmtx, canno$Phenotype)
     res[[g]] <- resg
 
-    save(mutmtx, canno, bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(Outputbase,".", g, ".Rd")))
-    setEPS()
-    postscript(file=paste0(Outputbase,".", g, "mut_status.eps"), width=9, height=4)
-    plot_mut(mutmtx, canno, bmrmtx, ganno)
-    dev.off()
+    save(mutmtx, canno, bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,".", g, ".Rd")))
+    #setEPS()
+    #postscript(file=paste0(outputbase,".", g, "mut_status.eps"), width=9, height=4)
+    #plot_mut(mutmtx, canno, bmrmtx, ganno)
+    #dev.off()
   }
 
-=======
-#' @param mode Mode indicating the type of nucleotide change. The case of mode=1 corresponds to
-#' regular change while mode=2 the mutation signature case.
-#' @import Matrix data.table
-#' @export
-diffdriver <- function(genef, mutf, phenof, drivermapsdir,k=5,mode=1, outputdir =".", outputname = "diffdriver_results"){
-if (mode==1){
-  res <- diffdriver_reg(genef, mutf, phenof, drivermapsdir = drivermapsdir, outputdir = outputdir, outputname = outputname)
-}else{
-  res <- diffdriver_sig(genef, mutf, phenof, drivermapsdir = drivermapsdir,k=k, outputdir = outputdir, outputname = outputname)
-}
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
   return(res)
 }

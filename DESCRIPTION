@@ -12,7 +12,14 @@ Imports:
   data.table (>= 1.10.0),
   Matrix,
   stats,
+<<<<<<< HEAD
   matrixStats
+=======
+  matrixStats,
+  plyr,
+  fastTopics,
+  resample
+>>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
 Suggests: 
     knitr,
     rmarkdown,
