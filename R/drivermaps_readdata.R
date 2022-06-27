@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# Global variable Totalnttype, Outputdir
-=======
 #' Global variable Totalnttype, Outputdir
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
 #' @import data.table
 ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
   # genesubset is a file containing genenames, each line has one gene name
@@ -30,23 +26,16 @@ ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
   return(ddm_j)
 }
 
-<<<<<<< HEAD
-=======
 
 
 
 
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
 #' @import data.table
 #' @export
 ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL, genesubset=NULL){
   matrixlist <- list()
   selectvars <- selectvars[selectvars !="nttypecode"] # nttypecode will always be included by reading data by type
-<<<<<<< HEAD
-  for (j in 1:Totalnttype){
-=======
   for (j in 1:totalnttype){
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
     dataall <- ddmread_j(afileinfo, j, varlist = readinvars, genesubset=genesubset)
     if (is.null(yfileinfo)){
       # if no Yfileinfo use 0 for all positions
@@ -59,30 +48,19 @@ ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars 
     anno <- dataselect[ , selectvars, with = F]
     y <- dataselect[ , "y", with = F]
     genename <- dataselect[ , "genename", with = F]
-<<<<<<< HEAD
-    matrixlist[[j]] <- list(anno, y, genename)
-=======
     nttypecode <- dataselect[,"nttypecode",with=F]
     matrixlist[[j]] <- list(anno, y, genename,nttypecode)
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
   }
   return(matrixlist)
 }
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
 #' @import data.table
 mlcoluniq <- function(matrixlist, checkcols = c("functypecode")){
   # check if all column in one dt has at least two values, if not, stop script
   # check if all column in different lists have the same set of unique values
   uniqvlist <- list()
-<<<<<<< HEAD
-  for (j in 1:Totalnttype){
-=======
   for (j in 1:totalnttype){
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
     anno <- matrixlist[[j]][[1]]
     uniq <- lapply(anno, unique)
     uniqvlist[[j]] <- lapply(uniq, sort, na.last = NA)
@@ -134,12 +112,9 @@ ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
   return(matrixlist)
 }
 
-<<<<<<< HEAD
-=======
 
 
 
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
 #' @import data.table matrixStats
 ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=c(-1.8,0.3), cvarimpute = 0, fixmusd=NULL){
   # for vars in qnvars, will plug in normal distributed values for missing values using a normal distribution with width of qnvarimpute[2]  and a downshift of the mean by qnvarimpute[1] compared to distribution of all.
@@ -147,11 +122,7 @@ ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=
   print("processing ...")
   print("for qnvars, filling in missing values ...")
   print("for cvars (0/1 categories), filling in missing values ...")
-<<<<<<< HEAD
-  for (j in 1:Totalnttype){
-=======
   for (j in 1:totalnttype){
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
     anno <- matrixlist[[j]][[1]]
     innames <- colnames(anno)
     inqnvars <- innames[innames %in% qnvars]
@@ -185,11 +156,7 @@ ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=
     alllen <-  colSums(do.call(rbind,lapply(matrixlist, function(x) dim(x[[1]]))))[1]
     allmu <- allsum/alllen
     allvarlist <- list()
-<<<<<<< HEAD
-    for (j in 1:Totalnttype){
-=======
     for (j in 1:totalnttype){
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
       allvarlist[[j]] <- colVars(matrixlist[[j]][[1]],center=allmu) * dim(matrixlist[[j]][[1]])[1]
       gc()
     }
@@ -199,11 +166,7 @@ ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=
     load(fixmusd)
   }
   print("normalizing categorical variables in annotation matrix ...")
-<<<<<<< HEAD
-  for (j in 1:Totalnttype){
-=======
   for (j in 1:totalnttype){
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
     anno <- matrixlist[[j]][[1]]
     for (cvar in cvars) set(anno, j = cvar, value = (anno[[cvar]] - allmu[cvar])/allsd[cvar])
     gc()
@@ -215,11 +178,7 @@ ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=
 splitddm <- function(matrixlist, cpgenelist){
   # divide matrixlist into groups defined in cpgenelist, if not in any group in cpggenelist, it is put in the last group. need to optimize almost hit 20G
   outmatrixlist <- vector("list", length(cpgenelist)+1)
-<<<<<<< HEAD
-  for (j in 1:Totalnttype){
-=======
   for (j in 1:totalnttype){
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
     annoall <- matrixlist[[j]][[1]]
     yall <- matrixlist[[j]][[2]]
     geneall <- matrixlist[[j]][[3]]
@@ -242,11 +201,8 @@ splitddm <- function(matrixlist, cpgenelist){
 
 #' @import data.table
 #' @export
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
 readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL,qnvars = c("expr","repl","hic"),functypecodelevel = NULL,qnvarimpute=c(-1.8,0.3), cvarimpute = 0, genesubset=NULL, fixmusd=NULL){
   # read data for a subset of genes. genesubset is a file containing gene names, one gene name per line.
   # fixmusd is a .Rd file when loaded contain allmu and allsd variables to be used in ddmprocess
@@ -257,14 +213,6 @@ readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readi
   return(matrixlist)
 }
 
-<<<<<<< HEAD
-#' @import data.table
-#' @export
-matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
-  GLMlist <- list()
-  chrposlist <- list()
-  BMcol <- names(BMpars$fullpars)[-c(1:Totalnttype,length(BMpars$fullpars)-1,length(BMpars$fullpars))]
-=======
 
 
 
@@ -287,19 +235,10 @@ matrixlistToGLM_sig <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_
   GLMlist <- list()
   chrposlist <- list()
   BMcol <- names(BMpars$fullpars)[-c(1:totalnttype,length(BMpars$fullpars)-1,length(BMpars$fullpars))]
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
   fixcol <- names(fixpars)
   alpha <- BMpars$fullpars["alpha"]
   lambdaPM_g_s <- data.table(agg_var = mu_g_s$agg_var, lambdaPE = log((y_g_s$y + alpha)/(mu_g_s$V1 + alpha)), key = "agg_var")
   BMvbeta <- BMpars$fullpars[1:(length(BMpars$fullpars)-2)]
-<<<<<<< HEAD
-  for (j in seq(1:Totalnttype)){
-    BMvbetasub <- convertbeta(j, BMvbeta)
-    BManno  <- matrixlist[[j]][[1]][,c("(Intercept)",BMcol), with=F]
-    fixanno <- matrixlist[[j]][[1]][,fixcol, with =F]
-    chrposanno <- chrposmatrixlist[[j]][[1]]
-    genename <- matrixlist[[j]][[3]]
-=======
   for (j in seq(1:totalnttype)){
     BMvbetasub <- convertbeta_sig(j, BMvbeta)
     #BManno  <- matrixlist[[j]][[1]][,c("(Intercept)",BMcol), with=F]
@@ -308,7 +247,6 @@ matrixlistToGLM_sig <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_
    # chrposanno <- cbind(chrposmatrixlist[[j]][[1]],chrposmatrixlist[[j]][[4]])
  chrposanno <- chrposmatrixlist[[j]][[1]]
 genename <- matrixlist[[j]][[3]]
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
     genename2 <- chrposmatrixlist[[j]][[3]]
     if (!identical(genename,genename2)) stop("matrixlist and chrpos not matching!")
     chrposanno[,"genename" := genename]
@@ -318,11 +256,7 @@ genename <- matrixlist[[j]][[3]]
     out <- matrixlist[[j]][[1]]
     out[, baseline:= rowSums(cbind(muit, lambdaPMit$lambdaPE, fixit))]
     out[, y:= matrixlist[[j]][[2]]]
-<<<<<<< HEAD
-    out[, c("(Intercept)",BMcol,fixcol):= NULL]
-=======
     #out[, c("(Intercept)",BMcol,fixcol):= NULL]
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
     GLMlist[[j]] <- out
     chrposlist[[j]] <- chrposanno
   }
@@ -336,15 +270,6 @@ genename <- matrixlist[[j]][[3]]
   return(list(glmdt,glmdtchrpos))
 }
 
-<<<<<<< HEAD
-#'
-convertbeta <- function(j, vbeta){
-  tbeta <- vbeta[j]
-  ibeta <- vbeta[-c(1:Totalnttype)]
-  vbetasub <- c(tbeta,ibeta)
-  return(vbetasub)
-}
-=======
 #' @param j
 #' @param vbeta
 convertbeta_sig <- function(j, vbeta){
@@ -419,4 +344,3 @@ convertbeta <- function(j, vbeta){
 
 
 
->>>>>>> 94530f490d469c3e87bbf5d6ceb53c54b88b60f5
