@@ -9,7 +9,7 @@
 #' regular change while mode=2 the mutation signature case.
 #' @import Matrix data.table
 #' @export
-diffdriver <- function(genef, mutf, phenof, drivermapsdir,k=5,mode=1, outputdir =".", outputname = "diffdriver_results"){
+diffdriver <- function(genef, mutf, phenof,  drivermapsdir,k=5,mode=1, outputdir =".", outputname = "diffdriver_results"){
 if (mode==1){
   res <- diffdriver_reg(genef, mutf, phenof, drivermapsdir = drivermapsdir, outputdir = outputdir, outputname = outputname)
 }else{

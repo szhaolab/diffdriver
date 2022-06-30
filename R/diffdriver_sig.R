@@ -133,7 +133,7 @@ rm(ri,mutation,fanno)
     fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
 
     resg <- list()
-    resg <- ddmodel(as.matrix(mutmtx), canno$Phenotype, as.matrix(bmrmtx[[g]]), fe[,1])
+    resg <- ddmodel(as.matrix(mutmtx), canno$RA_NG2010.hap3, as.matrix(bmrmtx[[g]]), fe[,1])
     resg[["mlr"]] <- mlr(mutmtx, canno$Phenotype)
     resg[["mlr.v2"]] <- mlr.v2(mutmtx, canno$Phenotype, canno$Nsyn)
     resg[["fisher"]] <- genefisher(mutmtx, canno$Phenotype)

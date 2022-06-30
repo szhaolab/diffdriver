@@ -117,7 +117,7 @@ bmrOld=list()
     fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
 
     resg <- list()
-    resg[["dd"]] <- ddmodel(mutmtx, canno$Phenotype, bmrmtx, fe[,1])
+    resg[["dd"]] <- ddmodel(mutmtx, canno$RA_NG2010.hap3, bmrmtx, fe[,1])
     resg[["mlr"]] <- mlr(mutmtx, canno$Phenotype)
     resg[["mlr.v2"]] <- mlr.v2(mutmtx, canno$Phenotype, canno$Nsyn)
 #   resg[["fisher"]] <- genefisher(mutmtx, canno$Phenotype)
