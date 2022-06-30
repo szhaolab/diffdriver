@@ -7,7 +7,7 @@
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
 #' @import Matrix data.table
 #' @export
-diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
+diffdriver_sig <- function(genef, mutf, phenof,j, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
@@ -83,7 +83,7 @@ ri=ri[-index,]
 
   # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
   canno <- fread(phenof, header = "auto")
-
+ colnames(canno)[j]="Phenotype"
   # column index (ci): sampleID
   ci <- canno[,"SampleID"]
   ci[,"cidx" := 1:dim(canno)[1]]
