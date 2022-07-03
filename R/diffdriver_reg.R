@@ -113,7 +113,7 @@ for (t in 1:length(matrixlist)){
     # normalize BMR for each sample
     bmr0g=as.matrix(bmrallg[[g]])
     bmrg=as.data.table(bmr0g[,rep(1,nrow(canno))])
-    bmrmtx <-sweep(bmrg, 2, bmrsc, "+")
+    bmrmtx <-as.matrix(sweep(bmrg, 2, bmrsc, "+"))
 if (any(is.na(bmrmtx))) {stop("bmr missing")}
     betaf <- Fpars[[g]][names(Fpars[[g]]) != "beta_f0"]
     betaf0 <- Fpars[[g]]["beta_f0"]
