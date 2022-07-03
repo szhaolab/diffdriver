@@ -28,10 +28,13 @@ diffdriver_reg <- function(genef, mutf, phenof,j, drivermapsdir, outputdir =".",
   fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
   allg <- read.table(genef, stringsAsFactors = F)[,1]
-  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
-  chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
+#  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
+ # chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
 
-
+#save(matrixlist,file="matrixlist9.Rd")
+#save(chrposmatrixlist,file="chrposmatrixlist9.Rd")
+load("matrixlist9.Rd")
+load("chrposmatrixlist9.Rd")
 BMRlist=BMRlist$UCS
 
 for (t in 1:length(matrixlist)){
@@ -46,7 +49,7 @@ for (t in 1:length(matrixlist)){
   # background mutation rate (bmrdt): data.table, each column correponds to one BMR label
   bmrdt <- data.table()
 
-
+  
     matrixlisttemp <- copy(matrixlist)
     chrposmatrixlisttemp <- copy(chrposmatrixlist)
     y_g_s <- BMRlist$Y_g_s_all[allg][,1:2, with=F]
@@ -55,9 +58,9 @@ for (t in 1:length(matrixlist)){
     mu_g_s[is.na(mu_g_s)] <- 0
     glmdtall <- matrixlistToGLM(matrixlisttemp, chrposmatrixlisttemp, BMRlist$BMpars, mu_g_s, y_g_s, fixpars=NULL)
     #glmdtall <- matrixlistToGLM(matrixlist, chrposmatrixlist, BMRlist[[label]]$BMpars, mu_g_s, y_g_s, fixpars=NULL)
-    bmrdt[,eval(label):= glmdtall[[1]]$baseline]
+    bmrdt[,eval(type):= glmdtall[[1]]$baseline]
     rm(matrixlisttemp,chrposmatrixlisttemp); gc()
-
+  
 
   # functional annotation (fanno):data.table, each row has functional annotation for each possible mutation
   fanno <- glmdtall[[1]]
@@ -65,11 +68,11 @@ for (t in 1:length(matrixlist)){
   # row index (ri): chr pos ref alt
   ri <- glmdtall[[2]]
 
-
+  
   # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
   muts0 <- fread(mutf, header = T)
   if (!grepl('chr', muts0$Chromosome[1], fixed = T)) {muts0$Chromosome <- paste0("chr",muts0$Chromosome)}
-
+  
   # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
   canno <- as.data.table(fread(phenof, header = "auto"))
   canno0 <- as.data.table(fread(phenof, header = "auto"))
@@ -78,14 +81,14 @@ for (t in 1:length(matrixlist)){
   index2=which(muts0$SampleID %in% shared)
   muts<- muts0[index2,]
   canno = canno0[index1,]
-
+  
   # column index (ci): sampleID
   ci <- canno[,"SampleID"]
   ci[,"cidx" := 1:dim(canno)[1]]
 
-
+  
     BMRlist[["nsyn"]] <- sum(canno$Nsyn)
-
+  
   # split based on gene
   bmrallg <- split(bmrdt, ri$genename)
   riallg <- split(ri,ri$genename)
@@ -94,14 +97,14 @@ for (t in 1:length(matrixlist)){
   res <- list()
   #for (g in names(bmrallg)) {
     # normalize BMR for each sample
-  #  bmrsc <- log(canno$Nsyn/BMRlist$nsyn)
+    bmrsc <- log(canno$Nsyn/BMRlist$nsyn)
     # bmrmtx is matrix, rows are positions, columns are for each samples
     #bmrmtx <-sweep(as.matrix(bmrallg[[g]][,canno$BMRlabel,with=F]), 2, bmrsc, "+")
   #  bmr0g=as.matrix(bmrallg[[g]])
   #  bmrg=bmr0g[,rep(1,nrow(canno))]
    # bmrmtx <-sweep(bmrg, 2, bmrsc, "+")
   #}
-
+  
   for (g in names(bmrallg)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
