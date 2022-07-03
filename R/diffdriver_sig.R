@@ -5,9 +5,10 @@
 #' @param genef file for name of genes to be included in the analysis
 #' @param mutf mutation list file, use the driverMAPS mutation input format
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
+#' @param j The index of phenotype
 #' @import Matrix data.table
 #' @export
-diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
+diffdriver_sig <- function(genef, mutf, phenof,j, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
@@ -28,8 +29,12 @@ diffdriver_sig <- function(genef, mutf, phenof, drivermapsdir,k=k, outputdir =".
   fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
   allg <- read.table(genef, stringsAsFactors = F)[,1]
-  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
-  chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
+#  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel,qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd=fixmusdfile)
+ # chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
+#save(matrixlist,file="matrixlist96.Rd")
+#save(chrposmatrixlist,file="chrposmatrixlist96.Rd")
+load("matrixlist96.Rd")
+load("chrposmatrixlist96.Rd")
  BMRlist=BMRlist$UCS
 
 
@@ -80,9 +85,16 @@ index=unique(which(is.na(ri),arr.ind = T)[,1])
 fanno=fanno[-index,]
 ri=ri[-index,]
 
-
+# mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
+muts0 <- fread(mutf, header = T)
+if (!grepl('chr', muts0$Chromosome[1], fixed = T)) {muts0$Chromosome <- paste0("chr",muts0$Chromosome)}
   # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
-  canno <- fread(phenof, header = "auto")
+  canno0 <- as.data.table(fread(phenof, header = "auto"))
+shared=intersect(muts0$SampleID,canno0$SampleID)
+index1=which(canno0$SampleID %in% shared)
+index2=which(muts0$SampleID %in% shared)
+muts<- muts0[index2,]
+canno = canno0[index1,]
 
   # column index (ci): sampleID
   ci <- canno[,"SampleID"]
@@ -92,20 +104,17 @@ ri=ri[-index,]
   #   BMRlist[[l]][["nsyn"]] <- sum(canno$Nsyn[canno$BMRlabel == l])
   # }
 
-  # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
-  muts <- fread(mutf, header = T)
-  if (!grepl('chr', muts$Chromosome[1], fixed = T)) {muts$Chromosome <- paste0("chr",muts$Chromosome)}
-sampleid=unique(muts$SampleID)
+
 ##estimate bmr mu_ij
 mutation=data.table()
 coe=BMRlist$BMpars$fullpars[c("expr","repl","hic")]
 numerator=exp(fanno$expr*coe[1]+fanno$repl*coe[2]+fanno$hic*coe[3])
-for (i in 1:length(sampleid)) {
+for (i in 1:length(shared)) {
   print(paste("bmr for sample",i,sep=" "))
   mui=(ri$lambda)*numerator*(bmrsig$sampelsig[i,ri$nttypecode])/bmrsig$normconstant
   mutation=cbind(mutation,mui)
     }
-
+if (any(is.na(mutation))) {stop("bmr missing")}
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
 bmrmtx <- split(mutation,ri$genename)
@@ -133,12 +142,13 @@ rm(ri,mutation,fanno)
     fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
 
     resg <- list()
-    resg <- ddmodel(as.matrix(mutmtx), canno$RA_NG2010.hap3, as.matrix(bmrmtx[[g]]), fe[,1])
-    resg[["mlr"]] <- mlr(mutmtx, canno$Phenotype)
-    resg[["mlr.v2"]] <- mlr.v2(mutmtx, canno$Phenotype, canno$Nsyn)
-    resg[["fisher"]] <- genefisher(mutmtx, canno$Phenotype)
-    resg[["binom"]] <- genebinom(mutmtx, canno$Phenotype)
-    resg[["lr"]] <- genelr(mutmtx, canno$Phenotype)
+    e=canno[[j]]
+    resg <- ddmodel(mutmtx, e, bmrmtx[[g]], fe[,1])
+    resg[["mlr"]] <- mlr(mutmtx, e)
+    resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
+    resg[["fisher"]] <- genefisher(mutmtx, e)
+    #resg[["binom"]] <- genebinom(mutmtx, e)
+    #resg[["lr"]] <- genelr(mutmtx, e)
     res[[g]] <- resg
 
     save(mutmtx, canno, bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,".", g, ".Rd")))

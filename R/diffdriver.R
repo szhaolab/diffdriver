@@ -7,13 +7,14 @@
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
 #' @param mode Mode indicating the type of nucleotide change. The case of mode=1 corresponds to
 #' regular change while mode=2 the mutation signature case.
+#' @param j The index of phenotype
 #' @import Matrix data.table
 #' @export
-diffdriver <- function(genef, mutf, phenof,  drivermapsdir,k=5,mode=1, outputdir =".", outputname = "diffdriver_results"){
+diffdriver <- function(genef, mutf, phenof,j,  drivermapsdir,k=5,mode=1, outputdir =".", outputname = "diffdriver_results"){
 if (mode==1){
-  res <- diffdriver_reg(genef, mutf, phenof, drivermapsdir = drivermapsdir, outputdir = outputdir, outputname = outputname)
+  res <- diffdriver_reg(genef, mutf, phenof, j, drivermapsdir = drivermapsdir, outputdir = outputdir, outputname = outputname)
 }else{
-  res <- diffdriver_sig(genef, mutf, phenof, drivermapsdir = drivermapsdir,k=k, outputdir = outputdir, outputname = outputname)
+  res <- diffdriver_sig(genef, mutf, phenof, j, drivermapsdir = drivermapsdir,k=k, outputdir = outputdir, outputname = outputname)
 }
   return(res)
 }
