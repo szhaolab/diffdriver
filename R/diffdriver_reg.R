@@ -108,6 +108,7 @@ for (t in 1:length(matrixlist)){
     rig$ridx <- 1:dim(rig)[1]
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
     mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
+    mutmtx <- as.matrix(mutmtx)
     if (sum(mutmtx) ==0) {next}
 
     # normalize BMR for each sample
