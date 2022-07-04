@@ -4,7 +4,7 @@
 \alias{plot_mut}
 \title{plot mutations}
 \usage{
-plot_mut(mutmtx, canno, bmrmtx, ganno)
+plot_mut(mutmtx, canno, bmrmtx, ganno, ...)
 }
 \description{
 plot mutations
