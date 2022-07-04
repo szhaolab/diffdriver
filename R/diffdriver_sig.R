@@ -8,7 +8,7 @@
 #' @param j The index of phenotype
 #' @import Matrix data.table
 #' @export
-diffdriver_sig <- function(genef, mutf, phenof,j, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
+diffdriver_sig= function(genef, mutf, phenof,j, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
