@@ -22,14 +22,11 @@ phenof =paste0(mutationdir,type,"/",type,"_PRS_46phenotype.txt")
 print(mutf)
 print(phenof)
 
-
-
 logfile <- file(paste0(outputdir,"/", outputname, ".log"), open="wt")
 addHandler(writeToFile, file= logfile, level='DEBUG')
 loginfo("Started running diffdriver ...")
 
 res <- diffdriver(genef, mutf, phenof,j=6, drivermapsdir = drivermapsdir,k=6,mode=2, outputdir = outputdir, outputname = outputname)
-
 #save(res,file="res.Rd")
 
 
