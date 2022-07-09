@@ -105,7 +105,7 @@ for (t in 1:length(matrixlist)){
   #}
     ## hotspot
     hotspots=read.table(file = hotf)
-    hmm=readRDS(paste0(dirvermapsdir, "hmmOGpar_ASHmean.rds"))
+    hmm=readRDS(paste0(drivermapsdir, "hmmOGpar_ASHmean.rds"))
   for (g in names(bmrallg)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
