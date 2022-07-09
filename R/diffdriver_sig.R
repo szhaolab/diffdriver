@@ -8,7 +8,7 @@
 #' @param j The index of phenotype
 #' @import Matrix data.table
 #' @export
-diffdriver_sig= function(genef, mutf, phenof,j, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
+diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
@@ -121,12 +121,20 @@ bmrmtx <- split(mutation,ri$genename)
 rm(ri,mutation,fanno)
   # run diffdriver for each gene
   res <- list()
+  ## hotspot
+  hotspots=read.table(file = hotf)
+  hmm=readRDS(file="hmmOGpar_ASHmean.rds")
+
   for (g in names(bmrmtx)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
     mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
+
+    hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
+    hotmat=rep(0,nrow(rig))
+    hotmat[hotg$ridx]=1
     if (sum(mutmtx) ==0) {
       next
       }
@@ -139,7 +147,7 @@ rm(ri,mutation,fanno)
       betaf0 <-  Fpars[["TP53"]]["beta_f0"]
     } # if OG/TSG unknown, use TSG parameters.
     ganno <- fannoallg[[g]]
-    fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
+    fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf+ hotmat*hmm[8] + betaf0
 
     resg <- list()
     e=canno[[j]]

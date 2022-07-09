@@ -9,6 +9,7 @@ diffdriver_sig(
   mutf,
   phenof,
   j,
+  hotf,
   drivermapsdir,
   k = k,
   outputdir = ".",

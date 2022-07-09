@@ -8,7 +8,7 @@
 #' @param j The index of phenotype
 #' @import Matrix data.table
 #' @export
-diffdriver_reg <- function(genef, mutf, phenof,j, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
+diffdriver_reg <- function(genef, mutf, phenof,j,hotf, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "/nttypeXXX_annodata.txt", sep=""),
@@ -49,7 +49,7 @@ for (t in 1:length(matrixlist)){
   # background mutation rate (bmrdt): data.table, each column correponds to one BMR label
   bmrdt <- data.table()
 
-  
+
     matrixlisttemp <- copy(matrixlist)
     chrposmatrixlisttemp <- copy(chrposmatrixlist)
     y_g_s <- BMRlist$Y_g_s_all[allg][,1:2, with=F]
@@ -60,7 +60,7 @@ for (t in 1:length(matrixlist)){
     #glmdtall <- matrixlistToGLM(matrixlist, chrposmatrixlist, BMRlist[[label]]$BMpars, mu_g_s, y_g_s, fixpars=NULL)
     bmrdt[,eval(type):= glmdtall[[1]]$baseline]
     rm(matrixlisttemp,chrposmatrixlisttemp); gc()
-  
+
 
   # functional annotation (fanno):data.table, each row has functional annotation for each possible mutation
   fanno <- glmdtall[[1]]
@@ -68,11 +68,11 @@ for (t in 1:length(matrixlist)){
   # row index (ri): chr pos ref alt
   ri <- glmdtall[[2]]
 
-  
+
   # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
   muts0 <- fread(mutf, header = T)
   if (!grepl('chr', muts0$Chromosome[1], fixed = T)) {muts0$Chromosome <- paste0("chr",muts0$Chromosome)}
-  
+
   # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
   canno0 <- as.data.table(fread(phenof, header = "auto"))
   shared=intersect(muts0$SampleID,canno0$SampleID)
@@ -80,14 +80,14 @@ for (t in 1:length(matrixlist)){
   index2=which(muts0$SampleID %in% shared)
   muts<- muts0[index2,]
   canno = canno0[index1,]
-  
+
   # column index (ci): sampleID
   ci <- canno[,"SampleID"]
   ci[,"cidx" := 1:dim(canno)[1]]
 
-  
+
     BMRlist[["nsyn"]] <- sum(canno$Nsyn)
-  
+
   # split based on gene
   bmrallg <- split(bmrdt, ri$genename)
   riallg <- split(ri,ri$genename)
@@ -103,7 +103,9 @@ for (t in 1:length(matrixlist)){
   #  bmrg=bmr0g[,rep(1,nrow(canno))]
    # bmrmtx <-sweep(bmrg, 2, bmrsc, "+")
   #}
-  
+    ## hotspot
+    hotspots=read.table(file = hotf)
+    hmm=readRDS(file="hmmOGpar_ASHmean.rds")
   for (g in names(bmrallg)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
@@ -111,6 +113,10 @@ for (t in 1:length(matrixlist)){
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
     mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
     mutmtx= as.matrix(mutmtx)
+
+    hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
+    hotmat=rep(0,nrow(rig))
+    hotmat[hotg$ridx]=1
     if (sum(mutmtx) ==0) {next}
 
     # normalize BMR for each sample
@@ -125,7 +131,7 @@ if (any(is.na(bmrmtx))) {stop("bmr missing")}
       betaf0 <-  Fpars[["TP53"]]["beta_f0"]
     } # if OG/TSG unknown, use TSG parameters.
     ganno <- fannoallg[[g]]
-    fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
+    fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
 
     resg <- list()
     e=canno[[j]]
