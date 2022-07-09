@@ -2,10 +2,9 @@
 library("diffdriver")
 library("logging")
 drivermapsdir<- "/dartfs/rc/lab/S/Szhao/library/diffdriver_anno/"
-#drivermapsdir<- "~/SimingLab/library/diffdriver_anno/"
 outputdir <- "~/temp/"
 outputname <- "diffDriver_demo"
-load(paste0(drivermapsdir,"/mapsparameters/Fpars.rda"))  # see data-raw folder for how to generate Fpars from drivermaps results 
+load(paste0(drivermapsdir,"/mapsparameters/Fpars.rda"))  # see data-raw folder for how to generate Fpars from drivermaps results
 load(paste0(drivermapsdir,"/mapsparameters/BMRlist.rda")) # see data-raw folder for how to generate BMRlist from drivermaps results
 
 #genef <- system.file("extdata/genes.txt", package = "diffdriver")
@@ -19,9 +18,6 @@ mutationdir="/dartfs/rc/lab/S/Szhao/diffDriver/data_run_prs/tumor_specific_input
 genef = paste0(drivermapsdir,"extdata/genes.txt")
 mutf = paste0(mutationdir,type,"/",type,"_mutations.txt")
 phenof =paste0(mutationdir,type,"/",type,"_PRS_46phenotype.txt")
-print(mutf)
-print(phenof)
-
 logfile <- file(paste0(outputdir,"/", outputname, ".log"), open="wt")
 addHandler(writeToFile, file= logfile, level='DEBUG')
 loginfo("Started running diffdriver ...")

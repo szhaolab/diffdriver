@@ -9,6 +9,7 @@ diffdriver_reg(
   mutf,
   phenof,
   j,
+  hotf,
   drivermapsdir,
   outputdir = ".",
   outputname = "diffdriver_results"

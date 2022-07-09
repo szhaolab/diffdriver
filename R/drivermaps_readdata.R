@@ -30,8 +30,20 @@ ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
 
 
 
-#' @import data.table
+
+#' Read data
+#'
+#' @param afileinfo Annotation file
+#' @param yfileinfo
+#' @param selectvars
+#' @param selectmuttype
+#' @param readinvars
+#' @param genesubset
+#'
+#' @return A list
 #' @export
+#'
+#' @examples
 ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL, genesubset=NULL){
   matrixlist <- list()
   selectvars <- selectvars[selectvars !="nttypecode"] # nttypecode will always be included by reading data by type
@@ -55,11 +67,19 @@ ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars 
 }
 
 
-#' @import data.table
+
+#'  check if all column in one dt has at least two values, if not, stop script
+#'    check if all column in different lists have the same set of unique values
+
+#' @param matrixlist
+#' @param checkcols
+#'
+#' @return A list
+#' @export
+#'
+#' @examples
 mlcoluniq <- function(matrixlist, checkcols = c("functypecode")){
-  # check if all column in one dt has at least two values, if not, stop script
-  # check if all column in different lists have the same set of unique values
-  uniqvlist <- list()
+uniqvlist <- list()
   for (j in 1:totalnttype){
     anno <- matrixlist[[j]][[1]]
     uniq <- lapply(anno, unique)
@@ -76,10 +96,16 @@ mlcoluniq <- function(matrixlist, checkcols = c("functypecode")){
   }
 }
 
-#' @import data.table
+
+#'   check if any column is duplicate, if yes, stop script
+#'   Note this is a rough way (check sum)
+#'
+#' @param dt
+#'
+#' @return A warning sign
+
 dtcoldup <- function(dt){
-  # check if any column is duplicate, if yes, stop script
-  # Note this is a rough way (check sum)
+
   colsum <- lapply(dt, sum , na.rm = TRUE)
   colsum <- unlist(colsum)
   if (length(unique(colsum)) < length(colsum)){
@@ -88,9 +114,17 @@ dtcoldup <- function(dt){
   }
 }
 
-#' @import data.table
+
+
+#'  Add intercept, if have functtypecode, then code and move to the front.
+#'
+#' @param matrixlist
+#' @param selectvars
+#' @param functypecodelevel
+#'
+#' @return A list
 ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
-  # add intercept, if have functtypecode, then code and move to the front.
+
   selectvars <- selectvars[selectvars !="nttypecode"]
   print("coding...")
   mlcoluniq(matrixlist)
@@ -115,11 +149,19 @@ ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
 
 
 
-#' @import data.table matrixStats
+
+#' For vars in qnvars, will plug in normal distributed values for missing values using a normal distribution with width of qnvarimpute[2]  and a downshift of the mean by qnvarimpute[1] compared to distribution of all.
+# for others, should all be categorical and will assign the lowest level (which is 0 under default) for missing values and then normalize.
+#' @param matrixlist
+#' @param qnvars
+#' @param qnvarimpute
+#' @param cvarimpute
+#' @param fixmusd
+#'
+#' @return A list
+
 ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=c(-1.8,0.3), cvarimpute = 0, fixmusd=NULL){
-  # for vars in qnvars, will plug in normal distributed values for missing values using a normal distribution with width of qnvarimpute[2]  and a downshift of the mean by qnvarimpute[1] compared to distribution of all.
-  # for others, should all be categorical and will assign the lowest level (which is 0 under default) for missing values and then normalize.
-  print("processing ...")
+print("processing ...")
   print("for qnvars, filling in missing values ...")
   print("for cvars (0/1 categories), filling in missing values ...")
   for (j in 1:totalnttype){
@@ -174,9 +216,16 @@ ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=
   return(matrixlist)
 }
 
-#' @import data.table
+
+#' divide matrixlist into groups defined in cpgenelist,
+#' if not in any group in cpggenelist,
+#' it is put in the last group. need to optimize almost hit 20G
+#'
+#' @param matrixlist
+#' @param cpgenelist
+#' @return A list
+
 splitddm <- function(matrixlist, cpgenelist){
-  # divide matrixlist into groups defined in cpgenelist, if not in any group in cpggenelist, it is put in the last group. need to optimize almost hit 20G
   outmatrixlist <- vector("list", length(cpgenelist)+1)
   for (j in 1:totalnttype){
     annoall <- matrixlist[[j]][[1]]
@@ -199,10 +248,23 @@ splitddm <- function(matrixlist, cpgenelist){
   return(outmatrixlist)
 }
 
-#' @import data.table
-#' @export
 
 
+#' Read into data
+#'
+#' @param afileinfo
+#' @param yfileinfo
+#' @param selectvars
+#' @param selectmuttype
+#' @param readinvars
+#' @param qnvars
+#' @param functypecodelevel
+#' @param qnvarimpute
+#' @param cvarimpute
+#' @param genesubset
+#' @param fixmusd
+#'
+#' @return A list
 readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL,qnvars = c("expr","repl","hic"),functypecodelevel = NULL,qnvarimpute=c(-1.8,0.3), cvarimpute = 0, genesubset=NULL, fixmusd=NULL){
   # read data for a subset of genes. genesubset is a file containing gene names, one gene name per line.
   # fixmusd is a .Rd file when loaded contain allmu and allsd variables to be used in ddmprocess
@@ -227,7 +289,7 @@ readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readi
 #' @param y_g_s
 #' @param fixpars
 #'
-#' @return
+#' @return A list
 #' @export
 #'
 #' @examples
@@ -270,8 +332,13 @@ genename <- matrixlist[[j]][[3]]
   return(list(glmdt,glmdtchrpos))
 }
 
+
+#' Create parameter vector for signature model
+#'
 #' @param j
 #' @param vbeta
+#'
+#' @return A numerical vector
 convertbeta_sig <- function(j, vbeta){
   tbeta <- vbeta[j]
   ibeta <- vbeta[-c(1:totalnttype)]
@@ -331,8 +398,12 @@ matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s,
 }
 
 
+#' Create parameter vector for regular model
+#'
 #' @param j
 #' @param vbeta
+#'
+#' @return A numerical vector
 convertbeta <- function(j, vbeta){
   tbeta <- vbeta[j]
   ibeta <- vbeta[-c(1:totalnttype)]

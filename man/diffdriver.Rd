@@ -2,13 +2,14 @@
 % Please edit documentation in R/diffdriver.R
 \name{diffdriver}
 \alias{diffdriver}
-\title{Run diffDriver given input files}
+\title{Detect the relationship between a specified phenotype and mutation}
 \usage{
 diffdriver(
   genef,
   mutf,
   phenof,
   j,
+  hotf,
   drivermapsdir,
   k = 5,
   mode = 1,
@@ -17,16 +18,23 @@ diffdriver(
 )
 }
 \arguments{
-\item{genef}{file for name of genes to be included in the analysis}
+\item{genef}{Link for files of name of genes to be included in the analysis}
 
-\item{mutf}{mutation list file, use the driverMAPS mutation input format}
+\item{mutf}{Link for mutation file, use the driverMAPS mutation input format}
 
-\item{phenof}{phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.}
+\item{phenof}{Link for phenoptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.}
 
 \item{j}{The index of phenotype}
 
+\item{k}{The specified number of components in NMF}
+
 \item{mode}{Mode indicating the type of nucleotide change. The case of mode=1 corresponds to
 regular change while mode=2 the mutation signature case.}
+
+\item{model}{The type of annotation. The case of mode=1 is for regular annotation while the case of mode=2 is for signature annotation file}
+}
+\value{
+A list
 }
 \description{
 This is the function to run diffDriver. We first need to set up: run driverMAPS for groups with potential different BMR, assign BMR labels for each sample. then BMR for each sample will be scaled based on driverMAPS results.

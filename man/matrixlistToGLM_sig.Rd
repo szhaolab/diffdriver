@@ -16,6 +16,9 @@ matrixlistToGLM_sig(
 \arguments{
 \item{fixpars}{}
 }
+\value{
+A list
+}
 \description{
 Compute the bmr
 }
