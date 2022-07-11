@@ -82,9 +82,10 @@ diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputd
   save(ff,file=paste0(outputbase,"_factors.Rd"))
 ri=plyr::join(ri,lambda_pe)
 index=unique(which(is.na(ri),arr.ind = T)[,1])
+if (length(index)>0){
 fanno=fanno[-index,]
 ri=ri[-index,]
-
+}
 # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
 muts0 <- fread(mutf, header = T)
 if (!grepl('chr', muts0$Chromosome[1], fixed = T)) {muts0$Chromosome <- paste0("chr",muts0$Chromosome)}
