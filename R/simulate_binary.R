@@ -6,17 +6,17 @@
 #' @param betaf0, shift of mutation rate from BMR, log scale, shared in all samples.
 #' @param Nsample, total number of samples
 #' @param beta_gc, effect size for functional covariates, log scale. Right now we only have one functional covariate, that is whether the mutation is missense or loss of function mutation. beta_gc[1] indicates the shift of mutation rate for missense ( coded as 7 in functype code column in `sgdata`), beta_gc[2] indicates the shift of mutation rate for loss of function ( coded as 8 in functype code column in `sgdata`). log scale.
-#' @param fracc, fraction of positively selected samples in group E=1
-#' @param fracn, fraction of positively selected samples in group E=0
+#' @param par par[1] is the fraction of positively selected samples in group E=1; par[2] is the
+#' fraction of negatively selected samples in group E=0
 #' @import Matrix data.table
 #' @export
-simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c(0,1), par=c(0.8,0.2)){
+simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c(0,1),para=c(0.8,0.2),hotspot=c(0.05,0.5)){
   Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
   Nsamplen <- Nsample-Nsamplec
   edata <- c(rep(1,Nsamplec),rep(0,Nsamplen))
 
-  Nsamplec.ps <- rbinom(1, Nsamplec, par[1]) # number of positively selected samples in group E=1
-  Nsamplen.ps <- rbinom(1, Nsamplen, par[2]) # number of positively selected samples in group E=0
+  Nsamplec.ps <- rbinom(1, Nsamplec, para[1]) # number of positively selected samples in group E=1
+  Nsamplen.ps <- rbinom(1, Nsamplen, para[2]) # number of positively selected samples in group E=0
   Nsample.ps <- Nsamplec.ps + Nsamplen.ps
   Nsample.neu <- Nsample - Nsample.ps
 
@@ -24,6 +24,7 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c
   countlist <- list()
   annodata <- list()
   bmrmtxlist <- list()
+  hotsize <- c()
   for (t in 1:length(sgdata)){ # Simulate mutation data. t: nucleotide change type
     tnpos1 <- dim(sgdata[[t]][functypecode==7])[1]
     tnpos2 <- dim(sgdata[[t]][functypecode==8])[1]
@@ -41,6 +42,8 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c
     mutlist[[t]] <- cbind(mutc.out,mutn.out)
     countlist[[t]] <- c(tnpos1, tnpos2,sum(mutc1),sum(mutc2),sum(mutn1), sum(mutn2), sum(mutc.out), sum(mutn.out), sum(mutc.out[1:tnpos1,]), sum(mutn.out[1:tnpos1,]))
     bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]]))
+  aa <- hotspot[2]*sample(x=c(1,0),size=tnpos1+tnpos2,replace = T,prob = c(hotspot[1],1-hotspot[1]))
+  hotsize=c(hotsize,aa)  
   }
 
   avbetaf1 <- log(exp(beta_gc[1]) * Nsample.ps/Nsample + Nsample.neu/Nsample)
@@ -48,6 +51,6 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c
   pos1pos2ratio <- colSums(do.call(rbind, countlist))[1]/colSums(do.call(rbind, countlist))[2]
   avbetaf1f2 <- log((pos1pos2ratio*exp(avbetaf1) + exp(avbetaf2))/(pos1pos2ratio+1))
   betaf1f2 <- log((pos1pos2ratio*exp(beta_gc[1]) + exp(beta_gc[2]))/(pos1pos2ratio+1))
-  simdata <- list("mutlist"= mutlist, "pheno" = edata, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "par" = par, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf1" = avbetaf1, "avbetaf2" = avbetaf2, "avbetaf1f2" = avbetaf1f2,"betaf1f2"=betaf1f2))
+  simdata <- list("mutlist"= mutlist, "pheno" = edata, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para" = para, "hotsize"=hotsize, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf1" = avbetaf1, "avbetaf2" = avbetaf2, "avbetaf1f2" = avbetaf1f2,"betaf1f2"=betaf1f2))
   return(simdata)
 }
