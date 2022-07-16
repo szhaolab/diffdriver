@@ -10,12 +10,14 @@
 #' fraction of negatively selected samples in group E=0
 #' @import Matrix data.table
 #' @export
-simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c(0,1),para=c(0.8,0.2),hotspot=c(0.05,0.5)){
+simulate_1funcv <- function(sgdata, bmrpars, betaf0, Nsample, beta_gc,para,hotspot){
   Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
   Nsamplen <- Nsample-Nsamplec
   edata <- c(rep(1,Nsamplec),rep(0,Nsamplen))
-
-  Nsamplec.ps <- rbinom(1, Nsamplec, para[1]) # number of positively selected samples in group E=1
+  
+  Nsamplec.ps <- rbinom(1, Nsamplec, para[1]) # number of hotspots position in positively selected samples  in group E=1
+  #Nsamplec.ps.hot <- rbinom(1, Nsamplec.ps, hotspot[1]) # number of hotspots position in positively selected samples  in group E=1
+  #Nsamplec.ps.reg=Nsamplec.ps-Nsample.ps.hot
   Nsamplen.ps <- rbinom(1, Nsamplen, para[2]) # number of positively selected samples in group E=0
   Nsample.ps <- Nsamplec.ps + Nsamplen.ps
   Nsample.neu <- Nsample - Nsample.ps
@@ -28,12 +30,30 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c
   for (t in 1:length(sgdata)){ # Simulate mutation data. t: nucleotide change type
     tnpos1 <- dim(sgdata[[t]][functypecode==7])[1]
     tnpos2 <- dim(sgdata[[t]][functypecode==8])[1]
+  
     annodata[[t]] <- rbind(sgdata[[t]][functypecode==7], sgdata[[t]][functypecode==8])
-    mutc1 <- rsparsematrix(tnpos1, Nsample.ps, nnz=rbinom(1, Nsample.ps * tnpos1, exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1])), rand.x=NULL)
-    mutc2 <- rsparsematrix(tnpos2, Nsample.ps, nnz=rbinom(1, Nsample.ps * tnpos2, exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])), rand.x=NULL)
+    
+    
+    mutc1.hot <- rsparsematrix(floor(tnpos1*hotspot[1]), Nsample.ps, nnz=rbinom(1, Nsample.ps * floor(tnpos1*hotspot[1]), exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1]))*exp(hotspot[2]), rand.x=NULL)
+    mutc1.reg <- rsparsematrix(floor(tnpos1*(1-hotspot[1])), Nsample.ps, nnz=rbinom(1, Nsample.ps * floor(tnpos1*(1-hotspot[1])), exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1])), rand.x=NULL)
+    mutc1=rbind(mutc1.hot,mutc1.reg)
+    
+    mutc2.hot <- rsparsematrix(floor(tnpos2*hotspot[1]), Nsample.ps, nnz=rbinom(1, Nsample.ps * floor(tnpos2*hotspot[1]), exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])*exp(hotspot[2])), rand.x=NULL)
+    mutc2.reg <- rsparsematrix(floor(tnpos2*(1-hotspot[1])), Nsample.ps, nnz=rbinom(1, Nsample.ps * floor(tnpos2*(1-hotspot[1])), exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])), rand.x=NULL)
+    mutc2=rbind(mutc2.hot,mutc2.reg)
+    
     mutc <- rbind(mutc1, mutc2)
-    mutn1 <- rsparsematrix(tnpos1, Nsample.neu, nnz=rbinom(1, Nsample.neu * tnpos1, exp(bmrpars[t])*exp(betaf0)), rand.x=NULL)
-    mutn2 <- rsparsematrix(tnpos2, Nsample.neu, nnz=rbinom(1, Nsample.neu * tnpos2, exp(bmrpars[t])*exp(betaf0)), rand.x=NULL)
+
+    
+    mutn1.hot <- rsparsematrix(floor(tnpos1*hotspot[1]), Nsample.neu, nnz=rbinom(1, Nsample.neu * floor(tnpos1*hotspot[1]), exp(bmrpars[t])*exp(betaf0))*exp(hotspot[2]), rand.x=NULL)
+    mutn1.reg <- rsparsematrix(floor(tnpos1*(1-hotspot[1])), Nsample.neu, nnz=rbinom(1, Nsample.neu * floor(tnpos1*(1-hotspot[1])), exp(bmrpars[t])*exp(betaf0)), rand.x=NULL)
+    mutn1=rbind(mutn1.hot,mutn1.reg)
+  
+    
+    mutn2.hot <- rsparsematrix(floor(tnpos2*hotspot[1]), Nsample.neu, nnz=rbinom(1, Nsample.neu * floor(tnpos2*hotspot[1]), exp(bmrpars[t])*exp(betaf0)*exp(hotspot[2])), rand.x=NULL)
+    mutn2.reg <- rsparsematrix(floor(tnpos2*(1-hotspot[1])), Nsample.neu, nnz=rbinom(1, Nsample.neu * floor(tnpos2*(1-hotspot[1])), exp(bmrpars[t])*exp(betaf0)), rand.x=NULL)
+    mutn2=rbind(mutn2.hot,mutn2.reg)
+    
     mutn <- rbind(mutn1, mutn2)
 
     mutc.out <- cbind(mutc[, 1:Nsamplec.ps], mutn[, 1:(Nsamplec-Nsamplec.ps)])
@@ -42,9 +62,10 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0=0.5, Nsample=1000, beta_gc=c
     mutlist[[t]] <- cbind(mutc.out,mutn.out)
     countlist[[t]] <- c(tnpos1, tnpos2,sum(mutc1),sum(mutc2),sum(mutn1), sum(mutn2), sum(mutc.out), sum(mutn.out), sum(mutc.out[1:tnpos1,]), sum(mutn.out[1:tnpos1,]))
     bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]]))
-  aa <- hotspot[2]*sample(x=c(1,0),size=tnpos1+tnpos2,replace = T,prob = c(hotspot[1],1-hotspot[1]))
-  hotsize=c(hotsize,aa)  
-  }
+    aa=hotspot[2]*c(rep(1,floor(tnpos1*hotspot[1])),rep(0,floor(tnpos1*(1-hotspot[1]))),
+     rep(1,floor(tnpos2*hotspot[1])),rep(0,floor(tnpos1*(1-hotspot[1])))) 
+    hotsize=c(hotsize,aa)
+      }
 
   avbetaf1 <- log(exp(beta_gc[1]) * Nsample.ps/Nsample + Nsample.neu/Nsample)
   avbetaf2 <- log(exp(beta_gc[1] + beta_gc[2]) * Nsample.ps/Nsample + Nsample.neu/Nsample)

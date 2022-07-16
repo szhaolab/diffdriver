@@ -15,6 +15,8 @@ simulate_2funcv <- function(sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,ho
   phenotype=rnorm(Nsample,mean = para[1],sd=para[2])
   pp=exp(para[3]+para[4]*phenotype)/(1+exp(para[3]+para[4]*phenotype))
   ss=ifelse(runif(Nsample)-pp<0,1,0)
+  index=which(ss==1)
+  phenotype=c(phenotype[index],phenotype[-index])
   Nsample.ps=sum(ss)
   Nsample.neu <- Nsample - Nsample.ps
 
@@ -26,27 +28,53 @@ simulate_2funcv <- function(sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,ho
   for (t in 1:length(sgdata)) {
     tnpos1 <- dim(sgdata[[t]][functypecode==7])[1]
     tnpos2 <- dim(sgdata[[t]][functypecode==8])[1]
+    
     annodata[[t]] <- rbind(sgdata[[t]][functypecode==7], sgdata[[t]][functypecode==8])
-    mut1=matrix(nrow = tnpos1,ncol = Nsample)
-    mut2=matrix(nrow = tnpos2,ncol = Nsample)
+    
+ 
+    # mut1=matrix(nrow = tnpos1,ncol = Nsample)
+    # mut2=matrix(nrow = tnpos2,ncol = Nsample)
     pp1=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1])
     pp2=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])
     pp3=exp(bmrpars[t])*exp(betaf0)
-    for (j in 1:Nsample) {
-      if (ss[j]==1){
-        mut1[,j]= sample(c(0,1),tnpos1, replace=T,prob= c(1-pp1,pp1))
-        mut2[,j]= sample(c(0,1),tnpos2, replace = T, prob = c(1-pp2,pp2))
-      }
-      if (ss[j]==0){
-        mut1[,j]= sample(c(0,1),tnpos1, replace=T, prob= c(1-pp3,pp3))
-        mut2[,j]= sample(c(0,1),tnpos2, replace = T, prob = c(1-pp3,pp3))
-      }
-    }
-    mut=rbind(mut1,mut2)
-    mutlist[[t]] <- mut
-    countlist[[t]] <- c(tnpos1, tnpos2,sum(mut),sum(mut1), sum(mut2))
+    
+    
+    mutc1.hot <- rsparsematrix(floor(tnpos1*hotspot[1]), Nsample.ps, nnz=rbinom(1, Nsample.ps * floor(tnpos1*hotspot[1]), exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1]))*exp(hotspot[2]), rand.x=NULL)
+    mutc1.reg <- rsparsematrix(floor(tnpos1*(1-hotspot[1])), Nsample.ps, nnz=rbinom(1, Nsample.ps * floor(tnpos1*(1-hotspot[1])), exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1])), rand.x=NULL)
+    mutc1=rbind(mutc1.hot,mutc1.reg)
+    
+    mutc2.hot <- rsparsematrix(floor(tnpos2*hotspot[1]), Nsample.ps, nnz=rbinom(1, Nsample.ps * floor(tnpos2*hotspot[1]), exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])*exp(hotspot[2])), rand.x=NULL)
+    mutc2.reg <- rsparsematrix(floor(tnpos2*(1-hotspot[1])), Nsample.ps, nnz=rbinom(1, Nsample.ps * floor(tnpos2*(1-hotspot[1])), exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])), rand.x=NULL)
+    mutc2=rbind(mutc2.hot,mutc2.reg)
+    
+    mut.ps <- rbind(mutc1, mutc2)
+    
+    mutn1.hot <- rsparsematrix(floor(tnpos1*hotspot[1]), Nsample.neu, nnz=rbinom(1, Nsample.neu * floor(tnpos1*hotspot[1]), exp(bmrpars[t])*exp(betaf0))*exp(hotspot[2]), rand.x=NULL)
+    mutn1.reg <- rsparsematrix(floor(tnpos1*(1-hotspot[1])), Nsample.neu, nnz=rbinom(1, Nsample.neu * floor(tnpos1*(1-hotspot[1])), exp(bmrpars[t])*exp(betaf0)), rand.x=NULL)
+    mutn1=rbind(mutn1.hot,mutn1.reg)
+    
+    
+    mutn2.hot <- rsparsematrix(floor(tnpos2*hotspot[1]), Nsample.neu, nnz=rbinom(1, Nsample.neu * floor(tnpos2*hotspot[1]), exp(bmrpars[t])*exp(betaf0)*exp(hotspot[2])), rand.x=NULL)
+    mutn2.reg <- rsparsematrix(floor(tnpos2*(1-hotspot[1])), Nsample.neu, nnz=rbinom(1, Nsample.neu * floor(tnpos2*(1-hotspot[1])), exp(bmrpars[t])*exp(betaf0)), rand.x=NULL)
+    mutn2=rbind(mutn2.hot,mutn2.reg)
+    
+    mut.neu <- rbind(mutn1, mutn2)
+    # for (j in 1:Nsample) {
+    #   if (ss[j]==1){
+    #     mut1[,j]= sample(c(0,1),tnpos1, replace=T,prob= c(1-pp1,pp1))
+    #     mut2[,j]= sample(c(0,1),tnpos2, replace = T, prob = c(1-pp2,pp2))
+    #   }
+    #   if (ss[j]==0){
+    #     mut1[,j]= sample(c(0,1),tnpos1, replace=T, prob= c(1-pp3,pp3))
+    #     mut2[,j]= sample(c(0,1),tnpos2, replace = T, prob = c(1-pp3,pp3))
+    #   }
+    # }
+    # mut=rbind(mut1,mut2)
+    mutlist[[t]] <- cbind(mut.ps,mut.neu)
+    countlist[[t]] <- c(tnpos1, tnpos2,sum(mut.ps),sum(mut.neu))
     bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]]))
-    aa <- hotspot[2]*sample(x=c(1,0),size=tnpos1+tnpos2,replace = T,prob = c(hotspot[1],1-hotspot[1]))
+    aa=hotspot[2]*c(rep(1,floor(tnpos1*hotspot[1])),rep(0,floor(tnpos1*(1-hotspot[1]))),
+                    rep(1,floor(tnpos2*hotspot[1])),rep(0,floor(tnpos1*(1-hotspot[1])))) 
     hotsize=c(hotsize,aa) 
     }
 
@@ -55,7 +83,7 @@ simulate_2funcv <- function(sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,ho
   pos1pos2ratio <- colSums(do.call(rbind, countlist))[1]/colSums(do.call(rbind, countlist))[2]
   avbetaf1f2 <- log((pos1pos2ratio*exp(avbetaf1) + exp(avbetaf2))/(pos1pos2ratio+1))
   betaf1f2 <- log((pos1pos2ratio*exp(beta_gc[1]) + exp(beta_gc[2]))/(pos1pos2ratio+1))
-  simdata <- list("mutlist"= mutlist, "pheno" = phenotype, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "hotsize"=hotsize,  "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf1" = avbetaf1, "avbetaf2" = avbetaf2, "avbetaf1f2" = avbetaf1f2,"betaf1f2"=betaf1f2))
+  simdata <- list("mutlist"= mutlist, "pheno" = phenotype, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "hotsize"=hotsize,"phenotype"=phenotype,  "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf1" = avbetaf1, "avbetaf2" = avbetaf2, "avbetaf1f2" = avbetaf1f2,"betaf1f2"=betaf1f2))
   return(simdata)
 }
 
