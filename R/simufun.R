@@ -5,12 +5,16 @@
 #' @param sgdata is the annotation data
 #' @param bmrpars is the background mutation rate.
 #' @param ... other parameters
-#'
+#' @param Nsample, total number of samples
+#' @param para para is the parameters for generating the data
+#' @param bmrpars a vector, each item is bmr in log scale for one nttype
+#' @param betaf0, shift of mutation rate from BMR, log scale, shared in all samples.
+#' @param beta_gc, effect size for functional covariates, log scale. Right now we only have one functional covariate, that is whether the mutation is missense or loss of function mutation. beta_gc[1] indicates the shift of mutation rate for missense ( coded as 7 in functype code column in `sgdata`), beta_gc[2] indicates the shift of mutation rate for loss of function ( coded as 8 in functype code column in `sgdata`). log scale.
+#' @param hotspot hotspot[1] is the probability of being hotspot for a given position. hotspot[2] is the log size
+#' for hotspots.
 #' @return A list composed of the p-values for 8 models
-#'        and the parameters used in these models.
+#' and the parameters used in these models.
 #' @export
-#'
-#' @examples
 power_compare <- function(family, Niter, sgdata, Nsample,para,bmrpars,betaf0,beta_gc,hotspot){
   m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <-
     m5.pvalue <- m6.pvalue <- m7.pvalue <- m8.pvalue <- rep(1,Niter)
