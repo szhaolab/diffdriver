@@ -22,45 +22,66 @@ simulate_2funcv <- function(sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,ho
   Nsample.ps=sum(ss)
   Nsample.neu <- Nsample - Nsample.ps
 
+  
+
+  
+  
   mutlist <- list()
   countlist <- list()
   annodata <- list()
   bmrmtxlist <- list()
   hotsize <- c()
   for (t in 1:length(sgdata)) {
+    print(t)
     tnpos1 <- dim(sgdata[[t]][functypecode==7])[1]
     tnpos2 <- dim(sgdata[[t]][functypecode==8])[1]
-    k1=round(tnpos1*hotspot[1])
+    
+    
+    
+    
+    seqt=sample(x=c(1,0),size=1,prob =c(hotspot[1],hotspot[2]))
+    for (i in 2:(tnpos1+tnpos2)) {
+      a=ifelse(seqt[i-1]==1,sample(x=c(1,0),size=1,prob =c(hotspot[3],hotspot[4])),
+               sample(x=c(1,0),size=1,prob =c(hotspot[5],hotspot[6])))
+      seqt=c(seqt,a)
+    }
+    
+    
+    
+    k1=sum(seqt[1:tnpos1])
     k2=tnpos1-k1
-    k3=round(tnpos2*hotspot[1])
+    k3=sum(seqt[(tnpos1+1):(tnpos1+tnpos2)])
     k4=tnpos2-k3
+    
+    pp2=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1])
+    pp3=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])
+    pp1=exp(bmrpars[t])*exp(betaf0)
+    
+    
     annodata[[t]] <- rbind(sgdata[[t]][functypecode==7], sgdata[[t]][functypecode==8])
     
  
     # mut1=matrix(nrow = tnpos1,ncol = Nsample)
     # mut2=matrix(nrow = tnpos2,ncol = Nsample)
-    pp1=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1])
-    pp2=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])
-    pp3=exp(bmrpars[t])*exp(betaf0)
+
     
-    
-    mutc1.hot <- rsparsematrix(k1, Nsample.ps, nnz=rbinom(1, Nsample.ps * k1, exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1]))*exp(hotspot[2]), rand.x=NULL)
-    mutc1.reg <- rsparsematrix(k2, Nsample.ps, nnz=rbinom(1, Nsample.ps * k2, exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1])), rand.x=NULL)
+    mutc1.hot <- rsparsematrix(k1, Nsample.ps, nnz=rbinom(1, Nsample.ps * k1, pp2*exp(hotspot[2])), rand.x=NULL)
+    mutc1.reg <- rsparsematrix(k2, Nsample.ps, nnz=rbinom(1, Nsample.ps * k2, pp2), rand.x=NULL)
     mutc1=rbind(mutc1.hot,mutc1.reg)
     
-    mutc2.hot <- rsparsematrix(k3, Nsample.ps, nnz=rbinom(1, Nsample.ps * k3, exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])*exp(hotspot[2])), rand.x=NULL)
-    mutc2.reg <- rsparsematrix(k4, Nsample.ps, nnz=rbinom(1, Nsample.ps * k4, exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])), rand.x=NULL)
+    mutc2.hot <- rsparsematrix(k3, Nsample.ps, nnz=rbinom(1, Nsample.ps * k3, pp3*exp(hotspot[2])), rand.x=NULL)
+    mutc2.reg <- rsparsematrix(k4, Nsample.ps, nnz=rbinom(1, Nsample.ps * k4, pp3), rand.x=NULL)
     mutc2=rbind(mutc2.hot,mutc2.reg)
     
     mut.ps <- rbind(mutc1, mutc2)
     
-    mutn1.hot <- rsparsematrix(k1, Nsample.neu, nnz=rbinom(1, Nsample.neu * k1, exp(bmrpars[t])*exp(betaf0))*exp(hotspot[2]), rand.x=NULL)
-    mutn1.reg <- rsparsematrix(k2, Nsample.neu, nnz=rbinom(1, Nsample.neu * k2, exp(bmrpars[t])*exp(betaf0)), rand.x=NULL)
+    mutn1.hot <- rsparsematrix(k1, Nsample.neu, nnz=rbinom(1, Nsample.neu * k1, pp1*exp(hotspot[2])), rand.x=NULL)
+    mutn1.reg <- rsparsematrix(k2, Nsample.neu, nnz=rbinom(1, Nsample.neu * k2, pp1), rand.x=NULL)
     mutn1=rbind(mutn1.hot,mutn1.reg)
     
     
-    mutn2.hot <- rsparsematrix(k3, Nsample.neu, nnz=rbinom(1, Nsample.neu * k3, exp(bmrpars[t])*exp(betaf0)*exp(hotspot[2])), rand.x=NULL)
-    mutn2.reg <- rsparsematrix(k4, Nsample.neu, nnz=rbinom(1, Nsample.neu * k4, exp(bmrpars[t])*exp(betaf0)), rand.x=NULL)
+    mutn2.hot <- rsparsematrix(k3, Nsample.neu, nnz=rbinom(1, Nsample.neu * k3, pp1*exp(hotspot[2])), rand.x=NULL)
+    mutn2.reg <- rsparsematrix(k4, Nsample.neu, nnz=rbinom(1, Nsample.neu * k4, pp1), rand.x=NULL)
     mutn2=rbind(mutn2.hot,mutn2.reg)
     
     mut.neu <- rbind(mutn1, mutn2)
