@@ -4,15 +4,7 @@
 \alias{simulate_1funcv}
 \title{simulate phenotype and mutations for one gene, using one functional annotation.}
 \usage{
-simulate_1funcv(
-  sgdata,
-  bmrpars,
-  betaf0 = 0.5,
-  Nsample = 1000,
-  beta_gc = c(0, 1),
-  para = c(0.8, 0.2),
-  hotspot = c(0.05, 0.5)
-)
+simulate_1funcv(sgdata, bmrpars, betaf0, Nsample, beta_gc, para, hotspot)
 }
 \arguments{
 \item{sgdata}{a list, each list item for one nttype}
@@ -25,8 +17,11 @@ simulate_1funcv(
 
 \item{beta_gc, }{effect size for functional covariates, log scale. Right now we only have one functional covariate, that is whether the mutation is missense or loss of function mutation. beta_gc[1] indicates the shift of mutation rate for missense ( coded as 7 in functype code column in `sgdata`), beta_gc[2] indicates the shift of mutation rate for loss of function ( coded as 8 in functype code column in `sgdata`). log scale.}
 
-\item{par}{par[1] is the fraction of positively selected samples in group E=1; par[2] is the
+\item{para}{par[1] is the fraction of positively selected samples in group E=1; par[2] is the
 fraction of negatively selected samples in group E=0}
+
+\item{hotspot}{hotspot[1] is the probability of being hotspot for a given position. hotspot[2] is the log size
+for hotspots.}
 }
 \description{
 simulate mutations for one gene. The sample level phenotype are binary (two groups.).

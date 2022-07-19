@@ -2,17 +2,18 @@
 % Please edit documentation in R/simufun.R
 \name{power_compare}
 \alias{power_compare}
-\title{Simulation function}
+\title{Title}
 \usage{
 power_compare(
-  family = "binary",
-  Niter = 200,
+  family,
+  Niter,
   sgdata,
+  Nsample,
+  para,
   bmrpars,
-  betaf0 = 0,
-  Nsample = 1000,
-  beta_gc = c(0, 1.2),
-  par
+  betaf0,
+  beta_gc,
+  hotspot
 )
 }
 \arguments{
@@ -22,20 +23,25 @@ power_compare(
 
 \item{sgdata}{is the annotation data}
 
-\item{bmrpars}{is the background mutation rate.}
+\item{Nsample, }{total number of samples}
 
-\item{betaf0}{gene effect mutation}
+\item{para}{para is the parameters for generating the data}
 
-\item{Nsample}{sample size of simulation}
+\item{bmrpars}{a vector, each item is bmr in log scale for one nttype}
 
-\item{beta_gc}{the effects of missense and nonsense}
+\item{betaf0, }{shift of mutation rate from BMR, log scale, shared in all samples.}
 
-\item{par}{parameters for the simuation}
+\item{beta_gc, }{effect size for functional covariates, log scale. Right now we only have one functional covariate, that is whether the mutation is missense or loss of function mutation. beta_gc[1] indicates the shift of mutation rate for missense ( coded as 7 in functype code column in `sgdata`), beta_gc[2] indicates the shift of mutation rate for loss of function ( coded as 8 in functype code column in `sgdata`). log scale.}
+
+\item{hotspot}{hotspot[1] is the probability of being hotspot for a given position. hotspot[2] is the log size
+for hotspots.}
+
+\item{...}{other parameters}
 }
 \value{
 A list composed of the p-values for 8 models
-       and the parameters used in these models.
+and the parameters used in these models.
 }
 \description{
-Simulation function
+Title
 }
