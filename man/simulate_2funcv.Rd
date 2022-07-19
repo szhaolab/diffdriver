@@ -17,6 +17,9 @@ simulate_2funcv(sgdata, bmrpars, betaf0 = 2, Nsample, beta_gc, para, hotspot)
 
 \item{beta_gc, }{effect size for functional covariates, log scale. Right now we only have one functional covariate, that is whether the mutation is missense or loss of function mutation. beta_gc[1] indicates the shift of mutation rate for missense ( coded as 7 in functype code column in `sgdata`), beta_gc[2] indicates the shift of mutation rate for loss of function ( coded as 8 in functype code column in `sgdata`). log scale.}
 
+\item{hotspot}{hotspot[1] is the probability of being hotspot for a given position. hotspot[2] is the log size
+for hotspots.}
+
 \item{par, }{the parameters for generating the data,  in which par[1] is the mean of phenotype, par[2] the sd of phenotype,
 par[3] the intercept of logistic regression and par[4] the slope of the logistic regression. Here the outcome of logistic regression is the
 positive sample and the independent variable is the phenotype.}
