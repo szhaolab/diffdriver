@@ -38,10 +38,10 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0, Nsample, beta_gc,para,hotsp
     tnpos2 <- dim(sgdata[[t]][functypecode==8])[1]
   
     
-      seqt=sample(x=c(1,0),size=1,prob =c(hotspot[1],hotspot[2]))
+      seqt=sample(x=c(0,1),size=1,prob =c(hotspot[1],hotspot[2]))
     for (i in 2:(tnpos1+tnpos2)) {
-      a=ifelse(seqt[i-1]==1,sample(x=c(1,0),size=1,prob =c(hotspot[3],hotspot[4])),
-               sample(x=c(1,0),size=1,prob =c(hotspot[5],hotspot[6])))
+      a=ifelse(seqt[i-1]==0,sample(x=c(0,1),size=1,prob =c(hotspot[3],hotspot[4])),
+               sample(x=c(0,1),size=1,prob =c(hotspot[5],hotspot[6])))
       seqt=c(seqt,a)
     }
     
@@ -89,8 +89,8 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0, Nsample, beta_gc,para,hotsp
     mutlist[[t]] <- cbind(mutc.out,mutn.out)
     countlist[[t]] <- c(tnpos1, tnpos2,sum(mutc1),sum(mutc2),sum(mutn1), sum(mutn2), sum(mutc.out), sum(mutn.out), sum(mutc.out[1:tnpos1,]), sum(mutn.out[1:tnpos1,]))
     bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]]))
-    aa=hotspot[2]*c(rep(1,floor(tnpos1*hotspot[1])),rep(0,floor(tnpos1*(1-hotspot[1]))),
-     rep(1,floor(tnpos2*hotspot[1])),rep(0,floor(tnpos1*(1-hotspot[1])))) 
+    aa=hotspot[9]*c(rep(1,k1),rep(0,k2),
+     rep(1,k3),rep(0,k4)) 
     hotsize=c(hotsize,aa)
       }
 
