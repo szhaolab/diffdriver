@@ -56,29 +56,41 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0, Nsample, beta_gc,para,hotsp
     pp2=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1])
     pp3=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])
     pp1=exp(bmrpars[t])*exp(betaf0)
-    
+    hotpp1= min(pp1*exp(hotspot[9]),1)
+    hotpp2= min(pp2*exp(hotspot[9]),1)
+    hotpp3= min(pp3*exp(hotspot[9]),1)
     
     annodata[[t]] <- rbind(sgdata[[t]][functypecode==7], sgdata[[t]][functypecode==8])
     
     
-    mutc1.hot <- rsparsematrix(k1, Nsample.ps, nnz=rbinom(1, Nsample.ps * k1, pp2*exp(hotspot[9])), rand.x=NULL)
+    mutc1.hot <- rsparsematrix(k1, Nsample.ps, nnz=rbinom(1, Nsample.ps * k1, hotpp2), rand.x=NULL)
+    
     mutc1.reg <- rsparsematrix(k2, Nsample.ps, nnz=rbinom(1, Nsample.ps * k2, pp2), rand.x=NULL)
+    
     mutc1=rbind(mutc1.hot,mutc1.reg)
     
-    mutc2.hot <- rsparsematrix(k3, Nsample.ps, nnz=rbinom(1, Nsample.ps * k3, pp3*exp(hotspot[9])), rand.x=NULL)
+    
+    
+    mutc2.hot <- rsparsematrix(k3, Nsample.ps, nnz=rbinom(1, Nsample.ps * k3, hotpp3), rand.x=NULL)
+  
     mutc2.reg <- rsparsematrix(k4, Nsample.ps, nnz=rbinom(1, Nsample.ps * k4, pp3), rand.x=NULL)
+  
     mutc2=rbind(mutc2.hot,mutc2.reg)
     
     mutc <- rbind(mutc1, mutc2)
 
     
-    mutn1.hot <- rsparsematrix(k1, Nsample.neu, nnz=rbinom(1, Nsample.neu * k1, pp1*exp(hotspot[9])), rand.x=NULL)
+    mutn1.hot <- rsparsematrix(k1, Nsample.neu, nnz=rbinom(1, Nsample.neu * k1, hotpp1), rand.x=NULL)
+    
     mutn1.reg <- rsparsematrix(k2, Nsample.neu, nnz=rbinom(1, Nsample.neu * k2, pp1), rand.x=NULL)
+    
     mutn1=rbind(mutn1.hot,mutn1.reg)
   
     
-    mutn2.hot <- rsparsematrix(k3, Nsample.neu, nnz=rbinom(1, Nsample.neu * k3, pp1*exp(hotspot[9])), rand.x=NULL)
+    mutn2.hot <- rsparsematrix(k3, Nsample.neu, nnz=rbinom(1, Nsample.neu * k3, hotpp1), rand.x=NULL)
+    
     mutn2.reg <- rsparsematrix(k4, Nsample.neu, nnz=rbinom(1, Nsample.neu * k4, pp1), rand.x=NULL)
+    
     mutn2=rbind(mutn2.hot,mutn2.reg)
     
     mutn <- rbind(mutn1, mutn2)
