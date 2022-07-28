@@ -42,7 +42,7 @@ genelr <- function(mut, e){
   # logistic regression on gene level
   dstatus <- colSums(mut)
   dstatus[which(dstatus>0)] <- 1
-  glrfit <- glm(e ~ dstatus, family = binomial(link = "logit"))
+  glrfit <- glm(dstatus ~ e, family = binomial(link = "logit"))
   glrres <- summary(glrfit)
   res <- list("res" = glrres, "pvalue" = glrres$coefficients[2,4])
   return(res)
