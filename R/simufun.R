@@ -31,7 +31,7 @@ power_compare <- function(family, Niter, sgdata, Nsample,para,bmrpars,betaf0,bet
     bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
     hotsize <- simdata$hotsize
     e <- simdata$pheno
-    e_bisect=ifelse(e>median(e),1,0)
+    e_bisect=ifelse(e>mean(e),1,0)
     funcv <- unlist(lapply(ssgdata, "[[", "functypecode"))
     ef <- simdata$efsize
     fe1 <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]+hotsize
