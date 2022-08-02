@@ -19,5 +19,9 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
-    logging
+    logging,
+    testthat (>= 3.0.0)
 RoxygenNote: 7.2.0
+Config/testthat/edition: 3
+Depends: 
+    R (>= 2.10)
