@@ -21,8 +21,8 @@ ddmodel <- function(mut, e, mr, fe){
     alpha <- param[1]
     #fe0 <- param[2]
 
-    rate.s <- as.matrix(fe * mr)
-    rate.n <-  as.matrix(mr)
+    rate.s <-  fe * mr
+    rate.n <-  mr
 
     rate.s[rate.s <= 0] <- 1e-8
     rate.s[rate.s >= 1] <- 1 - 1e-8
@@ -49,8 +49,8 @@ ddmodel <- function(mut, e, mr, fe){
     alpha1 <- param[2]
     # fe0 <- param[3]
 
-    rate.s <- as.matrix(fe * mr)
-    rate.n <-  as.matrix(mr)
+    rate.s <-  fe * mr
+    rate.n <-  mr
 
     rate.s[rate.s <= 0] <- 1e-8
     rate.s[rate.s >= 1] <- 1 - 1e-8

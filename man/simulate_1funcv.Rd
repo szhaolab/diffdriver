@@ -4,7 +4,7 @@
 \alias{simulate_1funcv}
 \title{simulate phenotype and mutations for one gene, using one functional annotation.}
 \usage{
-simulate_1funcv(sgdata, bmrpars, betaf0, Nsample, beta_gc, para, hotspot)
+simulate_1funcv(sgdata, bmrpars, betaf0, Nsample, beta_gc, para, hotseq, hmm)
 }
 \arguments{
 \item{sgdata}{a list, each list item for one nttype}
