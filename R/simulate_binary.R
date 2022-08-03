@@ -9,90 +9,81 @@
 #' @param para par[1] is the fraction of positively selected samples in group E=1; par[2] is the
 #' fraction of negatively selected samples in group E=0
 #' @param hotspot hotspot[1] is the probability of being hotspot for a given position. hotspot[2] is the log size
-#' for hotspots.    
+#' for hotspots.
 #' @import Matrix data.table
 #' @export
-simulate_1funcv <- function(sgdata, bmrpars, betaf0, Nsample, beta_gc,para,hotspot){
+simulate_1funcv <- function(sgdata, bmrpars, betaf0, Nsample, beta_gc,para,hotseq,hmm){
   Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
   Nsamplen <- Nsample-Nsamplec
   edata <- c(rep(1,Nsamplec),rep(0,Nsamplen))
-  
+
   Nsamplec.ps <- rbinom(1, Nsamplec, para[1]) # number of hotspots position in positively selected samples  in group E=1
   #Nsamplec.ps.hot <- rbinom(1, Nsamplec.ps, hotspot[1]) # number of hotspots position in positively selected samples  in group E=1
   #Nsamplec.ps.reg=Nsamplec.ps-Nsample.ps.hot
   Nsamplen.ps <- rbinom(1, Nsamplen, para[2]) # number of positively selected samples in group E=0
   Nsample.ps <- Nsamplec.ps + Nsamplen.ps
   Nsample.neu <- Nsample - Nsample.ps
-  
 
-  
-  
-  
+
   mutlist <- list()
   countlist <- list()
   annodata <- list()
   bmrmtxlist <- list()
+  ssgdata <- list()
   hotsize <- c()
   for (t in 1:length(sgdata)){ # Simulate mutation data. t: nucleotide change type
+
+    ssgdata=merge(sgdata[[t]],hotseq,by="start")
     tnpos1 <- dim(sgdata[[t]][functypecode==7])[1]
     tnpos2 <- dim(sgdata[[t]][functypecode==8])[1]
-  
-    
-      seqt=sample(x=c(0,1),size=1,prob =c(hotspot[1],hotspot[2]))
-    for (i in 2:(tnpos1+tnpos2)) {
-      a=ifelse(seqt[i-1]==0,sample(x=c(0,1),size=1,prob =c(hotspot[3],hotspot[4])),
-               sample(x=c(0,1),size=1,prob =c(hotspot[5],hotspot[6])))
-      seqt=c(seqt,a)
-    }
-    
-    
-    
+seqt=ssgdata$seqt
+
     k1=sum(seqt[1:tnpos1])
     k2=tnpos1-k1
     k3=sum(seqt[(tnpos1+1):(tnpos1+tnpos2)])
     k4=tnpos2-k3
-    
-    
+
+
     pp2=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1])
     pp3=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])
     pp1=exp(bmrpars[t])*exp(betaf0)
-    hotpp1= min(pp1*exp(hotspot[9]),1)
-    hotpp2= min(pp2*exp(hotspot[9]),1)
-    hotpp3= min(pp3*exp(hotspot[9]),1)
-    
+    hotpp1= min(pp1*exp(hmm[9]),1)
+    hotpp2= min(pp1*exp(hmm[9]),1)
+    hotpp3= min(pp1*exp(hmm[9]),1)
+
     annodata[[t]] <- rbind(sgdata[[t]][functypecode==7], sgdata[[t]][functypecode==8])
-    
-    
+
+
     mutc1.hot <- rsparsematrix(k1, Nsample.ps, nnz=rbinom(1, Nsample.ps * k1, hotpp2), rand.x=NULL)
-    
+
     mutc1.reg <- rsparsematrix(k2, Nsample.ps, nnz=rbinom(1, Nsample.ps * k2, pp2), rand.x=NULL)
-    
+
     mutc1=rbind(mutc1.hot,mutc1.reg)
-    
-    
-    
+
+
+
     mutc2.hot <- rsparsematrix(k3, Nsample.ps, nnz=rbinom(1, Nsample.ps * k3, hotpp3), rand.x=NULL)
-  
+
     mutc2.reg <- rsparsematrix(k4, Nsample.ps, nnz=rbinom(1, Nsample.ps * k4, pp3), rand.x=NULL)
-  
+
     mutc2=rbind(mutc2.hot,mutc2.reg)
-    
+
     mutc <- rbind(mutc1, mutc2)
 
-    
+
     mutn1.hot <- rsparsematrix(k1, Nsample.neu, nnz=rbinom(1, Nsample.neu * k1, hotpp1), rand.x=NULL)
-    
+
     mutn1.reg <- rsparsematrix(k2, Nsample.neu, nnz=rbinom(1, Nsample.neu * k2, pp1), rand.x=NULL)
-    
+
     mutn1=rbind(mutn1.hot,mutn1.reg)
-  
-    
+
+
     mutn2.hot <- rsparsematrix(k3, Nsample.neu, nnz=rbinom(1, Nsample.neu * k3, hotpp1), rand.x=NULL)
-    
+
     mutn2.reg <- rsparsematrix(k4, Nsample.neu, nnz=rbinom(1, Nsample.neu * k4, pp1), rand.x=NULL)
-    
+
     mutn2=rbind(mutn2.hot,mutn2.reg)
-    
+
     mutn <- rbind(mutn1, mutn2)
 
     mutc.out <- cbind(mutc[, 1:Nsamplec.ps], mutn[, 1:(Nsamplec-Nsamplec.ps)])
@@ -101,8 +92,8 @@ simulate_1funcv <- function(sgdata, bmrpars, betaf0, Nsample, beta_gc,para,hotsp
     mutlist[[t]] <- cbind(mutc.out,mutn.out)
     countlist[[t]] <- c(tnpos1, tnpos2,sum(mutc1),sum(mutc2),sum(mutn1), sum(mutn2), sum(mutc.out), sum(mutn.out), sum(mutc.out[1:tnpos1,]), sum(mutn.out[1:tnpos1,]))
     bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]]))
-    aa=hotspot[9]*c(rep(1,k1),rep(0,k2),
-     rep(1,k3),rep(0,k4)) 
+    aa=hmm[9]*c(rep(1,k1),rep(0,k2),
+     rep(1,k3),rep(0,k4))
     hotsize=c(hotsize,aa)
       }
 

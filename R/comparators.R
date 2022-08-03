@@ -17,7 +17,7 @@ mlr.v2 <- function(mut, e, nmut){
   # nmut is number of mutations per sample
   dstatus <- colSums(mut)
   dstatus[which(dstatus>0)] <- 1
-  dstatus <- as.factor(dstatus)
+  #dstatus <- as.factor(dstatus)
   mlrfit <- lm(e ~ dstatus + nmut)
   mlrres <- summary(mlrfit)
   res <- list("res" = mlrres, "pvalue" = mlrres$coefficients[2,4])
@@ -42,7 +42,7 @@ genelr <- function(mut, e){
   # logistic regression on gene level
   dstatus <- colSums(mut)
   dstatus[which(dstatus>0)] <- 1
-  glrfit <- glm(dstatus ~ e, family = binomial(link = "logit"))
+  glrfit <- glm(e ~ dstatus, family = binomial(link = "logit"))
   glrres <- summary(glrfit)
   res <- list("res" = glrres, "pvalue" = glrres$coefficients[2,4])
   return(res)
