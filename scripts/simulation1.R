@@ -1,4 +1,13 @@
-
+family="cont"
+Niter=100
+sgdata=sgdata
+bmrpars=log(BMR)
+betaf0=1
+Nsample=400
+beta_gc=c(1.2,Fe)
+para=c(0,5,0.1,1)
+hotseq = hotseq
+hmm = hmm
 library(Matrix)
 library(diffdriver)
 library(data.table)
@@ -7,7 +16,7 @@ for (i1 in c(0, 1)){
   for (i2 in c(0, 1.2)){
   for (i3 in c(400,800,1600)) {
     print(c(i1,i2,i3))
-    simures=power_compare(family="cont", Niter=100, sgdata=sgdata, bmrpars=log(BMR), betaf0=i1,Nsample=i3,beta_gc=c(i2,Fe),para=c(0,5,0.1,1),hotseq = hotseq,hmm = hmm)
+    simures=power_compare(family="binary", Niter=100, sgdata=sgdata, bmrpars=log(BMR), betaf0=i1,Nsample=i3,beta_gc=c(i2,Fe),para=c(0.8,0.2),hotseq = hotseq,hmm = hmm)
     save(simures,file=paste0("power_betaf0=",i1,"_betagc=",i2,"_sample",i3,".Rd")
 )
     }
