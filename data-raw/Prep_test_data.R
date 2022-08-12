@@ -20,5 +20,6 @@ hotspotseq=function(hmm,sgdata){
   return(hotseq)
 }
 hotseq=hotspotseq(hmm,sgdata)
-
-usethis::use_data(hotseq, overwrite = T)
+sum(hotseq[,2])
+hotseq6=hotseq
+usethis::use_data(hotseq6, overwrite = T)
