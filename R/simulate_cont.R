@@ -66,12 +66,12 @@ simulate_2funcv <- function(sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,ho
 
     mut.ps <- rbind(mutc1, mutc2)
 
-    mutn1.hot <- rsparsematrix(k1, Nsample.neu, nnz=rbinom(1, Nsample.neu * k1, hotpp1), rand.x=NULL)
+    mutn1.hot <- rsparsematrix(k1, Nsample.neu, nnz=rbinom(1, Nsample.neu * k1, pp1), rand.x=NULL)
     mutn1.reg <- rsparsematrix(k2, Nsample.neu, nnz=rbinom(1, Nsample.neu * k2, pp1), rand.x=NULL)
     mutn1=rbind(mutn1.hot,mutn1.reg)
 
 
-    mutn2.hot <- rsparsematrix(k3, Nsample.neu, nnz=rbinom(1, Nsample.neu * k3, hotpp1), rand.x=NULL)
+    mutn2.hot <- rsparsematrix(k3, Nsample.neu, nnz=rbinom(1, Nsample.neu * k3, pp1), rand.x=NULL)
     mutn2.reg <- rsparsematrix(k4, Nsample.neu, nnz=rbinom(1, Nsample.neu * k4, pp1), rand.x=NULL)
     mutn2=rbind(mutn2.hot,mutn2.reg)
 
