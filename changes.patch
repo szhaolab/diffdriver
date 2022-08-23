@@ -1,0 +1,13 @@
+diff --git a/R/diffdriver_sig.R b/R/diffdriver_sig.R
+index d5f2dcb..1c06de8 100644
+--- a/R/diffdriver_sig.R
++++ b/R/diffdriver_sig.R
+@@ -147,7 +147,7 @@ rm(ri,mutation,fanno)
+       betaf0 <-  Fpars[["TP53"]]["beta_f0"]
+     } # if OG/TSG unknown, use TSG parameters.
+     ganno <- fannoallg[[g]]
+-    fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf+ hotmat*hmm[8] + betaf0
++    fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf+ hotmat*hmm[9] + betaf0
+ 
+     resg <- list()
+     e=canno[[j]]
