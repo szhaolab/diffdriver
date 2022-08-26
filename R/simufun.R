@@ -45,7 +45,7 @@ power_compare <- function(family, Niter, sgdata, Nsample,para,bmrpars,betaf0,bet
     #fe2<- c(ef$avbetaf1, ef$avbetaf1 + ef$avbetaf2)[as.factor(funcv)]+hotsize
     #fe3 <- rep(ef$betaf1f2, length(funcv))+hotsize
     #fe4 <- rep(ef$avbetaf1f2, length(funcv))+hotsize
-    fe2 <- rep(0,length(hotsize))
+    fe2 <- rep(ef$betaf1f2, length(funcv))
     fe3 <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]
     mr <- bmrmtx + ef$betaf0
     if (sum(mut) ==0) {next}
