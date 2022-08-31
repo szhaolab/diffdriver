@@ -12,7 +12,7 @@
 #' @param model The type of annotation. The case of mode=1 is for regular annotation while the case of mode=2 is for signature annotation file
 #' @return A list
 #' @export
-diffdriver <- function(genef, mutf, phenof,j, hotf, drivermapsdir,k=5,mode=1, outputdir =".", outputname = "diffdriver_results"){
+diffdriver <- function(genef, mutf, phenof,j, hotf=NULL, drivermapsdir,k=5,mode=1, outputdir =".", outputname = "diffdriver_results"){
 if (mode==1){
   res <- diffdriver_reg(genef, mutf, phenof, j, hotf, drivermapsdir = drivermapsdir, outputdir = outputdir, outputname = outputname)
 }else{
