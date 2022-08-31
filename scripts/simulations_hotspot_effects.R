@@ -1,3 +1,6 @@
+## This code compare the mutation number for hotspots and non-hotspots
+## so that you can get the idea how hotspot cans increase the risk
+
 library(diffdriver)
 bmrpars=log(BMR)
 betaf0=1
