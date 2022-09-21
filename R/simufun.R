@@ -44,7 +44,7 @@ power_compare <- function(family, Niter, sgdata, Nsample,para,bmrpars,betaf0,bet
     fe1 <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]+hotsize
     fe2<- c(ef$avbetaf1, ef$avbetaf1 + ef$avbetaf2)[as.factor(funcv)]
     fe3 <- rep(ef$betaf1f2, length(funcv))
-    fe4 <- rep(ef$avbetaf1f2, length(funcv))
+    #fe4 <- rep(ef$avbetaf1f2, length(funcv))
     mr <- bmrmtx + ef$betaf0
     if (sum(mut) ==0) {next}
     res.m1 <- mlr(mut,e)
@@ -54,7 +54,7 @@ power_compare <- function(family, Niter, sgdata, Nsample,para,bmrpars,betaf0,bet
     res.m5 <-  ddmodel(mut,e, mr, fe1)
     res.m6<-   ddmodel(mut,e, mr, fe2)
     res.m7 <-  ddmodel(mut,e, mr, fe3)
-    res.m8 <-  ddmodel(mut,e, mr, fe4)
+    #res.m8 <-  ddmodel(mut,e, mr, fe4)
     m1.pvalue[iter] <-  res.m1$pvalue
     m2.pvalue[iter] <-  res.m2$pvalue
     m3.pvalue[iter] <-  res.m3$pvalue
@@ -62,14 +62,14 @@ power_compare <- function(family, Niter, sgdata, Nsample,para,bmrpars,betaf0,bet
     m5.pvalue[iter] <-  res.m5$pvalue
     m6.pvalue[iter] <-  res.m6$pvalue
     m7.pvalue[iter] <-  res.m7$pvalue
-    m8.pvalue[iter] <-  res.m8$pvalue
+    #m8.pvalue[iter] <-  res.m8$pvalue
     parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
     a=rbind(a,parameters)
   }
    return(list("parameters"=a, "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue,"m3.pvalue" =m3.pvalue,"m4.pvalue" =m4.pvalue,
                 "m5.pvalue" =m5.pvalue,"m6.pvalue" =m6.pvalue,
                 "m7.pvalue" =m7.pvalue,"m8.pvalue" =m8.pvalue,"res.m1"=res.m1, "res.m2"=res.m2, "res.m3"=res.m3, "res.m4"=res.m4,
-                "res.m5"=res.m5, "res.m6"=res.m6, "res.m7"=res.m7, "res.m8"=res.m8))
+                "res.m5"=res.m5, "res.m6"=res.m6, "res.m7"=res.m7))
 
   # return(list("parameters"=a, "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue,"m3.pvalue" =m3.pvalue,
   #             "m4.pvalue" =m4.pvalue, "m6.pvalue" =m6.pvalue,"m7.pvalue" =m7.pvalue))
