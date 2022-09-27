@@ -54,28 +54,34 @@ simulate_2funcv <- function(sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,ho
     hotpp3= min(pp3*exp(hmm[9]),1)
 
     annodata[[t]] <- rbind(sgdata[[t]][functypecode==7], sgdata[[t]][functypecode==8])
+    mut1=matrix(nrow = tnpos1,ncol = Nsample.ps)
+    mut2=matrix(nrow = tnpos2,ncol = Nsample.ps)
+    mut3=matrix(nrow = tnpos1,ncol = Nsample.neu)
+    mut4=matrix(nrow = tnpos2,ncol = Nsample.neu)
+
+    for (j in 1:Nsample.ps) {
+      if (k1>0){
+        mut1[1:k1,j]= sample(c(0,1),k1, replace=T,prob= c(1-hotpp2,hotpp2))
+        mut1[(1+k1):tnpos1,j]= sample(c(0,1),k2, replace = T, prob = c(1-pp2,pp2))
+      }else{
+        mut1[,j]=sample(c(0,1),k2, replace = T, prob = c(1-pp2,pp2))
+      }
+
+      if (k3>0){
+        mut2[1:k3,j]= sample(c(0,1),k3, replace=T,prob= c(1-hotpp3,hotpp3))
+        mut2[(1+k3):tnpos2,j]= sample(c(0,1),k4, replace = T, prob = c(1-pp3,pp3))
+      }else{
+      mut2[,j]=sample(c(0,1),k4, replace = T, prob = c(1-pp3,pp3))
+      }
+    }
+    mut.ps=rbind(mut1,mut2)
 
 
-    mutc1.hot <- rsparsematrix(k1, Nsample.ps, nnz=rbinom(1, Nsample.ps * k1, hotpp2), rand.x=NULL)
-    mutc1.reg <- rsparsematrix(k2, Nsample.ps, nnz=rbinom(1, Nsample.ps * k2, pp2), rand.x=NULL)
-    mutc1=rbind(mutc1.hot,mutc1.reg)
-
-    mutc2.hot <- rsparsematrix(k3, Nsample.ps, nnz=rbinom(1, Nsample.ps * k3, hotpp3), rand.x=NULL)
-    mutc2.reg <- rsparsematrix(k4, Nsample.ps, nnz=rbinom(1, Nsample.ps * k4, pp3), rand.x=NULL)
-    mutc2=rbind(mutc2.hot,mutc2.reg)
-
-    mut.ps <- rbind(mutc1, mutc2)
-
-    mutn1.hot <- rsparsematrix(k1, Nsample.neu, nnz=rbinom(1, Nsample.neu * k1, pp1), rand.x=NULL)
-    mutn1.reg <- rsparsematrix(k2, Nsample.neu, nnz=rbinom(1, Nsample.neu * k2, pp1), rand.x=NULL)
-    mutn1=rbind(mutn1.hot,mutn1.reg)
-
-
-    mutn2.hot <- rsparsematrix(k3, Nsample.neu, nnz=rbinom(1, Nsample.neu * k3, pp1), rand.x=NULL)
-    mutn2.reg <- rsparsematrix(k4, Nsample.neu, nnz=rbinom(1, Nsample.neu * k4, pp1), rand.x=NULL)
-    mutn2=rbind(mutn2.hot,mutn2.reg)
-
-    mut.neu <- rbind(mutn1, mutn2)
+    for (j in (1+Nsample.ps):Nsample) {
+      mut3[,j]= sample(c(0,1),tnpos1, replace=T,prob= c(1-pp1,pp1))
+      mut4[,j]= sample(c(0,1),tnpos2, replace=T,prob= c(1-pp1,pp1))
+    }
+   mut.neu=rbind(mut3,mut4)
 
     mutlist[[t]] <- cbind(mut.ps,mut.neu)
     countlist[[t]] <- c(tnpos1, tnpos2,sum(mut.ps),sum(mut.neu))
