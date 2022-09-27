@@ -66,11 +66,7 @@ power_compare <- function(family, Niter, sgdata, Nsample,para,bmrpars,betaf0,bet
     parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
     a=rbind(a,parameters)
   }
-   return(list("parameters"=a, "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue,"m3.pvalue" =m3.pvalue,"m4.pvalue" =m4.pvalue,
-                "m7.pvalue" =m7.pvalue, "res.m1"=res.m1, "res.m2"=res.m2, "res.m3"=res.m3, "res.m4"=res.m4,
-                "res.m7"=res.m7))
-
-  # return(list("parameters"=a, "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue,"m3.pvalue" =m3.pvalue,
-  #             "m4.pvalue" =m4.pvalue, "m6.pvalue" =m6.pvalue,"m7.pvalue" =m7.pvalue))
-  #
+   return(list("parameters"=a, "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue,
+               "m3.pvalue" =m3.pvalue,"m4.pvalue" =m4.pvalue,
+                "m7.pvalue" =m7.pvalue))
   }
