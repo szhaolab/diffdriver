@@ -1,4 +1,10 @@
 #' Global variable Totalnttype, Outputdir
+#'
+#' @param fileinfo Anno file information
+#' @param j the number of nytype
+#' @param varlist Variables of interest
+#' @param genesubset Genes of interest
+#'
 #' @import data.table
 ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
   # genesubset is a file containing genenames, each line has one gene name

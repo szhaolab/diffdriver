@@ -77,7 +77,7 @@ simulate_2funcv <- function(sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,ho
     mut.ps=rbind(mut1,mut2)
 
 
-    for (j in (1+Nsample.ps):Nsample) {
+    for (j in 1:Nsample.neu) {
       mut3[,j]= sample(c(0,1),tnpos1, replace=T,prob= c(1-pp1,pp1))
       mut4[,j]= sample(c(0,1),tnpos2, replace=T,prob= c(1-pp1,pp1))
     }

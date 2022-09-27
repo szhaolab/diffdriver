@@ -9,7 +9,7 @@ diffdriver(
   mutf,
   phenof,
   j,
-  hotf,
+  hotf = NULL,
   drivermapsdir,
   k = 5,
   mode = 1,
