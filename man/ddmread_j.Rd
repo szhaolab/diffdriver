@@ -6,6 +6,15 @@
 \usage{
 ddmread_j(fileinfo, j, varlist = NULL, genesubset = NULL)
 }
+\arguments{
+\item{fileinfo}{Anno file information}
+
+\item{j}{the number of nytype}
+
+\item{varlist}{Variables of interest}
+
+\item{genesubset}{Genes of interest}
+}
 \description{
 Global variable Totalnttype, Outputdir
 }
