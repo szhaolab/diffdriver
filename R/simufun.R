@@ -15,7 +15,7 @@
 #' @return A list composed of the p-values for 8 models
 #' and the parameters used in these models.
 #' @export
-power_compare <- function(binary,family, Niter, sgdata, Nsample,para,bmrpars,betaf0,beta_gc,hotseq,hmm){
+power_compare <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf0,beta_gc,hotseq,hmm){
 
 
   m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <-
