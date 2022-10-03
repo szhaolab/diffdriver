@@ -15,7 +15,7 @@
 #' @return A list composed of the p-values for 8 models
 #' and the parameters used in these models.
 #' @export
-power_compare <- function(family, Niter, sgdata, Nsample,para,bmrpars,betaf0,beta_gc,hotseq,hmm){
+power_compare <- function(binary,family, Niter, sgdata, Nsample,para,bmrpars,betaf0,beta_gc,hotseq,hmm){
 
 
   m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <-
@@ -23,16 +23,7 @@ power_compare <- function(family, Niter, sgdata, Nsample,para,bmrpars,betaf0,bet
   a=c()
   for (iter in 1:Niter) {
     print(paste0("Iteration: ",  iter))
-    if (family=="binary"){
-      simdata <- simulate_1funcv(sgdata, bmrpars, betaf0, Nsample, beta_gc, para,hotseq,hmm)
-    }else{
-      if (family=="cont"){
-        simdata <- simulate_2funcv(sgdata, bmrpars, betaf0, Nsample, beta_gc, para,hotseq,hmm)
-      }else{
-        stop("Error:only binary/cont is allowed")
-      }
-    }
-
+    simdata <- simulate_2funcv(binary=binary,sgdata, bmrpars, betaf0, Nsample, beta_gc, para,hotseq,hmm)
     ssgdata=simdata$annodata
     mut <- do.call(rbind, simdata$mutlist)
     bmrmtx <- do.call(rbind, simdata$bmrmtxlist)

@@ -13,10 +13,20 @@
 #' for hotspots.
 #' @import Matrix data.table
 #' @export
-simulate_2funcv <- function(sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,hotseq, hmm){
+simulate_2funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,hotseq, hmm){
+  if (binary==T){
+    Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
+    Nsamplen <- Nsample-Nsamplec
+    phenotype <- c(rep(1,Nsamplec),rep(0,Nsamplen))
+    ss=ifelse(phenotype==1,sample(c(0,1),size=Nsamplec,replace=T,prob = c(1-para[1],para[1])),
+              sample(c(0,1),size=Nsamplen,replace=T,prob = c(1-para[2],para[2])))
+
+  }else{
   phenotype=rnorm(Nsample,mean = para[1],sd=para[2])
   pp=exp(para[3]+para[4]*phenotype)/(1+exp(para[3]+para[4]*phenotype))
   ss=ifelse(runif(Nsample)-pp<0,1,0)
+  }
+
   index=which(ss==1)
   phenotype=c(phenotype[index],phenotype[-index])
   Nsample.ps=sum(ss)
