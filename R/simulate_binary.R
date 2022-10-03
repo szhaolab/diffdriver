@@ -15,13 +15,13 @@
 simulate_1funcv <- function(sgdata, bmrpars, betaf0, Nsample, beta_gc,para,hotseq,hmm){
   Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
   Nsamplen <- Nsample-Nsamplec
-  edata <- c(rep(1,Nsamplec),rep(0,Nsamplen))
+  phenotype <- c(rep(1,Nsamplec),rep(0,Nsamplen))
+  ss=ifelse(phenotype==1,sample(c(0,1),size=Nsamplec,replace=T,prob = c(1-para[1],para[1])),
+            sample(c(0,1),size=Nsamplen,replace=T,prob = c(1-para[2],para[2])))
 
-  Nsamplec.ps <- rbinom(1, Nsamplec, para[1]) # number of hotspots position in positively selected samples  in group E=1
-  #Nsamplec.ps.hot <- rbinom(1, Nsamplec.ps, hotspot[1]) # number of hotspots position in positively selected samples  in group E=1
-  #Nsamplec.ps.reg=Nsamplec.ps-Nsample.ps.hot
-  Nsamplen.ps <- rbinom(1, Nsamplen, para[2]) # number of positively selected samples in group E=0
-  Nsample.ps <- Nsamplec.ps + Nsamplen.ps
+  index=which(ss==1)
+  phenotype=c(phenotype[index],phenotype[-index])
+  Nsample.ps=sum(ss)
   Nsample.neu <- Nsample - Nsample.ps
 
 
@@ -52,30 +52,37 @@ seqt=ssgdata$seqt
     hotpp3= min(pp1*exp(hmm[9]),1)
 
     annodata[[t]] <- rbind(sgdata[[t]][functypecode==7], sgdata[[t]][functypecode==8])
+    mut1=matrix(nrow = tnpos1,ncol = Nsample.ps)
+    mut2=matrix(nrow = tnpos2,ncol = Nsample.ps)
+    mut3=matrix(nrow = tnpos1,ncol = Nsample.neu)
+    mut4=matrix(nrow = tnpos2,ncol = Nsample.neu)
 
 
-    mutc1.hot <- rsparsematrix(k1, Nsample.ps, nnz=rbinom(1, Nsample.ps * k1, hotpp2), rand.x=NULL)
+    for (j in 1:Nsample.ps) {
+      if (k1>0){
+        mut1[1:k1,j]= sample(c(0,1),k1, replace=T,prob= c(1-hotpp2,hotpp2))
+        mut1[(1+k1):tnpos1,j]= sample(c(0,1),k2, replace = T, prob = c(1-pp2,pp2))
+      }else{
+        mut1[,j]=sample(c(0,1),k2, replace = T, prob = c(1-pp2,pp2))
+      }
 
-    mutc1.reg <- rsparsematrix(k2, Nsample.ps, nnz=rbinom(1, Nsample.ps * k2, pp2), rand.x=NULL)
-
-    mutc1=rbind(mutc1.hot,mutc1.reg)
-
-
-
-    mutc2.hot <- rsparsematrix(k3, Nsample.ps, nnz=rbinom(1, Nsample.ps * k3, hotpp3), rand.x=NULL)
-
-    mutc2.reg <- rsparsematrix(k4, Nsample.ps, nnz=rbinom(1, Nsample.ps * k4, pp3), rand.x=NULL)
-
-    mutc2=rbind(mutc2.hot,mutc2.reg)
-
-    mutc <- rbind(mutc1, mutc2)
+      if (k3>0){
+        mut2[1:k3,j]= sample(c(0,1),k3, replace=T,prob= c(1-hotpp3,hotpp3))
+        mut2[(1+k3):tnpos2,j]= sample(c(0,1),k4, replace = T, prob = c(1-pp3,pp3))
+      }else{
+        mut2[,j]=sample(c(0,1),k4, replace = T, prob = c(1-pp3,pp3))
+      }
+    }
+    mut.ps=rbind(mut1,mut2)
 
 
-    mutn1.hot <- rsparsematrix(k1, Nsample.neu, nnz=rbinom(1, Nsample.neu * k1, pp1), rand.x=NULL)
 
-    mutn1.reg <- rsparsematrix(k2, Nsample.neu, nnz=rbinom(1, Nsample.neu * k2, pp1), rand.x=NULL)
+    for (j in 1:Nsample.neu) {
+      mut3[,j]= sample(c(0,1),tnpos1, replace=T,prob= c(1-pp1,pp1))
+      mut4[,j]= sample(c(0,1),tnpos2, replace=T,prob= c(1-pp1,pp1))
+    }
+    mut.neu=rbind(mut3,mut4)
 
-    mutn1=rbind(mutn1.hot,mutn1.reg)
 
 
     mutn2.hot <- rsparsematrix(k3, Nsample.neu, nnz=rbinom(1, Nsample.neu * k3, pp1), rand.x=NULL)
