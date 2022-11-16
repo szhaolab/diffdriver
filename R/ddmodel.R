@@ -11,14 +11,18 @@ ddmodel <- function(mut, e, mr, fe){
   rate.n <- as.matrix(exp(mr))
   rate.s0 <- as.matrix(exp(fe) * rate.n)
   ll.n <- colSums(log(rate.n * mut +  (1-rate.n) * (1-mut)))
+  mutidx <- which(mut!=0,arr.ind = T)
 
   get_ll_s <- function(b){
     rate.s <- rate.s0 * exp(b)
+    rmtx <- log(1-rate.s)
+    rmtx[mutidx] <- log(rate.s[mutidx])
     # log likelihood for each sample under selection
-    colSums(log(rate.s * mut +  (1-rate.s) * (1-mut)))
+    colSums(rmtx) # faster than `colSums(log(rate.s * mut +  (1-rate.s) * (1-mut)))`
   }
 
   get_pi_null <- function(alpha, e){
+    alpha <- sum(alpha)
     pi <- exp(alpha)/(1 + exp(alpha))
     rep(pi, length(e))
   }
@@ -31,55 +35,70 @@ ddmodel <- function(mut, e, mr, fe){
 
   q_pos <- function(b, zpost){
     ll.s <- get_ll_s(b)
-    q <- sum(zpost * ll.s + (1-zpost) * ll.n)
+    q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
     return(q)
   }
 
-  ddmodel_EM <- function(niter = 30, type = c("null", "alt")){
-    # Initialize
-    beta0 <- 0
+  dd_EM <- function(beta0 = 0, alpha = c(0,0), type = c("null", "alt"), maxit = 50, tol = 1e-6){
+    ll_rec <- rep(0, maxit)
+    beta0_rec <- rep(0, maxit)
+    alpha_rec <- NULL
 
     if (type == "null"){
-      alpha = 0
       pi <- get_pi_null(alpha, e)
     }
 
     if (type == "alt"){
-      alpha = c(0,0)
       pi <- get_pi_alt(alpha, e)
     }
 
-    for (i in 1:niter){
-      # update z_i
-      ll.s <- get_ll_s(beta0)
-      zpost <- (pi * exp(ll.s) + (1-pi) * exp(ll.n))/sum(pi * exp(ll.s) + (1-pi) * exp(ll.n))
+    for (i in 1:maxit){
+      cat("iteration ", i, "\n")
 
+      ll.s <- get_ll_s(beta0)
+      ll <- sum(log(pi * exp(ll.s) + (1-pi) * exp(ll.n)))
+      ll_rec[i] <- ll
+
+      if (i>=2){
+        if (abs((ll_rec[i] -ll_rec[i-1])/ll_rec[i-1]) <= tol)
+          break
+      }
+
+      # update z_i
+      zpost <- cbind(pi * exp(ll.s) , (1-pi) * exp(ll.n)) # 1st column selection, 2nd column neutral
+      zpost <- zpost/rowSums(zpost)
       # update beta0
       res <- optim(0, q_pos, zpost = zpost, method = "BFGS", control=list(fnscale=-1))
       beta0 <- res$par
+      beta0_rec[i] <- beta0
 
       # update alpha
       if (type == "null"){
-        reslg <- multinom(pi ~ 1)
+        lg.x <- rep(1, ncol(mut))
       }
       if (type == "alt"){
-        reslg <- multinom(pi ~ e)
+        lg.x <- e
       }
-      alpha <- coefficients(reslg)
-      pi <- reslg$fitted.values
+      reslg <- nnet.default(lg.x, zpost, size = 0,
+                  skip = TRUE, softmax = TRUE, censored = FALSE,
+                  rang = 0, trace=FALSE)
+      coef <- coefficients(reslg) #  b->o1    i1->o1     b->o2    i1->o2
+      # 1: intercept for category 1, 2: slope for variable 1 in category 1.
+      # 3: intercept for category 2, 2: slope for variable 1 in category 2.
+      alpha <- c(coef[1] - coef[3],coef[2] - coef[4])
+      alpha_rec <- rbind(alpha_rec, alpha)
+      pi <- reslg$fitted.values[,1]
     }
-
-    ll <- sum(pi * exp(ll.s) + (1-pi) * exp(ll.n))
-    return(list("pi" = pi, "loglikelihood" = ll, "beta0" = beta0, "alpha" = alpha))
+    return(list("loglikelihood" = ll, "beta0" = beta0, "alpha" = alpha, "ll_trace" = ll_rec,
+                "beta0_trace" = beta0_rec, "alpha_race" = alpha_rec))
   }
 
-  res.null <- ddmodel_EM(type = "null")
-  res.alt <- ddmodel_EM(type = "alt")
+  res.null <- dd_EM(type = "null", maxit = 50)
+  res.alt <- dd_EM(type = "alt", maxit = 50)
   teststat<- -2*(res.null$loglikelihood - res.alt$loglikelihood)
   pvalue <- pchisq(teststat, df=1, lower.tail=FALSE)
   res <- list("pvalue"=pvalue, "res.null" = res.null, "res.alt"=res.alt)
   return(res)
-
 }
 
 
