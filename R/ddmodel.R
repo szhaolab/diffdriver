@@ -1,3 +1,103 @@
+get_ll_s <- function(b, rate.s0, mutidx){
+  rate.s <- rate.s0 * exp(b)
+  rmtx <- log(1-rate.s)
+  rmtx[mutidx] <- log(rate.s[mutidx])
+  # log likelihood for each sample under selection
+  colSums(rmtx) # faster than `colSums(log(rate.s * mut +  (1-rate.s) * (1-mut)))`
+}
+
+get_pi <- function(alpha, e){
+  alpha0 <- alpha[1]
+  alpha1 <- alpha[2]
+  exp(alpha0 + alpha1 * e)/(1 + exp(alpha0 + alpha1 * e))
+}
+
+q_pos <- function(b, zpost, rate.s0, mutdix){
+  ll.s <- get_ll_s(b, rate.s0, mutdix)
+  q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
+  return(q)
+}
+
+dd_loglik <- function(p, rate.s0, ll.n, mutidx){
+  ll.s <- get_ll_s(beta0, rate.s0, mutdix)
+  ll <- sum(log(pi * exp(ll.s) + (1-pi) * exp(ll.n)))
+}
+
+dd_EM_update <- function(p, rate.s0, ll.n, mutidx, type = c("null", "alt")){
+  # p: beta0, alpha
+  beta0 <- p[1]
+  alpha <- p[2:3]
+
+  # update z_i
+  ll.s <- get_ll_s(beta0, rate.s0, mutdix)
+  pi <- get_pi(alpha, e)
+  zpost <- cbind(pi * exp(ll.s) , (1-pi) * exp(ll.n)) # 1st column selection, 2nd column neutral
+  zpost <- zpost/rowSums(zpost)
+
+  # update beta0
+  res <- optim(0, q_pos, zpost = zpost, method = "BFGS", control=list(fnscale=-1))
+  beta0 <- res$par
+
+  # update alpha
+  if (type == "null"){
+    lg.x <- rep(1, ncol(mut))
+  }
+  if (type == "alt"){
+    lg.x <- e
+  }
+  reslg <- nnet.default(lg.x, zpost, size = 0,
+                        skip = TRUE, softmax = TRUE, censored = FALSE,
+                        rang = 0, trace=FALSE)
+  coef <- coefficients(reslg) #  b->o1    i1->o1     b->o2    i1->o2
+  # 1: intercept for category 1, 2: slope for variable 1 in category 1.
+  # 3: intercept for category 2, 2: slope for variable 1 in category 2.
+  alpha <- c(coef[1] - coef[3],coef[2] - coef[4])
+  if (type == "null"){
+    alpha <- c(sum(alpha), 0)
+  }
+
+  pnew <- c(beta0, alpha)
+
+  return(pnew)
+}
+
+dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 50, tol = 1e-6){
+  ll_rec <- rep(0, maxit)
+  p_rec <- NULL
+
+  # initialize
+  p <- c(beta0, alpha)
+
+  for (i in 1:maxit){
+    cat("iteration ", i, "\n")
+    pnew <- dd_EM_update(p, rate.s0, ll.n, mutidx, type = type)
+    p_rec <- rbind(p_rec, pnew)
+    ll <- dd_loglik(p, rate.s0, ll.n, mutidx)
+    ll_rec[i] <- ll
+
+    if  (dist(rbind(pnew, p) < tol){
+      break
+    }
+    p <- pnew
+  }
+
+  return(list("loglikelihood" = ll, "beta0" = p[1], "alpha" = p[2:3], "loglik_rec" = ll_rec,
+              "param_rec" = p_rec))
+}
+
+
+dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 50, tol = 1e-6){
+
+  # initialize
+  p <- c(beta0, alpha)
+  # EM
+  res <- squarem(p=p, rate.s0=rate.s0, ll.n=ll.n, mutidx=mutdix, type = type, fixptfn=dd_EM_update, control=list(tol=tol, maxiter = maxit))
+  p <- res$par
+  ll <- dd_loglik(p, rate.s0, ll.n, mutidx)
+
+  return(list("loglikelihood" = ll, "beta0" = p[1], "alpha" = p[2:3]))
+}
+
 #' @title diffDriver model
 #' @description This model is applied on data of a single gene. It will infer effect size for both sample-level variable and positional level functional annotations. We used an EM algorithm to infer parameters.
 #' @param mut a matrix of mutation status 0 or 1, rows positions, columns are samples.
@@ -11,90 +111,12 @@ ddmodel <- function(mut, e, mr, fe){
   rate.n <- as.matrix(exp(mr))
   rate.s0 <- as.matrix(exp(fe) * rate.n)
   ll.n <- colSums(log(rate.n * mut +  (1-rate.n) * (1-mut)))
-  mutidx <- which(mut!=0,arr.ind = T)
+  mutidx <- which(mut!=0, arr.ind = T)
 
-  get_ll_s <- function(b){
-    rate.s <- rate.s0 * exp(b)
-    rmtx <- log(1-rate.s)
-    rmtx[mutidx] <- log(rate.s[mutidx])
-    # log likelihood for each sample under selection
-    colSums(rmtx) # faster than `colSums(log(rate.s * mut +  (1-rate.s) * (1-mut)))`
-  }
-
-  get_pi_null <- function(alpha, e){
-    alpha <- sum(alpha)
-    pi <- exp(alpha)/(1 + exp(alpha))
-    rep(pi, length(e))
-  }
-
-  get_pi_alt <- function(alpha, e){
-    alpha0 <- alpha[1]
-    alpha1 <- alpha[2]
-    exp(alpha0 + alpha1 * e)/(1 + exp(alpha0 + alpha1 * e))
-  }
-
-  q_pos <- function(b, zpost){
-    ll.s <- get_ll_s(b)
-    q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
-    return(q)
-  }
-
-  dd_EM <- function(beta0 = 0, alpha = c(0,0), type = c("null", "alt"), maxit = 50, tol = 1e-6){
-    ll_rec <- rep(0, maxit)
-    beta0_rec <- rep(0, maxit)
-    alpha_rec <- NULL
-
-    if (type == "null"){
-      pi <- get_pi_null(alpha, e)
-    }
-
-    if (type == "alt"){
-      pi <- get_pi_alt(alpha, e)
-    }
-
-    for (i in 1:maxit){
-      cat("iteration ", i, "\n")
-
-      ll.s <- get_ll_s(beta0)
-      ll <- sum(log(pi * exp(ll.s) + (1-pi) * exp(ll.n)))
-      ll_rec[i] <- ll
-
-      if (i>=2){
-        if (abs((ll_rec[i] -ll_rec[i-1])/ll_rec[i-1]) <= tol)
-          break
-      }
-
-      # update z_i
-      zpost <- cbind(pi * exp(ll.s) , (1-pi) * exp(ll.n)) # 1st column selection, 2nd column neutral
-      zpost <- zpost/rowSums(zpost)
-      # update beta0
-      res <- optim(0, q_pos, zpost = zpost, method = "BFGS", control=list(fnscale=-1))
-      beta0 <- res$par
-      beta0_rec[i] <- beta0
-
-      # update alpha
-      if (type == "null"){
-        lg.x <- rep(1, ncol(mut))
-      }
-      if (type == "alt"){
-        lg.x <- e
-      }
-      reslg <- nnet.default(lg.x, zpost, size = 0,
-                  skip = TRUE, softmax = TRUE, censored = FALSE,
-                  rang = 0, trace=FALSE)
-      coef <- coefficients(reslg) #  b->o1    i1->o1     b->o2    i1->o2
-      # 1: intercept for category 1, 2: slope for variable 1 in category 1.
-      # 3: intercept for category 2, 2: slope for variable 1 in category 2.
-      alpha <- c(coef[1] - coef[3],coef[2] - coef[4])
-      alpha_rec <- rbind(alpha_rec, alpha)
-      pi <- reslg$fitted.values[,1]
-    }
-    return(list("loglikelihood" = ll, "beta0" = beta0, "alpha" = alpha, "ll_trace" = ll_rec,
-                "beta0_trace" = beta0_rec, "alpha_race" = alpha_rec))
-  }
-
-  res.null <- dd_EM(type = "null", maxit = 50)
-  res.alt <- dd_EM(type = "alt", maxit = 50)
+  res.null <- dd_EM_ordinary(ll.n=ll.n, mutidx=mutdix, type = "null", maxit = 50)
+  # res.null <- dd_squarEM(ll.n=ll.n, mutidx=mutdix, type = "null", maxit = 50)
+  res.alt <- dd_EM_ordinary(ll.n=ll.n, mutidx=mutdix, type = "alt", maxit = 50)
+  # res.alt <- dd_squarEM(ll.n=ll.n, mutidx=mutdix, type = "alt, maxit = 50)
   teststat<- -2*(res.null$loglikelihood - res.alt$loglikelihood)
   pvalue <- pchisq(teststat, df=1, lower.tail=FALSE)
   res <- list("pvalue"=pvalue, "res.null" = res.null, "res.alt"=res.alt)
