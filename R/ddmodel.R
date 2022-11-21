@@ -48,7 +48,7 @@ dd_EM_update <- function(p, rate.s0, ll.n, mutidx, type = c("null", "alt")){
   if (type == "alt"){
     lg.x <- e
   }
-  reslg <- nnet.default(lg.x, zpost, size = 0,
+  reslg <- nnet::nnet.default(lg.x, zpost, size = 0,
                         skip = TRUE, softmax = TRUE, censored = FALSE,
                         rang = 0, trace=FALSE)
   coef <- coefficients(reslg) #  b->o1    i1->o1     b->o2    i1->o2
