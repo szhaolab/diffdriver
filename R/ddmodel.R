@@ -12,14 +12,17 @@ get_pi <- function(alpha, e){
   exp(alpha0 + alpha1 * e)/(1 + exp(alpha0 + alpha1 * e))
 }
 
-q_pos <- function(b, zpost, rate.s0, mutdix){
-  ll.s <- get_ll_s(b, rate.s0, mutdix)
+q_pos <- function(b, zpost, rate.s0, ll.n, mutidx){
+  ll.s <- get_ll_s(b, rate.s0, mutidx)
   q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
   return(q)
 }
 
 dd_loglik <- function(p, rate.s0, ll.n, mutidx){
-  ll.s <- get_ll_s(beta0, rate.s0, mutdix)
+  beta0 <- p[1]
+  alpha <- p[2:3]
+  pi <- get_pi(alpha, e)
+  ll.s <- get_ll_s(beta0, rate.s0, mutidx)
   ll <- sum(log(pi * exp(ll.s) + (1-pi) * exp(ll.n)))
 }
 
@@ -29,13 +32,13 @@ dd_EM_update <- function(p, rate.s0, ll.n, mutidx, type = c("null", "alt")){
   alpha <- p[2:3]
 
   # update z_i
-  ll.s <- get_ll_s(beta0, rate.s0, mutdix)
+  ll.s <- get_ll_s(beta0, rate.s0, mutidx)
   pi <- get_pi(alpha, e)
   zpost <- cbind(pi * exp(ll.s) , (1-pi) * exp(ll.n)) # 1st column selection, 2nd column neutral
   zpost <- zpost/rowSums(zpost)
 
   # update beta0
-  res <- optim(0, q_pos, zpost = zpost, method = "BFGS", control=list(fnscale=-1))
+  res <- optim(0, q_pos, zpost = zpost, rate.s0 = rate.s0, ll.n = ll.n, mutidx = mutidx, method = "BFGS", control=list(fnscale=-1))
   beta0 <- res$par
 
   # update alpha
@@ -61,7 +64,7 @@ dd_EM_update <- function(p, rate.s0, ll.n, mutidx, type = c("null", "alt")){
   return(pnew)
 }
 
-dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 50, tol = 1e-6){
+dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 100, tol = 1e-3){
   ll_rec <- rep(0, maxit)
   p_rec <- NULL
 
@@ -69,29 +72,28 @@ dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.s0, ll.n, mutidx, typ
   p <- c(beta0, alpha)
 
   for (i in 1:maxit){
-    cat("iteration ", i, "\n")
-    pnew <- dd_EM_update(p, rate.s0, ll.n, mutidx, type = type)
-    p_rec <- rbind(p_rec, pnew)
     ll <- dd_loglik(p, rate.s0, ll.n, mutidx)
     ll_rec[i] <- ll
+    cat("iteration ", i,"; loglikelihood:", ll, "\n")
+    pnew <- dd_EM_update(p, rate.s0, ll.n, mutidx, type = type)
+    p_rec <- rbind(p_rec, pnew)
 
-    if  (dist(rbind(pnew, p) < tol){
+    if  (dist(rbind(pnew, p)) < tol){
       break
     }
     p <- pnew
   }
 
-  return(list("loglikelihood" = ll, "beta0" = p[1], "alpha" = p[2:3], "loglik_rec" = ll_rec,
-              "param_rec" = p_rec))
+  return(list("loglikelihood" = ll, "beta0" = p[1], "alpha" = p[2:3], "loglik_rec" = ll_rec, "param_rec" = p_rec))
 }
 
 
-dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 50, tol = 1e-6){
+dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 100, tol = 1e-3){
 
   # initialize
   p <- c(beta0, alpha)
   # EM
-  res <- squarem(p=p, rate.s0=rate.s0, ll.n=ll.n, mutidx=mutdix, type = type, fixptfn=dd_EM_update, control=list(tol=tol, maxiter = maxit))
+  res <- SQUAREM::squarem(p=p, rate.s0=rate.s0, ll.n=ll.n, mutidx=mutidx, type = type, fixptfn=dd_EM_update, control=list(tol=tol, maxiter = maxit))
   p <- res$par
   ll <- dd_loglik(p, rate.s0, ll.n, mutidx)
 
@@ -107,16 +109,16 @@ dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.s0, ll.n, mutidx, type = 
 #' @param fe, a vector, increased mutation rate at each position, depending on e (log scale),
 #'  should match the rows of \code{mut} and \code{mr}
 #' @export
-ddmodel <- function(mut, e, mr, fe){
+ddmodel <- function(mut, e, mr, fe, ...){
   rate.n <- as.matrix(exp(mr))
   rate.s0 <- as.matrix(exp(fe) * rate.n)
   ll.n <- colSums(log(rate.n * mut +  (1-rate.n) * (1-mut)))
   mutidx <- which(mut!=0, arr.ind = T)
 
-  res.null <- dd_EM_ordinary(ll.n=ll.n, mutidx=mutdix, type = "null", maxit = 50)
-  # res.null <- dd_squarEM(ll.n=ll.n, mutidx=mutdix, type = "null", maxit = 50)
-  res.alt <- dd_EM_ordinary(ll.n=ll.n, mutidx=mutdix, type = "alt", maxit = 50)
-  # res.alt <- dd_squarEM(ll.n=ll.n, mutidx=mutdix, type = "alt, maxit = 50)
+  # res.null <- dd_EM_ordinary(rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "null", ...)
+  res.null <- dd_squarEM(rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "null", ...)
+  # res.alt <- dd_EM_ordinary(rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "alt",  ...)
+  res.alt <- dd_squarEM(rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "alt", ...)
   teststat<- -2*(res.null$loglikelihood - res.alt$loglikelihood)
   pvalue <- pchisq(teststat, df=1, lower.tail=FALSE)
   res <- list("pvalue"=pvalue, "res.null" = res.null, "res.alt"=res.alt)
