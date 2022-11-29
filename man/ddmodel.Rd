@@ -4,7 +4,7 @@
 \alias{ddmodel}
 \title{diffDriver model}
 \usage{
-ddmodel(mut, e, mr, fe)
+ddmodel(mut, e, mr, fe, ...)
 }
 \arguments{
 \item{mut}{a matrix of mutation status 0 or 1, rows positions, columns are samples.}
@@ -18,7 +18,5 @@ should match the columns of \code{mut} and \code{mr}}
 should match the rows of \code{mut} and \code{mr}}
 }
 \description{
-This function uses the model as cmodel.frac,
- but generalizes to take more than 1 functional categories.
- This model is applied on data of a single gene
+This model is applied on data of a single gene. It will infer effect size for both sample-level variable and positional level functional annotations. We used an EM algorithm to infer parameters.
 }

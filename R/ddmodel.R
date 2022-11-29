@@ -1,23 +1,46 @@
-get_ll_s <- function(b, rate.s0, mutidx){
-  rate.s <- rate.s0 * exp(b)
-  rmtx <- log(1-rate.s)
-  rmtx[mutidx] <- log(rate.s[mutidx])
-  # log likelihood for each sample under selection
-  colSums(rmtx) # faster than `colSums(log(rate.s * mut +  (1-rate.s) * (1-mut)))`
-}
 
+
+
+#' get pi
+#' @param alpha
+#' @param e
+#' @return
+#' @export
 get_pi <- function(alpha, e){
   alpha0 <- alpha[1]
   alpha1 <- alpha[2]
   exp(alpha0 + alpha1 * e)/(1 + exp(alpha0 + alpha1 * e))
 }
 
+#' Title
+#'
+#' @param b
+#' @param zpost
+#' @param rate.s0
+#' @param ll.n
+#' @param mutidx
+#'
+#' @return
+#' @export
+#'
+#' @examples
 q_pos <- function(b, zpost, rate.s0, ll.n, mutidx){
   ll.s <- get_ll_s(b, rate.s0, mutidx)
   q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
   return(q)
 }
 
+#' Title
+#'
+#' @param p
+#' @param rate.s0
+#' @param ll.n
+#' @param mutidx
+#'
+#' @return
+#' @export
+#'
+#' @examples
 dd_loglik <- function(p, rate.s0, ll.n, mutidx){
   beta0 <- p[1]
   alpha <- p[2:3]
@@ -26,6 +49,19 @@ dd_loglik <- function(p, rate.s0, ll.n, mutidx){
   ll <- sum(log(pi * exp(ll.s) + (1-pi) * exp(ll.n)))
 }
 
+#' Title
+#'
+#' @param p
+#' @param rate.n
+#' @param rate.s0
+#' @param ll.n
+#' @param mutidx
+#' @param type
+#'
+#' @return
+#' @export
+#'
+#' @examples
 dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt")){
   # p: beta0, alpha
   beta0 <- p[1]
@@ -65,6 +101,22 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt
   return(pnew)
 }
 
+#' Title
+#'
+#' @param beta0
+#' @param alpha
+#' @param rate.n
+#' @param rate.s0
+#' @param ll.n
+#' @param mutidx
+#' @param type
+#' @param maxit
+#' @param tol
+#'
+#' @return
+#' @export
+#'
+#' @examples
 dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 100, tol = 1e-3){
   ll_rec <- rep(0, maxit)
   p_rec <- NULL
@@ -89,6 +141,22 @@ dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mut
 }
 
 
+#' Title
+#'
+#' @param beta0
+#' @param alpha
+#' @param rate.n
+#' @param rate.s0
+#' @param ll.n
+#' @param mutidx
+#' @param type
+#' @param maxit
+#' @param tol
+#'
+#' @return
+#' @export
+#'
+#' @examples
 dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 100, tol = 1e-3){
 
   # initialize

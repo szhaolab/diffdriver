@@ -5,7 +5,7 @@
 \title{Title}
 \usage{
 power_compare(
-  family,
+  binary,
   Niter,
   sgdata,
   Nsample,
@@ -18,8 +18,6 @@ power_compare(
 )
 }
 \arguments{
-\item{family}{indicates the type of E variable}
-
 \item{Niter}{is the number of replication in simulation}
 
 \item{sgdata}{is the annotation data}
@@ -33,6 +31,8 @@ power_compare(
 \item{betaf0, }{shift of mutation rate from BMR, log scale, shared in all samples.}
 
 \item{beta_gc, }{effect size for functional covariates, log scale. Right now we only have one functional covariate, that is whether the mutation is missense or loss of function mutation. beta_gc[1] indicates the shift of mutation rate for missense ( coded as 7 in functype code column in `sgdata`), beta_gc[2] indicates the shift of mutation rate for loss of function ( coded as 8 in functype code column in `sgdata`). log scale.}
+
+\item{family}{indicates the type of E variable}
 
 \item{...}{other parameters}
 

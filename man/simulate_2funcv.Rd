@@ -5,6 +5,7 @@
 \title{simulate phenotype and mutations for one gene, using one functional annotation.}
 \usage{
 simulate_2funcv(
+  binary = F,
   sgdata,
   bmrpars,
   betaf0 = 2,
