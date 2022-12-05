@@ -1,6 +1,8 @@
 
 library("devtools")
 library(foreach)
+library(doParallel)
+registerDoParallel(cores=4)
 load_all("./")
 
 Nsample=100
@@ -23,15 +25,17 @@ para=c(0.8,0.2)
  funcv <- unlist(lapply(ssgdata, "[[", "functypecode"))
  ef <- simdata$efsize
  fe=vector("list",4)
+ res.ddmodel=vector("list",4)
  fe[[1]] <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]+hotsize
  fe[[2]] <- c(ef$avbetaf1, ef$avbetaf1 + ef$avbetaf2)[as.factor(funcv)]
  fe[[3]] <- rep(ef$betaf1f2, length(funcv))
  fe[[4]] <- rep(ef$avbetaf1f2, length(funcv))
 
  mr <- bmrmtx + ef$betaf0
- foreach(fe=fe) %dopar%{
-   print(paste0("Iteration:",fe))
-   res.ddmodel <-  ddmodel(mut,e, mr, fe)
+ res.ddmodel=
+  foreach(m=c(1:4)) %dopar%{
+    print(m)
+   ddmodel(mut,e, mr, fe[[m]])
  }
  res <-  ddmodel(mut,e, mr, fe1)
 

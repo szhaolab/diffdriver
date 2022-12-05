@@ -32,18 +32,19 @@ power_compare <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf0,bet
     e_bisect=ifelse(e>mean(e),1,0)
     funcv <- unlist(lapply(ssgdata, "[[", "functypecode"))
     ef <- simdata$efsize
-    fe1 <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]+hotsize
-    fe2<- c(ef$avbetaf1, ef$avbetaf1 + ef$avbetaf2)[as.factor(funcv)]
-    fe3 <- rep(ef$betaf1f2, length(funcv))
-    fe4 <- rep(ef$avbetaf1f2, length(funcv))
+    fe <- vector("list",4)
+    fe[[1]] <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]+hotsize
+    fe[[2]] <- c(ef$avbetaf1, ef$avbetaf1 + ef$avbetaf2)[as.factor(funcv)]
+    fe[[3]] <- rep(ef$betaf1f2, length(funcv))
+    fe[[4]] <- rep(ef$avbetaf1f2, length(funcv))
     mr <- bmrmtx + ef$betaf0
     if (sum(mut) ==0) {next}
     res.m1 <- mlr(mut,e)
     res.m2 <- genefisher(mut,e_bisect)
     res.m3 <- genebinom(mut,e_bisect)
     res.m4 <- genelr(mut,e_bisect)
-    foreach(fe=c(fe1,fe2,fe3,fe4)) %dopar%{
-      res.ddmodel <-  ddmodel(mut,e, mr, fe)
+    res.ddmodel=foreach(m=c(1:4)) %dopar%{
+        ddmodel(mut,e, mr, fe[[m]])
     }
 
     m1.pvalue[iter] <-  res.m1$pvalue
