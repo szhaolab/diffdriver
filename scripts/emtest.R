@@ -22,12 +22,14 @@ para=c(0.8,0.2)
 
  funcv <- unlist(lapply(ssgdata, "[[", "functypecode"))
  ef <- simdata$efsize
- fe1 <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]+hotsize
- fe2<- c(ef$avbetaf1, ef$avbetaf1 + ef$avbetaf2)[as.factor(funcv)]
- fe3 <- rep(ef$betaf1f2, length(funcv))
- fe4 <- rep(ef$avbetaf1f2, length(funcv))
+ fe=vector("list",4)
+ fe[[1]] <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]+hotsize
+ fe[[2]] <- c(ef$avbetaf1, ef$avbetaf1 + ef$avbetaf2)[as.factor(funcv)]
+ fe[[3]] <- rep(ef$betaf1f2, length(funcv))
+ fe[[4]] <- rep(ef$avbetaf1f2, length(funcv))
+
  mr <- bmrmtx + ef$betaf0
- foreach(fe=c(fe1,fe2,fe3,fe4)) %dopar%{
+ foreach(fe=fe) %dopar%{
    print(paste0("Iteration:",fe))
    res.ddmodel <-  ddmodel(mut,e, mr, fe)
  }
