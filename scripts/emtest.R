@@ -37,9 +37,9 @@ para=c(0.8,0.2)
     print(m)
    ddmodel(mut,e, mr, fe[[m]])
  }
- res <-  ddmodel(mut,e, mr, fe1)
+ #res <-  ddmodel(mut,e, mr, fe1)
 
  ##
- simures=power_compare(binary=TRUE,Niter = 1,sgdata=sgdata,Nsample=100,para=c(0.8,0.2),bmrpars=log(BMR),betaf0=1,beta_gc=c(1,0),hotseq=hotseq0,hmm=hmm)
+# simures=power_compare(binary=TRUE,Niter = 1,sgdata=sgdata,Nsample=100,para=c(0.8,0.2),bmrpars=log(BMR),betaf0=1,beta_gc=c(1,0),hotseq=hotseq0,hmm=hmm)
 
 

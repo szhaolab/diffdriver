@@ -1,0 +1,12 @@
+library("devtools")
+library("foreach")
+library("doParallel")
+registerDoParallel(cores=4)
+load_all("../../")
+i1=0
+i2=0
+i3=1200
+Nsim=50
+simures=power_compare(binary=TRUE,Nite=Nsim,sgdata=sgdata,bmrpars=log(BMR),Nsample=i3,betaf0=i1,beta_gc=c(i2,Fe),para=c(0.8,0.2),hotseq=hotseq0,hmm=hmm)
+save(simures,file="pppower_betaf0=0_betagc=0_sample1200.Rd")
+q("no")

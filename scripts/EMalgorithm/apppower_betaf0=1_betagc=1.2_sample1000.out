@@ -1,0 +1,34 @@
+
+R version 4.1.2 (2021-11-01) -- "Bird Hippie"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library("devtools")
+Loading required package: usethis
+> library("foreach")
+> library("doParallel")
+Loading required package: iterators
+Loading required package: parallel
+> registerDoParallel(cores=4)
+> load_all("../../")
+i Loading diffdriver
+> i1=1
+> i2=1.2
+> i3=1000
+> Nsim=50
+> simures=power_compare(binary=TRUE,Nite=Nsim,sgdata=sgdata,bmrpars=log(BMR),Nsample=i3,betaf0=i1,beta_gc=c(i2,Fe),para=c(0.8,0.2),hotseq=hotseq0,hmm=hmm)
+[1] "Iteration: 1"
