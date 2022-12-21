@@ -15,13 +15,13 @@
 #' @return A list composed of the p-values for 8 models
 #' and the parameters used in these models.
 #' @export
-power_compare <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf0,beta_gc,hotseq,hmm){
+power_comparediff <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf0,beta_gc,hotseq,hmm){
 
 
-  m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <-
-    m5.pvalue <- m6.pvalue <- m7.pvalue <- m8.pvalue <- rep(1,Niter)
+  m1.pvalue <- m2.pvalue <- rep(1,Niter)
   a=c()
   for (iter in 1:Niter) {
+    set.seed(iter)
     print(paste0("Iteration: ",  iter))
     simdata <- simulate_1funcv(binary=binary,sgdata, bmrpars, betaf0, Nsample, beta_gc, para,hotseq,hmm)
     ssgdata=simdata$annodata
@@ -39,27 +39,12 @@ power_compare <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf0,bet
     fe[[4]] <- rep(ef$avbetaf1f2, length(funcv))
     mr <- bmrmtx + ef$betaf0
     if (sum(mut) ==0) {next}
-    res.m1 <- mlr(mut,e)
-    res.m2 <- genefisher(mut,e_bisect)
-    res.m3 <- genebinom(mut,e_bisect)
-    res.m4 <- genelr(mut,e_bisect)
-    res.m5 <- ddmodel(mut,e, mr, fe[[2]])
-    res.m6 <- ddmodel(mut,e,mr,fe[[4]])
-    res.m7 <- ddmodel_binary_simple(mut,e,mr,fe[[2]])
-    res.m8 <- ddmodel_binary_simple(mut,e,mr,fe[[4]])
+    res.m1 <- ddmodel(mut,e, mr, fe[[2]])
+    res.m2 <- ddmodel_binary_simple(mut,e,mr,fe[[2]])
     m1.pvalue[iter] <-  res.m1$pvalue
     m2.pvalue[iter] <-  res.m2$pvalue
-    m3.pvalue[iter] <-  res.m3$pvalue
-    m4.pvalue[iter] <-  res.m4$pvalue
-    m5.pvalue[iter] <-  res.m5$pvalue
-    m6.pvalue[iter] <-  res.m6$pvalue
-    m7.pvalue[iter] <-  res.m7$pvalue
-    m8.pvalue[iter] <-  res.m8$pvalue
     parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
     a=rbind(a,parameters)
   }
-   return(list("parameters"=a, "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue,
-               "m3.pvalue" =m3.pvalue,"m4.pvalue" =m4.pvalue,
-               "m5.pvalue" =m5.pvalue,"m6.pvalue" =m6.pvalue,
-                "m7.pvalue" =m7.pvalue,"m8.pvalue" =m8.pvalue))
+   return(list("parameters"=a, "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue))
   }
