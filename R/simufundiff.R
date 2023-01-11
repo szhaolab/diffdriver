@@ -39,12 +39,12 @@ power_comparediff <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf0
     fe[[4]] <- rep(ef$avbetaf1f2, length(funcv))
     mr <- bmrmtx + ef$betaf0
     if (sum(mut) ==0) {next}
-    res.m1 <- ddmodel(mut,e, mr, fe[[2]])
-    res.m2 <- ddmodel_binary_simple(mut,e,mr,fe[[2]])
+    res.m1 <- ddmodel(mut,e, mr, fe[[1]])
+    #res.m2 <- ddmodel_binary_simple(mut,e,mr,fe[[1]])
     m1.pvalue[iter] <-  res.m1$pvalue
-    m2.pvalue[iter] <-  res.m2$pvalue
+    #m2.pvalue[iter] <-  res.m2$pvalue
     parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
     a=rbind(a,parameters)
   }
-   return(list("parameters"=a, "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue))
+   return(list("parameters"=a, "m1.pvalue" =m1.pvalue))
   }

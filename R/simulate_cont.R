@@ -176,22 +176,20 @@ simulate_1funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc
     hotpp= min(pp1*exp(hmm[9]),1)
 
     annodata[[t]] <- rbind(sgdata[[t]][functypecode==7], sgdata[[t]][functypecode==8])
-    mut1=matrix(nrow = tnpos1,ncol = Nsample.ps)
-    mut2=matrix(nrow = tnpos2,ncol = Nsample.ps)
-    mut3=matrix(nrow = tnpos1,ncol = Nsample.neu)
-    mut4=matrix(nrow = tnpos2,ncol = Nsample.neu)
 
 
       if (k1>0){
-        mut1[1:k1,]= rsparsematrix(k1,Nsample.ps,nnz = rbinom(1, Nsample.ps * k1, hotpp),rand.x=NULL)
-        mut1[(1+k1):tnpos1,]= rsparsematrix(k2,Nsample.ps,nnz = rbinom(1, Nsample.ps * k2, pp2),rand.x=NULL)
+        mut11= rsparsematrix(k1,Nsample.ps,nnz = rbinom(1, Nsample.ps * k1, hotpp),rand.x=NULL)
+        mut12= rsparsematrix(k2,Nsample.ps,nnz = rbinom(1, Nsample.ps * k2, pp2),rand.x=NULL)
+        mut1=rbind(mut11,mut12)
       }else{
         mut1= rsparsematrix(k2,Nsample.ps,nnz = rbinom(1, Nsample.ps * k2, pp2),rand.x=NULL)
       }
 
       if (k3>0){
-        mut2[1:k3,]= rsparsematrix(k3,Nsample.ps,nnz = rbinom(1, Nsample.ps * k3, hotpp),rand.x=NULL)
-        mut2[(1+k3):tnpos2,]= rsparsematrix(k4,Nsample.ps,nnz = rbinom(1, Nsample.ps * k4, pp3),rand.x=NULL)
+        mut21= rsparsematrix(k3,Nsample.ps,nnz = rbinom(1, Nsample.ps * k3, hotpp),rand.x=NULL)
+        mut22= rsparsematrix(k4,Nsample.ps,nnz = rbinom(1, Nsample.ps * k4, pp3),rand.x=NULL)
+        mut2=rbind(mut21,mut22)
       }else{
         mut2=  rsparsematrix(k4,Nsample.ps,nnz = rbinom(1, Nsample.ps * k4, pp3),rand.x=NULL)
       }

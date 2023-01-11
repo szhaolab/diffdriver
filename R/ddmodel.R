@@ -74,7 +74,8 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt
   zpost <- zpost/rowSums(zpost)
 
   # update beta0
-  beta0.init <- log((nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F]))
+  bi=(nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F])
+  beta0.init <- ifelse( bi>0, log(bi),0)
   res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, ll.n = ll.n, mutidx = mutidx, method = "BFGS", control=list(fnscale=-1))
   beta0 <- res$par
 
