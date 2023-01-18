@@ -33,16 +33,14 @@ power_comparebase <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf0
     funcv <- unlist(lapply(ssgdata, "[[", "functypecode"))
     ef <- simdata$efsize
     fe <- vector("list",4)
-    fe[[1]] <- c(ef$beta_gc[1], ef$beta_gc[1] + ef$beta_gc[2])[as.factor(funcv)]+hotsize
+    fe[[1]] <- c(ef$avbetaf1, ef$avbetaf1 + ef$avbetaf2)[as.factor(funcv)]+hotsize
     fe[[2]] <- c(ef$avbetaf1, ef$avbetaf1 + ef$avbetaf2)[as.factor(funcv)]
-    fe[[3]] <- rep(ef$betaf1f2, length(funcv))
     fe[[4]] <- rep(ef$avbetaf1f2, length(funcv))
     mr <- bmrmtx + ef$betaf0
     if (sum(mut) ==0) {next}
     res.m1 <- ddmodel(mut,e, mr, fe[[4]])
-    #res.m2 <- ddmodel_binary_simple(mut,e,mr,fe[[4]])
+    #res.m1 <- ddmodel_binary_simple(mut,e,mr,fe[[4]])
     m1.pvalue[iter] <-  res.m1$pvalue
-    #m2.pvalue[iter] <-  res.m2$pvalue
     parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
     a=rbind(a,parameters)
   }

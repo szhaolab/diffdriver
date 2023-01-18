@@ -4,7 +4,7 @@ def main():
 	#	dataFileName ='~/SimingLab/library/diffdriver_anno/hmmOGpar_ASHmean.rds'
 		for i1 in ['0','1','1.5']:
 			for i2 in ['0','0.5','1']:
-				for i3 in ['200','400','600','800','1000','1200','1500','2000','2500','3000']:
+				for i3 in ['200','400','600','800','1000','1200']:
 					identifier='pppower_betaf0=' + i1 + '_betagc=' + i2 + '_sample' + i3
 					outfiles =  identifier + '.Rd'
 					RFileName = 'phynotype'+identifier  +'.R' 
