@@ -16,5 +16,5 @@ for (j in 1:Totalnttype){
   dataall[[j]] <- ddmread_j(Afileinfo, j, varlist = c("chrom","start","genename","functypecode","nttypecode"))
   sgdata[[j]] <- dataall[[j]][(functypecode==7 | functypecode==8)& genename == sg]
 }
-
-usethis::use_data(sgdata, overwrite = T)
+print(sgdata[[1]])
+#usethis::use_data(sgdata, overwrite = T)
