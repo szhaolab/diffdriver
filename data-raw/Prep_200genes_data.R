@@ -18,9 +18,13 @@ for (j in 1:Totalnttype){
   dataall[[j]] <- ddmread_j(Afileinfo, j, varlist = c("chrom","start","genename","functypecode","nttypecode"))
   sgdata78[[j]] <- dataall[[j]][(functypecode==7 | functypecode==8)]
 }
-genename200=unique(sgdata78[[1]]$genename)[1:200]
-sgdata200 <- vector("list",200)
-for (i in 1:200){
+genename200=unique(sgdata78[[1]]$genename)[1:250]
+index1=grep(',',genename200)
+index2=grep(';',genename200)
+index=c(index1,index2)
+genename200=genename200[-index]
+sgdata200 <- vector("list",length(genename200))
+for (i in 1:length(genename200)){
 sgdata200[[i]]=vector("list",9)
 for (j in 1:Totalnttype){
 sgdata200[[i]][[j]]=sgdata78[[j]][genename==genename200[i]]
