@@ -3,7 +3,8 @@
 library(devtools)
 load_all("~/SimingLab/jiezhou/diffdriver/")
 #drivermapsdir <- "~/cancer_somatic/maps/"
-drivermapsdir <- "~/SimingLab/library/diffdriver_anno/"
+#drivermapsdir <- "~/SimingLab/library/diffdriver_anno/"
+drivermapsdir <- "~/driverMAPS/data/"
 Totalnttype <- 9
 #Adirbase < paste0(drivermapsdir, "quicktest_data/")
 Adirbase <- drivermapsdir

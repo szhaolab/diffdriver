@@ -21,7 +21,7 @@ def main():
 					#RFile.write('hmm[9]=0\n')
 					RFile.write('Nsim=200\n')
 					RFile.write('set.seed(10)\n')                			
-					RFile.write('simuresbase=power_comparebase(binary=TRUE,Nite=Nsim,sgdata=sgdata,bmrpars=log(BMR),Nsample=i3,betaf0=i1,beta_gc=c(i2,2.2),para=c(0.8,0.2),hotseq=hotseq2,hmm=hmm)\n')
+					RFile.write('simuresbase=power_comparebase(binary=TRUE,Nite=Nsim,sgdata=sgdata,bmrpars=log(BMR),Nsample=i3,betaf0=i1,beta_gc=c(i2,2.2),para=c(0.5,0.5),hotseq=hotseq2,hmm=hmm)\n')
 					RFile.write('save(simuresbase,file="'+outfiles +'")\n')
 					RFile.write('q("no")\n')
 					RFile.close()

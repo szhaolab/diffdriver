@@ -20,7 +20,7 @@ power_compareother <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf
     m5.pvalue <- m6.pvalue <- m7.pvalue <- m8.pvalue <- rep(1,Niter)
   a=c()
   for (iter in 1:Niter) {
-    set.seed(iter)
+
     print(paste0("Iteration: ",  iter))
     simdata <- simulate_1funcv(binary=binary,sgdata, bmrpars, betaf0, Nsample, beta_gc, para,hotseq,hmm)
     ssgdata=simdata$annodata
