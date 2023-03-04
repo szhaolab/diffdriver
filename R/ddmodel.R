@@ -6,10 +6,15 @@
 #' @param e
 #' @return
 #' @export
-get_pi <- function(alpha, e){
-  alpha0 <- alpha[1]
+get_pi <- function(alpha, e){  
+alpha0 <- alpha[1]
   alpha1 <- alpha[2]
-  exp(alpha0 + alpha1 * e)/(1 + exp(alpha0 + alpha1 * e))
+if (alpha0>10 | alpha1>10){
+return(p=1)
+}
+else{
+  p=exp(alpha0 + alpha1 * e)/(1 + exp(alpha0 + alpha1 * e))
+}
 }
 
 #' Title

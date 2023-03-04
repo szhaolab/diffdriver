@@ -15,17 +15,20 @@
 #' @return A list composed of the p-values for 8 models
 #' and the parameters used in these models.
 #' @export
-power_compareother <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf0,beta_gc,hotseq,hmm){
+power_compareother <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf0,beta_gc,hot=0,hmm){
   m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <-
     m5.pvalue <- m6.pvalue <- m7.pvalue <- m8.pvalue <- rep(1,Niter)
   a=c()
+b=c()
   for (iter in 1:Niter) {
-
-    print(paste0("Iteration: ",  iter))
-    simdata <- simulate_1funcv(binary=binary,sgdata, bmrpars, betaf0, Nsample, beta_gc, para,hotseq,hmm)
+    #print(paste0("Iteration: ",  iter))
+    simdata <- simulate_1funcv(binary=binary,sgdata, bmrpars, betaf0, Nsample, beta_gc, para,hot,hmm)
     ssgdata=simdata$annodata
+hotseq <- simdata$hotseq
     mut <- do.call(rbind, simdata$mutlist)
-    bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
+ mutps <- do.call(rbind, simdata$mutpslist) 
+ mutneu <- do.call(rbind, simdata$mutneulist) 
+bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
     hotsize <- do.call(c,simdata$hotsize)
     e <- simdata$pheno
     e_bisect=ifelse(e>mean(e),1,0)
@@ -43,7 +46,9 @@ power_compareother <- function(binary, Niter, sgdata, Nsample,para,bmrpars,betaf
     m4.pvalue[iter] <-  res.m4$pvalue
     parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
     a=rbind(a,parameters)
+nummut=c(sum(mut),sum(mutps),sum(mutneu))
+b=rbind(b,nummut)
   }
    return(list("parameters"=a, "m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue,
-               "m3.pvalue" =m3.pvalue,"m4.pvalue" =m4.pvalue))
+               "m3.pvalue" =m3.pvalue,"m4.pvalue" =m4.pvalue,"#mut"=b))
   }

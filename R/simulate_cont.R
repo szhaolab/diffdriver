@@ -127,7 +127,7 @@ simulate_2funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc
 #' @export
 #'
 #' @examples
-simulate_1funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,hotseq, hmm){
+simulate_1funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,hot=0, hmm){
   if (binary==T){
     Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
     Nsamplen <- Nsample-Nsamplec
@@ -147,17 +147,19 @@ simulate_1funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc
   Nsample.neu <- Nsample - Nsample.ps
 
 
+hotseq=hotspotseq(hmm,sgdata)
+if (hot==0){
+hotseq[,2]=hotseq[,2]*0
+}
 
-
-
+mutpslist <- list()
+mutneulist <- list()
   mutlist <- list()
   countlist <- list()
   annodata <- list()
   bmrmtxlist <- list()
   hotsize <- list()
   for (t in 1:length(sgdata)) {
-
-
     ssgdata=merge(sgdata[[t]],hotseq,by="start")
 
     tnpos1 <- dim(sgdata[[t]][functypecode==7])[1]
@@ -199,7 +201,8 @@ simulate_1funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc
 
  mut.neu= rsparsematrix(tnpos1+tnpos2,Nsample.neu,nnz = rbinom(1, Nsample.neu * (tnpos1+tnpos2), pp1),rand.x=NULL)
 
-
+mutpslist[[t]] <- mut.ps
+mutneulist[[t]] <- mut.neu
     mutlist[[t]] <- cbind(mut.ps,mut.neu)
     countlist[[t]] <- c(tnpos1, tnpos2,sum(mut.ps),sum(mut.neu))
     bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]]))
@@ -212,7 +215,7 @@ simulate_1funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc
   pos1pos2ratio <- colSums(do.call(rbind, countlist))[1]/colSums(do.call(rbind, countlist))[2]
   avbetaf1f2 <- log((pos1pos2ratio*exp(avbetaf1) + exp(avbetaf2))/(pos1pos2ratio+1))
   betaf1f2 <- log((pos1pos2ratio*exp(beta_gc[1]) + exp(beta_gc[2]))/(pos1pos2ratio+1))
-  simdata <- list("mutlist"= mutlist, "hotsize"=hotsize, "pheno" = phenotype, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf1" = avbetaf1, "avbetaf2" = avbetaf2, "avbetaf1f2" = avbetaf1f2,"betaf1f2"=betaf1f2),"nsample"=c(Nsample.ps,Nsample.neu))
+  simdata <- list("mutpslist"=mutpslist,"mutneulist"=mutneulist,"mutlist"= mutlist, "hotseq"=hotseq,"hotsize"=hotsize, "pheno" = phenotype, "annodata" = annodata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avbetaf1" = avbetaf1, "avbetaf2" = avbetaf2, "avbetaf1f2" = avbetaf1f2,"betaf1f2"=betaf1f2),"nsample"=c(Nsample.ps,Nsample.neu))
   return(simdata)
 }
 

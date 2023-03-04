@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
-library("diffdriver")
+library('devtools')
+load_all("../")
 library("logging")
 drivermapsdir<- "/dartfs/rc/lab/S/Szhao/library/diffdriver_anno/"
 outputdir <- "~/temp/"
@@ -13,7 +14,7 @@ phenof =paste0(mutationdir,type,"/",type,"_PRS_46phenotype.txt")
 hotf=paste0(drivermapsdir,"hotspot.txt")
 
 
-logfile <- file(paste0(outputdir,"/", outputname, ".log"), open="wt")
+logfile <- file(paste0(outputdir, outputname, ".log"), open="wt")
 addHandler(writeToFile, file= logfile, level='DEBUG')
 loginfo("Started running diffdriver ...")
 
