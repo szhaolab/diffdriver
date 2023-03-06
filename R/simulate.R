@@ -42,11 +42,8 @@ simulate_1funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc
 		tnpos1 <- dim(ssgdata[functypecode==7])[1]
 		tnpos2 <- dim(ssgdata[functypecode==8])[1]
 		k1=ssgdata[functypecode==7 & seqt==1,.N]
-		k3=ssgdata[functypecode==8 & seqt==0,.N]
-		#seqt=ssgdata[functypecode==7,seqt]
-		#k1=sum(seqt[ssgdata[functypecode==7]]) # number of hot spots with functypecode=7
+		k3=ssgdata[functypecode==8 & seqt==1,.N]
 		k2=tnpos1-k1 
-		#k3=sum(seqt[ssgdata[functypecode==8]]) # number of hot spots with functypecode=8
 		k4=tnpos2-k3
 		pp2=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1]) # mutation rate for functypecode=7
 		pp3=exp(bmrpars[t])*exp(betaf0)*exp(beta_gc[1] + beta_gc[2])  # mutation rate for functypecode=8
