@@ -1,18 +1,4 @@
-#'
-#' @param Argument binary indicate whether the phenetype is binary or not.
-#' @param List sgdata provide the annotation data
-#' @param Vector bmrpars provides nine parameters for each of the ny type.
-#' @param Scalar betaf0 is the gene effect.
-#' @param Scalar Nsample specifies the sample size
-#' @param Two-compoent vector beta_gc specify the effect of functional type 7 and 8.
-#' @param The vector para are the parameters for generating under-selection genes from phenotype.
-#' @param The scalar hot indicate whether there are hotspot effect, in which hot=0 stands for no hotspots while hot=1 hotspots.
-#' @param The vector hmm provides probabilities for generating the hotspot sequence.
-#'
-#' @return A list including the mutation data, phenotype daga, annotation data and true parameters.
-#' @export
-#'
-#' @examples
+
 simulate_1funcv <- function(binary=F,sgdata, bmrpars, betaf0=2, Nsample, beta_gc, para,hot=0, hmm){
 	if (binary==T){ # generate binary phenotype
 		Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
