@@ -5,7 +5,7 @@
 #' @param adirbase The path to annotation files
 #' @param mutf The path to the mutation files
 #' @param BMRlist The parameters from drivermaps
-#' @param k is the number of output signatures 
+#' @param target The target positions where the bmr's are computed
 #'
 #' @return
 #' @export
