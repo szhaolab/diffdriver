@@ -23,8 +23,8 @@ diffdriver_reg <- function(genef, mutf, phenof,j,hotf, drivermapsdir, outputdir 
   funcvmuttype <- "functypecode == 7 | functypecode == 8"
   readinvars <- c("genename", "ssp",bmvars, funcvars) # This is optional, if not given, then will read all columns
   qnvars = c("expr","repl","hic") # all the rest will be normalized, except for nttypecode
-  outputbase <<- paste0(outputdir, "/", outputname)
-  paramdir <- paste0(drivermapsdir, "/param/")
+  outputbase <<- paste0(outputdir, outputname)
+  paramdir <- paste0(drivermapsdir, "param/")
   fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
   allg <- read.table(genef, stringsAsFactors = F)[,1]
