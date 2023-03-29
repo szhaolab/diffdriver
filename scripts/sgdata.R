@@ -58,5 +58,29 @@ for (t in 1:length(matrixlist)){
 
   # row index (ri): chr pos ref alt
   ri <- glmdtall[[2]]
-return (list=c("bmr"=bmr,"fannomatrix"=fanno,"fanno"=ri))
+
+  # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
+  muts0 <- fread(mutf, header = T)
+  if (!grepl('chr', muts0$Chromosome[1], fixed = T)) {muts0$Chromosome <- paste0("chr",muts0$Chromosome)}
+
+  # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
+  canno0 <- as.data.table(fread(phenof, header = "auto"))
+  shared=intersect(muts0$SampleID,canno0$SampleID)
+  index1=which(canno0$SampleID %in% shared)
+  index2=which(muts0$SampleID %in% shared)
+  muts<- muts0[index2,]
+  canno = canno0[index1,]
+
+  # column index (ci): sampleID
+  ci <- canno[,"SampleID"]
+  ci[,"cidx" := 1:dim(canno)[1]]
+
+
+  BMRlist[["nsyn"]] <- sum(canno$Nsyn)
+
+  # split based on gene
+  bmrallg <- split(bmrdt, ri$genename)
+  riallg <- split(ri,ri$genename)
+  fannoallg <- split(fanno,ri$genename)
+return (list("bmrAll"=bmrallg,"fannomatrixAll"=fannoallg,"fannoAll"=riallg))
 }

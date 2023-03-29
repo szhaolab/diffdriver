@@ -2,6 +2,7 @@
 library('devtools')
 load_all("../")
 library("logging")
+source("./scripts/sgdata.R")
 drivermapsdir<- "/dartfs/rc/lab/S/Szhao/library/diffdriver_anno/"
 outputdir <- "~/temp/"
 outputname <- "diffDriver_demo"
@@ -18,7 +19,7 @@ logfile <- file(paste0(outputdir, outputname, ".log"), open="wt")
 addHandler(writeToFile, file= logfile, level='DEBUG')
 loginfo("Started running diffdriver ...")
 
-res <- annoAllg(genef, mutf, phenof,j=6,hotf, drivermapsdir = drivermapsdir,k=6,mode=1, outputdir = outputdir, outputname = outputname)
-	save(res,file="res.Rd")
+res <- annoAllg(genef, mutf, phenof,j=6,hotf, drivermapsdir = drivermapsdir, outputdir = outputdir, outputname = outputname)
+save(res,file="annoAll.Rd")
 
 
