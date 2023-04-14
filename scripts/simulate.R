@@ -29,14 +29,14 @@ simulate_1funcv <- function(binary=F,sgdata, bmrpars,faIndex, betaf0=2, Nsample,
 	  hotseqt=merge(fanno,hotseq,by=start)$hotseq
 		ssgdata=cbind(sgdata[[t]][,c(..faIndex)],hotseqt)
 		pp.neu=rep(exp(bmrpars[t])*exp(betaf0),nrow(ssgdata))
-		fold=exp(as.matrix(ssgdata)%*%betagc+betagf0)
+		fold=exp(as.matrix(ssgdata)%*%betagc)
 		pp.ps=pp.neu*fold
 		foldlist[[t]]=data.table(fold=fold)
 		mutps=replicate(Nsample.ps,rbinom(length(pp.ps),size=1,pp.ps))
 		mutneu=replicate(Nsample.neu,rbinom(length(pp.neu),size=1,pp.neu))
-		mutframe=as(cbind(mutps,mutneu),"sparseMatrix")
+		mutlist[[t]]=as(cbind(mutps,mutneu),"sparseMatrix")
 		countlist[[t]] <- c(sum(mutlist[[t]]))
-		bmrmtxlist[[t]] <- matrix(bmrpars[t], ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]])) # background mutation matrix for nytype=t
+		bmrmtxlist[[t]] <- matrix(exp(bmrpars[t])*exp(betaf0), ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]])) # background mutation matrix for nytype=t
 }
 
 # The forllowings are the ture parameters (???)
