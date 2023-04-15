@@ -1,5 +1,5 @@
 
-simulate_1funcv <- function(binary=F,sgdata, bmrpars,faIndex, betaf0=2, Nsample, beta_gc, para,hot=0, hmm){
+simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample, beta_gc, para,hot=0, hmm){
 	if (binary==T){ # generate binary phenotype
 		Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
 		Nsamplen <- Nsample-Nsamplec
@@ -14,7 +14,7 @@ simulate_1funcv <- function(binary=F,sgdata, bmrpars,faIndex, betaf0=2, Nsample,
 		phenotype=c(phenotype[index],phenotype[-index])# the positive samples are placed in the front.
 		Nsample.ps=sum(ss) # number of positive samples
 		Nsample.neu <- Nsample - Nsample.ps # number of neutral samples
-		hotseq=hotspotseq(hmm,sgdata) # The first column 'start' is the positions, and the second column 'seqt',is the hotspot indicator.
+		hotseq=hotspotseq(hmm,sganno) # The first column 'start' is the positions, and the second column 'seqt',is the hotspot indicator.
 		if (hot==0){
 			hotseq[,2]=0
 			}
@@ -25,9 +25,9 @@ simulate_1funcv <- function(binary=F,sgdata, bmrpars,faIndex, betaf0=2, Nsample,
 	betagc=c(beta_gc,hmm[9])
 	mutRate <- list()
 	foldlist <- list()
-	for (t in 1:length(sgdata)) {
-	  hotseqt=merge(fanno,hotseq,by=start)$hotseq
-		ssgdata=cbind(sgdata[[t]][,c(..faIndex)],hotseqt)
+	for (t in 1:length(sganno)) {
+	  hotseqt=merge(sganno[[t]],hotseq,by=start)$hotseq
+		ssgdata=cbind(sgmatrix[[t]][,names(beta_gc)],hotseqt)
 		pp.neu=rep(exp(bmrpars[t])*exp(betaf0),nrow(ssgdata))
 		fold=exp(as.matrix(ssgdata)%*%betagc)
 		pp.ps=pp.neu*fold
@@ -42,9 +42,9 @@ simulate_1funcv <- function(binary=F,sgdata, bmrpars,faIndex, betaf0=2, Nsample,
 # The forllowings are the ture parameters (???)
 	fold <- do.call(rbind,foldlist)
 	avFe <- rep(log(mean(fold)*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
-	diffFe <-  log(fold*Nsample.ps/Nsample + Nsample.neu/Nsample) 
+	diffFe <-  log(fold*Nsample.ps/Nsample + Nsample.neu/Nsample)
 
-	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold, "annodata" = sgdata, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = beta_gc, "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
+	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold, "annodata" = sganno, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = betagc, "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
 	return(simdata)
 }
 
