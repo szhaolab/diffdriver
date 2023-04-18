@@ -17,7 +17,8 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 		hotseq=hotspotseq(hmm,sganno) # The first column 'start' is the positions, and the second column 'seqt',is the hotspot indicator.
 		if (hot==0){
 			hotseq[,2]=0
-			}
+		}
+
 	mutlist <- list() # a list of nine mutation matrices
 	countlist <- list()
 	annodata <- list() # a list of nine annotation data frames
@@ -26,14 +27,16 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 	mutRate <- list()
 	foldlist <- list()
 	for (t in 1:length(sganno)) {
-	  hotseqt=merge(sganno[[t]],hotseq,by=start)$hotseq
-		ssgdata=cbind(sgmatrix[[t]][,names(beta_gc)],hotseqt)
+	  hotseqt=merge(sganno[[t]],hotseq,by="start")$seqt
+	  selename=names(beta_gc)
+		ssgdata=cbind(sgmatrix[[t]][,..selename],hotseqt)
 		pp.neu=rep(exp(bmrpars[t])*exp(betaf0),nrow(ssgdata))
 		fold=exp(as.matrix(ssgdata)%*%betagc)
 		pp.ps=pp.neu*fold
 		foldlist[[t]]=data.table(fold=fold)
 		mutps=replicate(Nsample.ps,rbinom(length(pp.ps),size=1,pp.ps))
 		mutneu=replicate(Nsample.neu,rbinom(length(pp.neu),size=1,pp.neu))
+
 		mutlist[[t]]=as(cbind(mutps,mutneu),"sparseMatrix")
 		countlist[[t]] <- c(sum(mutlist[[t]]))
 		bmrmtxlist[[t]] <- matrix(exp(bmrpars[t])*exp(betaf0), ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]])) # background mutation matrix for nytype=t
@@ -41,8 +44,8 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 
 # The forllowings are the ture parameters (???)
 	fold <- do.call(rbind,foldlist)
-	avFe <- rep(log(mean(fold)*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
-	diffFe <-  log(fold*Nsample.ps/Nsample + Nsample.neu/Nsample)
+	avFe <- rep(log(mean(fold[[1]])*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
+	diffFe <-  log(fold[[1]]*Nsample.ps/Nsample + Nsample.neu/Nsample)
 
 	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold, "annodata" = sganno, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = betagc, "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
 	return(simdata)

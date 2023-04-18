@@ -1,6 +1,5 @@
 
 power_comparebase <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrpars,betaf0,beta_gc,hot=0,hmm){
-  if (length(faIndex)!=length(beta_gc)){stop("The number of functional annotions does not match!")}
   m1.pvalue <-  rep(1,Niter)
 	a=c()
 	b=c()
