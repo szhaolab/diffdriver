@@ -39,7 +39,7 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 
 		mutlist[[t]]=as(cbind(mutps,mutneu),"sparseMatrix")
 		countlist[[t]] <- c(sum(mutlist[[t]]))
-		bmrmtxlist[[t]] <- matrix(exp(bmrpars[t])*exp(betaf0), ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]])) # background mutation matrix for nytype=t
+		bmrmtxlist[[t]] <- matrix(bmrpars[t]+betaf0, ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]])) # background mutation matrix for nytype=t
 }
 
 # The forllowings are the ture parameters (???)
