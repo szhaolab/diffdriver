@@ -1,7 +1,10 @@
 #' @title gene level multiple linear regression
 #' @export
-mlr <- function(mut, e,covariates=NULL){
+mlr <- function(mut, e,covariates=1){
   # multilinear regression on gene level
+  if(covariates==1){
+    covariates=rep(1,length(e))
+    }
   dstatus <- colSums(mut)
   dstatus[which(dstatus>0)] <- 1
   mlrfit <- lm(e ~ dstatus+covariates)
@@ -12,9 +15,12 @@ mlr <- function(mut, e,covariates=NULL){
 
 #' @title gene level multiple linear regression, correcting for total number of mutations
 #' @export
-mlr.v2 <- function(mut, e, nmut,covariates=NULL){
+mlr.v2 <- function(mut, e, nmut,covariates=1){
   # multilinear regression adjusting for mutation rate
   # nmut is number of mutations per sample
+  if(covariates==1){
+    covariates=rep(1,length(e))
+  }
   dstatus <- colSums(mut)
   dstatus[which(dstatus>0)] <- 1
   #dstatus <- as.factor(dstatus)
@@ -38,8 +44,11 @@ genebinom <- function(mut, e){
 
 #' @title gene level logistic regression
 #' @export
-genelr <- function(mut, e,covariates=NULL){
+genelr <- function(mut, e,covariates=1){
   # logistic regression on gene level
+  if(covariates==1){
+    covariates=rep(1,length(e))
+  }
   dstatus <- colSums(mut)
   dstatus[which(dstatus>0)] <- 1
   glrfit <- glm(e ~ dstatus+covariates, family = binomial(link = "logit"))

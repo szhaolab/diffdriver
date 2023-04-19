@@ -6,7 +6,7 @@
 #' @param e
 #' @return
 #' @export
-get_pi <- function(alpha, e){
+get_pi <- function(alpha, e){  
 alpha0 <- alpha[1]
   alpha1 <- alpha[2]
 if (alpha0>10 | alpha1>10){
@@ -184,7 +184,7 @@ dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mutidx,
 #' @param fe, a vector, increased mutation rate at each position, depending on e (log scale),
 #'  should match the rows of \code{mut} and \code{mr}
 #' @export
-ddmodel <- function(mut, e, mr, fe, covariates=NULL, ...){
+ddmodel <- function(mut, e, mr, fe, ...){
   rate.n <- as.matrix(exp(mr))
   rate.s0 <- as.matrix(exp(fe) * rate.n)
   ll.n <- colSums(log(rate.n * mut +  (1-rate.n) * (1-mut)))

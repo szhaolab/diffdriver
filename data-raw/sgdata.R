@@ -1,14 +1,5 @@
-# TODO: mutation hotspot, quantitative phenotype
-# Notes: syn data prepared from direct join of mutation list to annodata is different from used in driverMAPS BMR estimation: 1. 5% syn are ssp are included. 2. BMR estimation from old driverMAPS run has different annodata. 3. genes without expr/hic/rep were removed in BMR driverMAPS estimation.
-#' @title Run diffDriver given input files
-#' @description This is the function to run diffDriver. We first need to set up: run driverMAPS for groups with potential different BMR, assign BMR labels for each sample. then BMR for each sample will be scaled based on driverMAPS results.
-#' @param genef file for name of genes to be included in the analysis
-#' @param mutf mutation list file, use the driverMAPS mutation input format
-#' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
-#' @param j The index of phenotype
-#' @import Matrix data.table
-#' @export
-diffdriver_reg <- function(genef, mutf, phenof,j,hotf, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
+
+annoAllg <- function(genef, mutf, phenof,j,hotf, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "/nttypeXXX_annodata.txt", sep=""),
@@ -68,7 +59,6 @@ for (t in 1:length(matrixlist)){
   # row index (ri): chr pos ref alt
   ri <- glmdtall[[2]]
 
-
   # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
   muts0 <- fread(mutf, header = T)
   if (!grepl('chr', muts0$Chromosome[1], fixed = T)) {muts0$Chromosome <- paste0("chr",muts0$Chromosome)}
@@ -86,69 +76,11 @@ for (t in 1:length(matrixlist)){
   ci[,"cidx" := 1:dim(canno)[1]]
 
 
-    BMRlist[["nsyn"]] <- sum(canno$Nsyn)
+  BMRlist[["nsyn"]] <- sum(canno$Nsyn)
 
   # split based on gene
   bmrallg <- split(bmrdt, ri$genename)
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
-  # run diffdriver for each gene
-  res <- list()
-  #for (g in names(bmrallg)) {
-    # normalize BMR for each sample
-    bmrsc <- log(canno$Nsyn/BMRlist$nsyn)
-    # bmrmtx is matrix, rows are positions, columns are for each samples
-    #bmrmtx <-sweep(as.matrix(bmrallg[[g]][,canno$BMRlabel,with=F]), 2, bmrsc, "+")
-  #  bmr0g=as.matrix(bmrallg[[g]])
-  #  bmrg=bmr0g[,rep(1,nrow(canno))]
-   # bmrmtx <-sweep(bmrg, 2, bmrsc, "+")
-  #}
-    ## hotspot
-    hotspots=read.table(file = hotf)
-    hmm=readRDS(paste0(drivermapsdir, "hmmOGpar_ASHmean.rds"))
-  for (g in names(bmrallg)) {
-    print(paste0("Start to process gene: ", g))
-    rig <- riallg[[g]]
-    rig$ridx <- 1:dim(rig)[1]
-    muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
-    mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
-    mutmtx= as.matrix(mutmtx)
-
-    hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
-    hotmat=rep(0,nrow(rig))
-    hotmat[hotg$ridx]=1
-    if (sum(mutmtx) ==0) {next}
-
-    # normalize BMR for each sample
-    bmr0g=as.matrix(bmrallg[[g]])
-    bmrg=as.data.table(bmr0g[,rep(1,nrow(canno))])
-    bmrmtx <-as.matrix(sweep(bmrg, 2, bmrsc, "+"))
-if (any(is.na(bmrmtx))) {stop("bmr missing")}
-    betaf <- Fpars[[g]][names(Fpars[[g]]) != "beta_f0"]
-    betaf0 <- Fpars[[g]]["beta_f0"]
-    if (is.null(betaf)){
-      betaf <-  Fpars[["TP53"]][names(Fpars[["TP53"]]) != "beta_f0"]
-      betaf0 <-  Fpars[["TP53"]]["beta_f0"]
-    } # if OG/TSG unknown, use TSG parameters.
-    ganno <- fannoallg[[g]]
-    fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
-
-    resg <- list()
-    e=canno[[j]]
-    resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1])
-    resg[["mlr"]] <- mlr(mutmtx, e)
-    resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
-   resg[["fisher"]] <- genefisher(mutmtx, e)
-#    resg[["binom"]] <- genebinom(mutmtx, e)
-#    resg[["lr"]] <- genelr(mutmtx, e)
-    res[[g]] <- resg
-
-    save(canno, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,".", g, ".Rd")))
-    #setEPS()
-    #postscript(file=paste0(outputbase,".", g, "mut_status.eps"), width=9, height=4)
-    #plot_mut(mutmtx, canno, bmrmtx, ganno)
-    #dev.off()
-  }
-
-  return(res)
+return (list("bmrAll"=bmrallg,"fannomatrixAll"=fannoallg,"fannoAll"=riallg))
 }
