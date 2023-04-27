@@ -11,7 +11,7 @@
 diffdriver_reg <- function(genef, mutf, phenof,j,hotf, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
-  afileinfo <- list(file = paste(adirbase, "/nttypeXXX_annodata.txt", sep=""),
+  afileinfo <- list(file = paste(adirbase, "nttypeXXX_annodata.txt", sep=""),
                     header = c("chrom","start","end","ref","alt","genename","functypecode","nttypecode","expr","repl","hic","mycons","sift","phylop100","MA","ssp","wggerp"),
                     coltype = c("character","numeric","numeric","character","character","character","character","factor","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
   totalnttype <<- 9
@@ -23,8 +23,8 @@ diffdriver_reg <- function(genef, mutf, phenof,j,hotf, drivermapsdir, outputdir 
   funcvmuttype <- "functypecode == 7 | functypecode == 8"
   readinvars <- c("genename", "ssp",bmvars, funcvars) # This is optional, if not given, then will read all columns
   qnvars = c("expr","repl","hic") # all the rest will be normalized, except for nttypecode
-  outputbase <<- paste0(outputdir, outputname)
-  paramdir <- paste0(drivermapsdir, "param/")
+  outputbase <<- paste0(outputdir, "/", outputname)
+  paramdir <- paste0(drivermapsdir, "/param/")
   fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
   allg <- read.table(genef, stringsAsFactors = F)[,1]
@@ -56,6 +56,7 @@ for (t in 1:length(matrixlist)){
     y_g_s[is.na(y_g_s)] <- 0
     mu_g_s <- BMRlist$Mu_g_s_all[allg][,1:2, with=F]
     mu_g_s[is.na(mu_g_s)] <- 0
+
     glmdtall <- matrixlistToGLM(matrixlisttemp, chrposmatrixlisttemp, BMRlist$BMpars, mu_g_s, y_g_s, fixpars=NULL)
     #glmdtall <- matrixlistToGLM(matrixlist, chrposmatrixlist, BMRlist[[label]]$BMpars, mu_g_s, y_g_s, fixpars=NULL)
     bmrdt[,eval(type):= glmdtall[[1]]$baseline]
@@ -92,6 +93,9 @@ for (t in 1:length(matrixlist)){
   bmrallg <- split(bmrdt, ri$genename)
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
+  #browser()
+#save(fannoallg,file="~/fannoallg.Rd")
+#save(riallg,file="~/riallg.Rd")
   # run diffdriver for each gene
   res <- list()
   #for (g in names(bmrallg)) {
@@ -131,22 +135,29 @@ if (any(is.na(bmrmtx))) {stop("bmr missing")}
       betaf0 <-  Fpars[["TP53"]]["beta_f0"]
     } # if OG/TSG unknown, use TSG parameters.
     ganno <- fannoallg[[g]]
-    fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
+    fe1 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
+ fe2 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
+fe <- if(g %in% og[,1]){
+	fe=fe1
+	}else{
+	fe=fe2
+	}
 
     resg <- list()
     e=canno[[j]]
+    phename=colnames(canno)[j]
     resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1])
     resg[["mlr"]] <- mlr(mutmtx, e)
     resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
-   resg[["fisher"]] <- genefisher(mutmtx, e)
-#    resg[["binom"]] <- genebinom(mutmtx, e)
-#    resg[["lr"]] <- genelr(mutmtx, e)
+    e_binary=ifelse(e>mean(e),1,0)
+   resg[["fisher"]] <- genefisher(mutmtx, e_binary)
+    resg[["binom"]] <- genebinom(mutmtx, e_binary)
+    resg[["lr"]] <- genelr(mutmtx, e_binary)
     res[[g]] <- resg
-
-    save(canno, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,".", g, ".Rd")))
+    save(mutmtx,canno,bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,"_",phename,"_", g, ".Rd")))
     #setEPS()
-    #postscript(file=paste0(outputbase,".", g, "mut_status.eps"), width=9, height=4)
-    #plot_mut(mutmtx, canno, bmrmtx, ganno)
+    #postscript(file=paste0(outputbase,".",phename,".", g, "mut_status.eps"), width=9, height=4)
+    #plot_mut(mutmtx, canno,j, bmrmtx, ganno)
     #dev.off()
   }
 
