@@ -159,7 +159,7 @@ rm(ri,mutation,fanno)
     #resg[["lr"]] <- genelr(mutmtx, e)
     res[[g]] <- resg
 
-    save(canno,fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,".", g, ".Rd")))
+    save(mutmtx,bmrmtx[[g]],canno,fe, ganno, betaf, betaf0, file=paste0(paste0(outputbase,".", g, ".Rd")))
     #setEPS()
     #postscript(file=paste0(outputbase,".", g, "mut_status.eps"), width=9, height=4)
     #plot_mut(mutmtx, canno, bmrmtx, ganno)
