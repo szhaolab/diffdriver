@@ -78,8 +78,8 @@ diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputd
   lambda_pe=bmrsig$lambda
   ll=bmrsig$ll
   ff=bmrsig$ff
-  save(ll,file=paste0(outputbase,"_loadings.Rd"))
-  save(ff,file=paste0(outputbase,"_factors.Rd"))
+  #save(ll,file=paste0(outputbase,"_loadings.Rd"))
+  #save(ff,file=paste0(outputbase,"_factors.Rd"))
 ri=plyr::join(ri,lambda_pe)
 index=unique(which(is.na(ri),arr.ind = T)[,1])
 if (length(index)>0){
@@ -113,19 +113,19 @@ numerator=exp(fanno$expr*coe[1]+fanno$repl*coe[2]+fanno$hic*coe[3])
 for (i in 1:length(shared)) {
   print(paste("bmr for sample",i,sep=" "))
   mui=(ri$lambda)*numerator*(bmrsig$sampelsig[i,ri$nttypecode])/bmrsig$normconstant
-  mutation=cbind(mutation,mui)
+  mutation=cbind(mutation,log(mui))
     }
 if (any(is.na(mutation))) {stop("bmr missing")}
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
-bmrmtx <- split(mutation,ri$genename)
+bmrallg <- split(mutation,ri$genename)
 rm(ri,mutation,fanno)
   # run diffdriver for each gene
   res <- list()
   ## hotspot
   hotspots=read.table(file = hotf)
   hmm=readRDS(paste0(drivermapsdir, "hmmOGpar_ASHmean.rds"))
-  for (g in names(bmrmtx)) {
+  for (g in names(bmrallg)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
@@ -137,8 +137,10 @@ rm(ri,mutation,fanno)
     hotmat[hotg$ridx]=1
     if (sum(mutmtx) ==0) {
       next
-      }
+    }
 
+
+    bmrmtx= bmrallg[[g]]
 
     betaf <- Fpars[[g]][names(Fpars[[g]]) != "beta_f0"]
     betaf0 <- Fpars[[g]]["beta_f0"]
@@ -147,22 +149,32 @@ rm(ri,mutation,fanno)
       betaf0 <-  Fpars[["TP53"]]["beta_f0"]
     } # if OG/TSG unknown, use TSG parameters.
     ganno <- fannoallg[[g]]
-    fe <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf+ hotmat*hmm[9] + betaf0
+   fe1 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
+  fe2 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
+ fe <- if(g %in% og[,1]){
+         fe=fe1
+         }else{
+         fe=fe2                                                                                                                                                                }
+
+
+
 
     resg <- list()
     e=canno[[j]]
-    resg <- ddmodel(mutmtx, e, bmrmtx[[g]], fe[,1])
-    resg[["mlr"]] <- mlr(mutmtx, e)
-    resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
-    resg[["fisher"]] <- genefisher(mutmtx, e)
-    #resg[["binom"]] <- genebinom(mutmtx, e)
-    #resg[["lr"]] <- genelr(mutmtx, e)
+phename=colnames(canno)[j]
+    #resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1])
+    #resg[["mlr"]] <- mlr(mutmtx, e)
+    #resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
+    e_binary=ifelse(e>mean(e),1,0)
+    #resg[["fisher"]] <- genefisher(mutmtx, e_binary)
+    #resg[["binom"]] <- genebinom(mutmtx, e_binary)
+    #resg[["lr"]] <- genelr(mutmtx, e_binary)
     res[[g]] <- resg
 
-    save(canno,fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,".", g, ".Rd")))
+    save(mutmtx,bmrmtx,canno,fe, ganno, betaf, betaf0, file=paste0(paste0(outputbase,"_",phename,"_", g, ".Rd")))
     #setEPS()
-    #postscript(file=paste0(outputbase,".", g, "mut_status.eps"), width=9, height=4)
-    #plot_mut(mutmtx, canno, bmrmtx, ganno)
+    #postscript(file=paste0(outputbase,".",phename,".", g, "mut_status.eps"), width=9, height=4)
+    #plot_mut(mutmtx, canno,j, bmrmtx, ganno)
     #dev.off()
   }
 
