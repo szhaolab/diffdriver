@@ -5,6 +5,7 @@ power_compareother <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrp
 	b=c()
 
 	for (iter in 1:Niter) {
+	  print(iter)
 		simdata <- simulate_1funcv(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,hot,hmm)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
@@ -12,6 +13,7 @@ power_compareother <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrp
 		e <- simdata$pheno
 		e_bisect=ifelse(e>mean(e),1,0)
 		ef <- simdata$efsize
+		print(sum(mut))
 		if (sum(mut) ==0) {next}
 		res.m1 <- mlr(mut,e)
 		res.m2 <- genefisher(mut,e_bisect)

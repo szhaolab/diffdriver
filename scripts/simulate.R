@@ -32,7 +32,7 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 		ssgdata=cbind(sgmatrix[[t]][,..selename],hotseqt)
 		pp.neu=rep(exp(bmrpars[t])*exp(betaf0),nrow(ssgdata))
 		fold=exp(as.matrix(ssgdata)%*%betagc)
-		pp.ps=pp.neu*fold
+		pp.ps=ifelse(pp.neu*fold<1,pp.neu*fold,1)
 		foldlist[[t]]=data.table(fold=fold)
 		mutps=replicate(Nsample.ps,rbinom(length(pp.ps),size=1,pp.ps))
 		mutneu=replicate(Nsample.neu,rbinom(length(pp.neu),size=1,pp.neu))
