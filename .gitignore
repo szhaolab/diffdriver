@@ -14,5 +14,4 @@ code/.*swp
 */*.rds
 */*.bk
 *.bk
-inst/doc
-scripts/
+inst/doc/
