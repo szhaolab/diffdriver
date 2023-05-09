@@ -30,8 +30,12 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 	  hotseqt=merge(sganno[[t]],hotseq,by="start")$seqt
 	  selename=names(beta_gc)
 		ssgdata=cbind(sgmatrix[[t]][,..selename],hotseqt)
+		hotindex=which(hotseqt==1)
 		pp.neu=rep(exp(bmrpars[t])*exp(betaf0),nrow(ssgdata))
 		fold=exp(as.matrix(ssgdata)%*%betagc)
+		fold[hotindex]=exp(hmm[9])
+		if (any(2*fold<1)){stop("Error:inappropriate parameter settings!")}
+		fold=2*fold-1
 		pp.ps=ifelse(pp.neu*fold<1,pp.neu*fold,1)
 		foldlist[[t]]=data.table(fold=fold)
 		mutps=replicate(Nsample.ps,rbinom(length(pp.ps),size=1,pp.ps))
