@@ -64,7 +64,7 @@ diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputd
 
 
 
-
+browser()
     bmrsig <- matrixlistToBMR(adirbase, mutf,BMRlist,k=k)
 
 

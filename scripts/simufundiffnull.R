@@ -1,5 +1,5 @@
 
-power_comparediff <- function(binary, Niter, sganno,sgmatrix,Nsample,para,bmrpars,betaf0,beta_gc,hot=0,hmm){
+power_comparediffnull <- function(binary, Niter, sganno,sgmatrix,Nsample,para,bmrpars,betaf0,beta_gc,hot=0,hmm){
   m1.pvalue <- rep(1,Niter)
 	a=c()
 	b=c()
@@ -13,11 +13,12 @@ power_comparediff <- function(binary, Niter, sganno,sgmatrix,Nsample,para,bmrpar
 		ef <- simdata$efsize
 		fe <- ef$diffFe
 		mr <- bmrmtx
+		momr <- mr*(fe%*%t(rep(1,ncol(mr))))
 		if (sum(mut) ==0) {next}
 		if (binary == F){
-		res.m1 <- ddmodel(mut,e, mr, fe)
+		res.m1 <- ddmodel(mut,e,momr, fe)
 		}else{
-		res.m1 <- ddmodel_binary_simple(mut,e,mr,fe)
+		res.m1 <- ddmodel_binary_simple(mut,e,momr,fe)
 		}
 		m1.pvalue[iter] <-  res.m1$pvalue
 		parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)

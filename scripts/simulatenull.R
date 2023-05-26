@@ -1,14 +1,20 @@
 
-simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample, beta_gc, para,hot=0, hmm){
+simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample, beta_gc, para,bpara,tao,hot=0, hmm){
 	if (binary==T){ # generate binary phenotype
 		Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
 		Nsamplen <- Nsample-Nsamplec
 		phenotype <- c(rep(1,Nsamplec),rep(0,Nsamplen))
 		ss=ifelse(phenotype==1,sample(c(0,1),size=Nsamplec,replace=T,prob = c(1-para[1],para[1])),sample(c(0,1),size=Nsamplen,replace=T,prob = c(1-para[2],para[2])))
+	
 		}else{
 		phenotype=rnorm(Nsample,mean = para[1],sd=para[2])
 		pp=exp(para[3]+para[4]*phenotype)/(1+exp(para[3]+para[4]*phenotype))
+		bpp=exp(bpara[3]+bpara[4]*phenotype)/(1+exp(bpara[3]+bpara[4]*phenotype))
 		ss=ifelse(runif(Nsample)-pp<0,1,0) # generate positive samples
+		bb=ifelse(runif(Nsample)-pp<0,1,0) # generate positive samples
+		Nsamplec <- sum(bb)
+		Nsamplen <- Nsample-Nsamplec
+		psudophenotype=c(rep(1,Nsamplec),rep(0,Nsamplen))
 		}
 		index=which(ss==1)
 		phenotype=c(phenotype[index],phenotype[-index])# the positive samples are placed in the front.

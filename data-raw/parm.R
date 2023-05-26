@@ -1,2 +1,6 @@
 load('parmASHmean.Rdata')
 usethis::use_data(parmASHmean,overwrite=T)
+load('~/SimingLab/jiezhou/diffdriver/data-raw/ff.Rd')
+usethis::use_data(ff,overwrite = T)
+load('~/SimingLab/jiezhou/diffdriver/data-raw/ll.Rd')
+usethis::use_data(ll,overwrite = T)
