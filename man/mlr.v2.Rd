@@ -4,7 +4,7 @@
 \alias{mlr.v2}
 \title{gene level multiple linear regression, correcting for total number of mutations}
 \usage{
-mlr.v2(mut, e, nmut)
+mlr.v2(mut, e, nmut, covariates = 1)
 }
 \description{
 gene level multiple linear regression, correcting for total number of mutations

@@ -12,6 +12,8 @@ dd_squarEM(
   ll.n,
   mutidx,
   type = c("null", "alt"),
+  mut,
+  e,
   maxit = 100,
   tol = 0.001
 )

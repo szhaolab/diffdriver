@@ -4,7 +4,7 @@
 \alias{dd_EM_update}
 \title{Title}
 \usage{
-dd_EM_update(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"))
+dd_EM_update(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"), mut, e)
 }
 \arguments{
 \item{type}{}
