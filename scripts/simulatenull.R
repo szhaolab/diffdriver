@@ -56,8 +56,8 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 		fold[hotindex]=exp(hmm[9])
 		if (any(2*fold<1)){stop("Error:inappropriate parameter settings!")}
 		fold=2*fold-1
-		pp.ps0=ifelse(pp.neu0*fold<1,pp.neu0*fold,0.95)
-		pp.ps1=ifelse(pp.neu1*fold<1,pp.neu1*fold,0.95)
+		pp.ps0=ifelse(pp.neu0*fold<1,pp.neu0*fold,0.99)
+		pp.ps1=ifelse(pp.neu1*fold<1,pp.neu1*fold,0.99)
 		foldlist[[t]]=data.table(fold=fold)
 		mutps1=replicate(Nsample.ps1,rbinom(length(pp.ps1),size=1,pp.ps1))
 		mutps0=replicate(Nsample.ps0,rbinom(length(pp.ps0),size=1,pp.ps0))
@@ -70,7 +70,8 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 		mutlist[[t]]=as(cbind(mutps1,mutps0,mutneu1,mutneu0),"sparseMatrix")
 		}
 		countlist[[t]] <- c(sum(mutlist[[t]]))
-		bmrmtxlist[[t]] <- matrix(bmrpars[t]+betaf0, ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]])) # background mutation matrix for nytype=t
+		bmrmtxlist[[t]] <-cbind(matrix(bmrpars[t]+betaf0+log(tau), ncol = Nsample.ps, nrow = nrow(mutlist[[t]])),
+					matrix(bmrpars[t]+betaf0, ncol = Nsample.neu, nrow = nrow(mutlist[[t]])) )# background mutation matrix for nytype=t
 }
 
 # The forllowings are the ture parameters (???)
