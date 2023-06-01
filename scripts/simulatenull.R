@@ -45,6 +45,7 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 	betagc=c(beta_gc,hmm[9])
 	mutRate <- list()
 	foldlist <- list()
+	bmrfold=ifelse(phenotype==0,1,tau)
 	for (t in 1:length(sganno)) {
 	  hotseqt=merge(sganno[[t]],hotseq,by="start")$seqt
 	  selename=names(beta_gc)
@@ -70,8 +71,13 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 		mutlist[[t]]=as(cbind(mutps1,mutps0,mutneu1,mutneu0),"sparseMatrix")
 		}
 		countlist[[t]] <- c(sum(mutlist[[t]]))
-		bmrmtxlist[[t]] <-cbind(matrix(bmrpars[t]+betaf0+log(tau), ncol = Nsample.ps, nrow = nrow(mutlist[[t]])),
-					matrix(bmrpars[t]+betaf0, ncol = Nsample.neu, nrow = nrow(mutlist[[t]])) )# background mutation matrix for nytype=t
+		bmrt=matrix(bmrpars[t]+betaf0, ncol = Nsample, nrow = nrow(mutlist[[t]]))
+		bmrmtxlist[[t]] <- bmrt+log(bmrfold[col(bmrt)])
+	#	bmrmtxlist[[t]] <-cbind(matrix(bmrpars[t]+betaf0+log(tau), ncol = Nsample.ps1, nrow = nrow(mutlist[[t]])),
+	#				matrix(bmrpars[t]+betaf0, ncol = Nsample.ps0, nrow = nrow(mutlist[[t]])),
+	#				matrix(bmrpars[t]+betaf0+log(tau), ncol = Nsample.neu1, nrow = nrow(mutlist[[t]])),
+	#				matrix(bmrpars[t]+betaf0, ncol = Nsample.neu0, nrow = nrow(mutlist[[t]]))	)# background mutation matrix for nytype=t
+
 }
 
 # The forllowings are the ture parameters (???)
@@ -79,7 +85,7 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 	avFe <- rep(log(mean(fold[[1]])*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
 	diffFe <-  log(fold[[1]]*Nsample.ps/Nsample + Nsample.neu/Nsample)
 
-	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold, "annodata" = sganno, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = betagc, "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
+	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold,"bmrfold"=bmrfold, "annodata" = sganno, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = betagc, "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
 	return(simdata)
 }
 

@@ -9,6 +9,7 @@ power_compareother <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bpar
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
+		bmrfold <- simdata$bmrfold
 		e <- simdata$pheno
 		e_bisect=ifelse(e>mean(e),1,0)
 		ef <- simdata$efsize
@@ -16,7 +17,7 @@ power_compareother <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bpar
 		res.m1 <- mlr(mut,e)
 		res.m2 <- genefisher(mut,e_bisect)
 		res.m3 <- genebinom(mut,e_bisect)
-		res.m4 <- genelr(mut,e_bisect)
+		res.m4 <- genelr(mut,e_bisect,covariate= bmrfold)
 		m1.pvalue[iter] <-  res.m1$pvalue
 		m2.pvalue[iter] <-  res.m2$pvalue
 		m3.pvalue[iter] <-  res.m3$pvalue
