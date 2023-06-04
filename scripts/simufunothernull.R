@@ -1,11 +1,11 @@
-power_compareother <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bpara=c(0,3),tau=1,bmrpars,betaf0,beta_gc,hot=0,hmm){
+power_compareother <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bpara=c(0,3),tau=1,rho,bmrpars,betaf0,beta_gc,hot=0,hmm){
 
   m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <- rep(1,Niter)
 	a=c()
 	b=c()
 
 	for (iter in 1:Niter) {
-		simdata <- simulate_1funcv(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,bpara,tau,hot,hmm)
+		simdata <- simulate_1funcv(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,bpara,tau,rho,hot,hmm)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
