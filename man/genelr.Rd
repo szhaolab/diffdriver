@@ -4,7 +4,7 @@
 \alias{genelr}
 \title{gene level logistic regression}
 \usage{
-genelr(mut, e, covariates = 1)
+genelr(mut, e, covariates = NULL)
 }
 \description{
 gene level logistic regression

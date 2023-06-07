@@ -1,5 +1,5 @@
 
-simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample, beta_gc, para,bpara,tau,hot=0, hmm){
+simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample, beta_gc, para,rho,tau,hot=0, hmm){
 	if (binary==T){ # generate binary phenotype
 		Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
 		Nsamplen <- Nsample-Nsamplec
@@ -10,11 +10,18 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
     Nsample.neu=Nsample-Nsample.ps
 		#index=which(ss==1)
 		#u=rnorm(n=length(phenotype),sd=sqrt((1/rho^2-1)*var(phenotype)))+phenotype
-		#u1=u/(sum(u^2))^0.5
-		#bmrfold=exp(u1*tau)
-		bb=ifelse(phenotype==1,sample(c(0,1),size=Nsamplec,replace=T,prob = c(1-bpara[1],bpara[1])),sample(c(0,1),size=Nsamplen,replace=T,prob = c(1-bpara[2],bpara[2])))
-		bmrfold=ifelse(bb==0,1,bb*tau)
-		phenotype=c(phenotype[index],phenotype[-index])# the positive samples are placed in the front.
+		#u1=u/sd(u)
+		#u1=u1-min(u1)+1
+    #bmrfold=u1*tau
+    complement <- function(y, rho, x) {
+      if (missing(x)) x <-runif(length(y), min=0, max =1) # Optional: supply a default if `x` is not given
+      y.perp <- residuals(lm(x ~ y))
+      rho * sd(y.perp) * y + y.perp * sd(y) * sqrt(1 - rho^2)
+    }
+    b=complement(phenotype,rho)
+    b.new=b-min(b)+0.1
+		bmrfold= (b.new/mean(b.new))*tau
+    #bmrfold=rep(1,length(b.new))*exp(tau)
 		}else{
 		phenotype=rnorm(Nsample,mean = para[1],sd=para[2])
 		pp=exp(para[3]+para[4]*phenotype)/(1+exp(para[3]+para[4]*phenotype))
@@ -38,7 +45,7 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 		if (hot==0){
 			hotseq[,2]=0
 		}
-#browser()
+
 	mutlist <- list() # a list of nine mutation matrices
 	countlist <- list()
 	annodata <- list() # a list of nine annotation data frames
@@ -58,11 +65,10 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 		fold=2*fold-1
 		F=cbind(fold,1)%*%selection
 		pp.total=ifelse(F*pp.neu<1,F*pp.neu,0.99)
-		foldlist[[t]]=data.table(fold=fold)
+		foldlist[[t]]=data.table::data.table(fold=fold)
 		if (nrow(pp.total)>1) {
 		mutlist[[t]]=as(apply(pp.total,2,rbinom,n=nrow(pp.total),size=1),"sparseMatrix")
 		}else{
-
 		  mutlist[[t]]=as(t(rbinom(length(pp.total),size=1,pp.total)),"sparseMatrix")
 		  }
 
