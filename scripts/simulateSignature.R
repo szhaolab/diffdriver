@@ -8,8 +8,8 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc, para,hot
 		selection=rbind(ss,1-ss)
 		Nsample.ps=sum(ss)
     Nsample.neu=Nsample-Nsample.ps
-
 		bmrfold= bmrSignature(e=phenotype,signatures=signatures,rho=rho,sc=sc)
+
 		}else{
 		phenotype=rnorm(Nsample,mean = para[1],sd=para[2])
 		pp=exp(para[3]+para[4]*phenotype)/(1+exp(para[3]+para[4]*phenotype))
@@ -41,10 +41,10 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc, para,hot
 	betagc=c(beta_gc,hmm[9])
 	mutRate <- list()
 	foldlist <- list()
-	#browser()
+	size=c()
 	for (t in 1:length(sganno)) {
-
-	  hotseqt= hotspot1sig[[t]]
+size=c(size,nrow(sganno[[t]]))
+	  hotseqt= hotspot2sig[[t]]
 	  selename=names(beta_gc)
 		ssgdata=cbind(sgmatrix[[t]][,..selename],hotseqt)
 		hotindex=which(hotseqt==1)
@@ -74,8 +74,8 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc, para,hot
 	fold <- do.call(rbind,foldlist)
 	avFe <- rep(log(mean(fold[[1]])*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
 	diffFe <-  log(fold[[1]]*Nsample.ps/Nsample + Nsample.neu/Nsample)
-
-	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold,"bmrfold"=bmrfold, "annodata" = sganno, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list(  "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
+ covariate=apply(bmrfold, 2, "%*%",size)
+	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold,"covariate"=covariate,"bmrfold"=bmrfold, "annodata" = sganno, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list(  "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
 	return(simdata)
 }
 
