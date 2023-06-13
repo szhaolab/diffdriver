@@ -7,9 +7,11 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc, para,hot
 		ss=ifelse(phenotype==1,sample(c(0,1),size=Nsamplec,replace=T,prob = c(1-para[1],para[1])),sample(c(0,1),size=Nsamplen,replace=T,prob = c(1-para[2],para[2])))
 		selection=rbind(ss,1-ss)
 		Nsample.ps=sum(ss)
-    Nsample.neu=Nsample-Nsample.ps
-		bmrfold= bmrSignature(e=phenotype,signatures=signatures,rho=rho,sc=sc)
-
+   	Nsample.neu=Nsample-Nsample.ps
+   	browser()
+   	sig1=merge(signatures,codeSignature)
+   	sig2=sig1[order(sig1$number),c(3,2,4,5)]
+		bmrfold= bmrSignature(e=phenotype,signatures=signatures,rho=rho,sc=sc)# generate the 96 times n bmr matrix
 		}else{
 		phenotype=rnorm(Nsample,mean = para[1],sd=para[2])
 		pp=exp(para[3]+para[4]*phenotype)/(1+exp(para[3]+para[4]*phenotype))
@@ -43,9 +45,9 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc, para,hot
 	foldlist <- list()
 	size=c()
 	for (t in 1:length(sganno)) {
-size=c(size,nrow(sganno[[t]]))
-	  hotseqt= hotspot2sig[[t]]
-	  selename=names(beta_gc)
+	  	size=c(size,nrow(sganno[[t]]))
+	  	hotseqt= hotspot2sig[[t]]
+	  	selename=names(beta_gc)
 		ssgdata=cbind(sgmatrix[[t]][,..selename],hotseqt)
 		hotindex=which(hotseqt==1)
 		pp.neu=matrix(rep(1,nrow(ssgdata)),ncol=1)%x%matrix(bmrfold[t,],nrow=1)
@@ -61,12 +63,6 @@ size=c(size,nrow(sganno[[t]]))
 		}else{
 		  mutlist[[t]]=as(t(rbinom(length(pp.total),size=1,pp.total)),"sparseMatrix")
 		  }
-
-		# if (!is.matrix(mutps)){
-		# mutlist[[t]]=as(cbind(t(mutps),t(mutneu)),"sparseMatrix")
-		# }else{
-		# mutlist[[t]]=as(cbind(mutps,mutneu),"sparseMatrix")
-		# }
 		countlist[[t]] <- c(sum(mutlist[[t]]))
 		bmrmtxlist[[t]] <- log(pp.neu)
 }
@@ -74,7 +70,7 @@ size=c(size,nrow(sganno[[t]]))
 	fold <- do.call(rbind,foldlist)
 	avFe <- rep(log(mean(fold[[1]])*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
 	diffFe <-  log(fold[[1]]*Nsample.ps/Nsample + Nsample.neu/Nsample)
- covariate=apply(bmrfold, 2, "%*%",size)
+ 	covariate=apply(bmrfold, 2, "%*%",size)
 	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold,"covariate"=covariate,"bmrfold"=bmrfold, "annodata" = sganno, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list(  "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
 	return(simdata)
 }

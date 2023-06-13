@@ -3,7 +3,7 @@
 #' @param e phenotype vector
 #' @param sigatures A 96 times m matrix M. Each column of it is a signaturee.
 #' @param rho Correlation between e and the loadings of first signature.
-#' @param ss Scale parameter
+#' @param s Scale parameter
 #' @return matrix bmr
 #' @export
 #'
