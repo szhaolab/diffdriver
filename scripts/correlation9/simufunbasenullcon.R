@@ -1,5 +1,5 @@
 
-power_comparediff <- function(binary, Niter, sganno,sgmatrix,Nsample,para,rho,tau=1,bmrpars,betaf0,beta_gc,hot=0,hmm){
+power_comparebase <- function(binary, Niter, sganno,sgmatrix,Nsample,para,rho,tau=1,bmrpars,betaf0,beta_gc,hot=0,hmm){
   m1.pvalue <- rep(1,Niter)
 	a=c()
 	b=c()

@@ -16,7 +16,7 @@ bmrSignature=function(e,signatures,rho,sc=1,adjustment=F){
      } # weight based on the number of silent mutations
 nn=length(e) ## sample size
 if (nrow(signatures)!=96) {stop("Signature length should be 96!")}
-m=ncol(signatures)-1 ## number of signatures
+m=ncol(signatures) ## number of signatures
 cc= matrix(runif(m*nn),nrow = m, ncol = nn) ## loading matrix
 # for (i in 1:nrow(cc)) {
 #   cc[i,]=cc[i,]/mean(cc[i,])
@@ -29,7 +29,7 @@ complement <- function(y, rho, x) {
 b=complement(e,rho)
 b.new=b-min(b)+0.1
 cc[1,]=b.new/mean(b.new)
-yy=as.matrix(signatures[,-1])%*%as.matrix(cc)
+yy=as.matrix(signatures)%*%as.matrix(cc)
 bmr=diag(1/w)%*%yy/sc
-return(bmr)
+return(list("bmr"=bmr,"loadings"=cc,"signatures"=signatures))
 }

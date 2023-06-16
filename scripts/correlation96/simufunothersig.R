@@ -1,6 +1,6 @@
 power_compareother <- function(binary, Niter, sganno,sgmatrix, Nsample,para,rho,signatures,beta_gc,hot=0,hmm,sc){
 
-  m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue <- rep(1,Niter)
+m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue<- m5.pvalue <- rep(1,Niter)
 	a=c()
 	b=c()
 
@@ -18,18 +18,20 @@ power_compareother <- function(binary, Niter, sganno,sgmatrix, Nsample,para,rho,
 		res.m1 <- mlr(mut,e)
 		res.m2 <- genefisher(mut,e_bisect)
 		res.m3 <- genebinom(mut,e_bisect)
-		res.m4 <- genelr(mut,e_bisect,covariate= covariate)
+		res.m4 <- genelr(mut,e_bisect,covariates= covariate)
+		res.m5 <- genelr(mut,e_bisect,covariates=rep(1,length(covariate)))
 		m1.pvalue[iter] <-  res.m1$pvalue
 		m2.pvalue[iter] <-  res.m2$pvalue
 		m3.pvalue[iter] <-  res.m3$pvalue
 		m4.pvalue[iter] <-  res.m4$pvalue
+		m5.pvalue[iter] <-  res.m5$pvalue
 		parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
 		a=rbind(a,parameters)
 		nummut=sum(mut)
 		b=c(b,nummut)
 		}
 		return(list("m1.pvalue" =m1.pvalue, "m2.pvalue" =m2.pvalue,
-               "m3.pvalue" =m3.pvalue,"m4.pvalue" =m4.pvalue,"#mut"=b))
+               "m3.pvalue" =m3.pvalue,"m4.pvalue" =m4.pvalue,"m5.pvalue"=m5.pvalue,"#mut"=b))
 		}
 
 

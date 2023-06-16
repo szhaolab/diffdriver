@@ -23,3 +23,8 @@ res <- diffdriver(genef, mutf, phenof,j=6,hotf, drivermapsdir = drivermapsdir,k=
 	save(res,file="res.Rd")
 
 
+
+
+	load("../diffdata/gene239/ri200sig.Rd")
+	load("../diffdata/gene239/fanno200sig.Rd")
+

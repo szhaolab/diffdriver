@@ -13,7 +13,7 @@ bmrSignature(e, signatures, rho, sc = 1, adjustment = F)
 
 \item{sigatures}{A 96 times m matrix M. Each column of it is a signaturee.}
 
-\item{ss}{Scale parameter}
+\item{s}{Scale parameter}
 }
 \value{
 matrix bmr
