@@ -4,7 +4,7 @@
 \alias{mlr}
 \title{gene level multiple linear regression}
 \usage{
-mlr(mut, e)
+mlr(mut, e, covariates = rep(1, length(e)))
 }
 \description{
 gene level multiple linear regression

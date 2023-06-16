@@ -9,7 +9,6 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports:
-  data.table (>= 1.10.0),
   Matrix,
   stats,
   matrixStats,

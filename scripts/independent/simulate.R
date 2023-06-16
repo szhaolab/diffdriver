@@ -40,8 +40,11 @@ simulate_1funcv <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample
 		foldlist[[t]]=data.table(fold=fold)
 		mutps=replicate(Nsample.ps,rbinom(length(pp.ps),size=1,pp.ps))
 		mutneu=replicate(Nsample.neu,rbinom(length(pp.neu),size=1,pp.neu))
-
+		if (!is.matrix(mutps)){
+		mutlist[[t]]=as(cbind(t(mutps),t(mutneu)),"sparseMatrix")
+		}else{
 		mutlist[[t]]=as(cbind(mutps,mutneu),"sparseMatrix")
+		}
 		countlist[[t]] <- c(sum(mutlist[[t]]))
 		bmrmtxlist[[t]] <- matrix(bmrpars[t]+betaf0, ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]])) # background mutation matrix for nytype=t
 }

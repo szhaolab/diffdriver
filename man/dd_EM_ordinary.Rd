@@ -13,7 +13,9 @@ dd_EM_ordinary(
   mutidx,
   type = c("null", "alt"),
   maxit = 100,
-  tol = 0.001
+  tol = 0.001,
+  mut,
+  e
 )
 }
 \arguments{

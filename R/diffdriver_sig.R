@@ -64,7 +64,6 @@ diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputd
 
 
 
-
     bmrsig <- matrixlistToBMR(adirbase, mutf,BMRlist,k=k)
 
 
@@ -116,6 +115,7 @@ for (i in 1:length(shared)) {
   mutation=cbind(mutation,log(mui))
     }
 if (any(is.na(mutation))) {stop("bmr missing")}
+browser()
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
 bmrallg <- split(mutation,ri$genename)

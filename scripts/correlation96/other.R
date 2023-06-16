@@ -1,0 +1,17 @@
+library("diffdriver")
+source("./scripts/correlation96/simufunothersig.R")
+source("./scripts/correlation96/simulateSignature.R")
+load("./scripts/correlation96/sgmatrixsig.Rd")
+load("./scripts/correlation96/sgannosig.Rd")
+sgmatrix=split(sgmatrix,sgannosig$nttypecode)
+sganno=split(sgannosig,sgannosig$nttypecode)
+i3=200
+beta_gc=unlist(parmASHmean[[1]])
+names(beta_gc)[6]="(Intercept)"
+par1=0.5
+par2=0.5
+rho=0.9
+set.seed(1)
+simuresother=power_compareother(binary=TRUE,Nite=100,sganno=sganno,sgmatrix=sgmatrix,Nsample=i3,beta_gc=beta_gc,para=c(par1,par2),signatures=signatures,rho=rho,hot=0,hmm=hmm,sc=10^4)
+save(simuresother,file="pppower_betaf0=10000_sample2000_0.5_0.8.Rd")
+q("no")

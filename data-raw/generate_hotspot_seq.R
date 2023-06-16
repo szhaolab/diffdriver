@@ -13,3 +13,5 @@ hotseq=hotspotseq(hmm,sgdata)
 sum(hotseq[,2])
 hotseq6=hotseq
 usethis::use_data(hotseq6, overwrite = T)
+load("~/SimingLab/jiezhou/diffdriver/data-raw/nttypeNumber.Rd")
+usethis::use_data(N,overwrite = T)

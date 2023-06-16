@@ -35,5 +35,11 @@ save(sgdata200,file="sgdata200.Rd")
 write(genename200,file="genename200.txt")
 usethis::use_data(genename200,overwrite= T)
 usethis::use_data(sgdata200, overwrite = T)
-load('pare')
-usethis::use_data()
+load('./data-raw/signatures.Rd')
+colnames(signatures)[1]="type"
+usethis::use_data(signatures,overwrite = T)
+
+load('./data-raw/codeSignature.Rd')
+
+usethis::use_data(codeSignature,overwrite = T)
+

@@ -4,7 +4,7 @@
 \alias{dd_loglik}
 \title{Title}
 \usage{
-dd_loglik(p, rate.s0, ll.n, mutidx)
+dd_loglik(p, rate.s0, ll.n, mutidx, e)
 }
 \arguments{
 \item{mutidx}{}

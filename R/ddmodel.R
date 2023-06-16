@@ -6,7 +6,7 @@
 #' @param e
 #' @return
 #' @export
-get_pi <- function(alpha, e){  
+get_pi <- function(alpha, e){
 alpha0 <- alpha[1]
   alpha1 <- alpha[2]
 if (alpha0>10 | alpha1>10){
@@ -336,24 +336,36 @@ ddmodel_binary_simple <- function(mut, e, bmr, fe){
   npos.e0 <- ncol(mut[, e==0]) -  mutpos.e0
   mutpos.e1 <- rowSums(mut[, e==1])
   npos.e1 <- ncol(mut[, e==1]) - mutpos.e1
+index0=min(which(e==0))
+index1=min(which(e==1))
+
 
   lln <- function(eta){
     # log likelihood under null
-    b.pi <- exp(eta) * (fe - 1) * bmr[,1] + bmr[,1]
-    b.pi[b.pi <= 0] <- 1e-8
-    b.pi[b.pi >= 1] <- 1 - 1e-8
+    b.pi0 <- exp(eta) * (fe - 1) * bmr[,index0] + bmr[,index0]
+    b.pi1 <- exp(eta) * (fe - 1) * bmr[,index1] + bmr[,index1]
 
-    llmtx <- npos * log(1 - b.pi) + mutpos * log(b.pi)
-    ll <- sum(llmtx)
+
+    b.pi0[b.pi0 <= 0] <- 1e-8
+    b.pi0[b.pi0 >= 1] <- 1 - 1e-8
+    b.pi1[b.pi1 <= 0] <- 1e-8
+    b.pi1[b.pi1 >= 1] <- 1 - 1e-8
+
+    llmtx0 <- npos.e0 * log(1- b.pi0) + mutpos.e0 * log(b.pi0)
+    llmtx1 <- npos.e1 * log(1- b.pi1) + mutpos.e1 * log(b.pi1)
+    ll <- sum(llmtx0)+sum(llmtx1)
     return(ll)
   }
+
 
   lla <- function(eta){
     # log likelihood under alt
     eta0 <- eta[1]
     eta1 <- eta[2]
-    b.pi0 <- t(exp(eta0) * (fe - 1) * bmr[,1] + bmr[,1])
-    b.pi1 <- t(exp(eta1) * (fe - 1) * bmr[,1] + bmr[,1])
+    index0=min(which(e==0))
+    index1=min(which(e==1))
+    b.pi0 <- t(exp(eta0) * (fe - 1) * bmr[,index0] + bmr[,index0])
+    b.pi1 <- t(exp(eta1) * (fe - 1) * bmr[,index1] + bmr[,index1])
     b.pi0[b.pi0 <= 0] <- 1e-8
     b.pi1[b.pi1 <= 0] <- 1e-8
     b.pi0[b.pi0 >= 1] <- 1 - 1e-8
