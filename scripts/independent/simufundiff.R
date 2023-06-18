@@ -13,6 +13,7 @@ power_comparediff <-function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrpar
 		ef <- simdata$efsize
 		fe <- ef$diffFe
 		mr <- bmrmtx
+browser()
 		if (sum(mut) ==0) {next}
 		if (binary == F){
 		res.m1 <- ddmodel(mut,e, mr, fe)
