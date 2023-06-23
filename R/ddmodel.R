@@ -305,10 +305,15 @@ ddmodel_binary <- function(mut, e, bmr, fe){
 
   resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
   resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
+  probnull <- mean(exp(resn$par)*(fe-1)*bmr+bmr)
+  probalt1 <- mean(exp(resa$par[1])*(fe-1)*bmr+bmr)
+  probalt2 <- mean(exp(resa$par[2])*(fe-1)*bmr+bmr)
 
   teststat<- -2*(resn$value-resa$value)
   pvalue <- pchisq(teststat,df=1,lower.tail=FALSE)
-  res <- list("pvalue"=pvalue, "null.eta0" = resn$par, "alt.eta"=resa$par, "null.ll"= resn$value, "alt.ll" = resa$value)
+all<- c(pvalue,resn$par,resa$par,resn$value,resa$value)
+names(all)=c("pvalue","null_para","e=0","e=1","null_likelihood","alt_likelihood")
+  res <- list("pvalue"=pvalue, "null.eta0" = resn$par, "alt.eta"=resa$par, "null.ll"= resn$value, "alt.ll" = resa$value,"all"=all)
   return(res)
 }
 

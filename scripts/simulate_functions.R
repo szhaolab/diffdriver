@@ -71,7 +71,7 @@ power_compareotheri <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bmr
 
 	for (iter in 1:Niter) {
 	  print(iter)
-		simdata <- simulate_1funcv(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,hot,hmm)
+		simdata <- simulate_1funcvi(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,hot,hmm)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
@@ -106,7 +106,8 @@ power_comparebasei <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrp
 	b=c()
 
 	for (iter in 1:Niter) {
-		simdata <- simulate_1funcv(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,hot,hmm)
+		print(iter)
+		simdata <- simulate_1funcvi(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,hot,hmm)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
@@ -139,7 +140,8 @@ power_comparediffi <-function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrpa
 	b=c()
 
 	for (iter in 1:Niter) {
-		simdata <- simulate_1funcv(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,hot,hmm)
+		print(iter)
+		simdata <- simulate_1funcvi(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,hot,hmm)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
@@ -147,7 +149,6 @@ power_comparediffi <-function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrpa
 		ef <- simdata$efsize
 		fe <- ef$diffFe
 		mr <- bmrmtx
-browser()
 		if (sum(mut) ==0) {next}
 		if (binary == F){
 		res.m1 <- ddmodel(mut,e, mr, fe)
@@ -268,7 +269,7 @@ power_compareother9 <- function(binary, Niter, sganno,sgmatrix, Nsample,para,rho
 	b=c()
 
 	for (iter in 1:Niter) {
-		simdata <- simulate_1funcv(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para, rho,tau,hot,hmm)
+		simdata <- simulate_1funcv9(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para, rho,tau,hot,hmm)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
@@ -303,7 +304,7 @@ power_comparebase9 <- function(binary, Niter, sganno,sgmatrix,Nsample,para,rho,t
 	b=c()
 
 	for (iter in 1:Niter) {
-		simdata <- simulate_1funcv(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,rho,tau,hot,hmm)
+		simdata <- simulate_1funcv9(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,rho,tau,hot,hmm)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
@@ -336,7 +337,7 @@ power_comparediff9 <- function(binary, Niter, sganno,sgmatrix,Nsample,para,rho,t
 	b=c()
 
 	for (iter in 1:Niter) {
-		simdata <- simulate_1funcv(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,rho,tau,hot,hmm)
+		simdata <- simulate_1funcv9(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,rho,tau,hot,hmm)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
@@ -411,7 +412,7 @@ simulate_1funcv96 <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc, para,h
 	for (t in 1:length(sganno)) {
 	  	size=c(size,nrow(sganno[[t]]))
 	  	if (nrow(sganno[[t]])==0) {next}
-	  	hotseqt= hotspot2sig[[t]]
+	  	hotseqt= hotspot1sig[[t]]*hot
 	  	selename=names(beta_gc)
 		ssgdata=cbind(sgmatrix[[t]][,..selename],hotseqt)
 		hotindex=which(hotseqt==1)
@@ -432,10 +433,13 @@ simulate_1funcv96 <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc, para,h
 		bmrmtxlist[[t]] <- log(pp.neu)
 }
 # The forllowings are the ture parameters (???)
+
 	fold <- do.call(rbind,foldlist)
-	avFe <- rep(log(mean(fold[[1]])*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
+	#avFe <- rep(log(mean(fold[[1]])*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
+	#avFe <- rep(log(mean(fold[[1]])*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
 	diffFe <-  log(fold[[1]]*Nsample.ps/Nsample + Nsample.neu/Nsample)
- 	#covariate=apply(bmrfold$bmr, 2, "%*%",size)
+ 	avFe <-rep(mean(diffFe),nrow(fold))
+	#covariate=apply(bmrfold$bmr, 2, "%*%",size)
 	covariate=apply(bmrfold$loadings, 2, sum)
 	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold,"covariate"=covariate,"bmrfold"=bmrfold, "annodata" = sganno, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list(  "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
 	return(simdata)
@@ -453,7 +457,7 @@ m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue<- m5.pvalue <- rep(1,Niter)
 
 	for (iter in 1:Niter) {
 	  print(iter)
-		simdata <- simulate_1funcv(binary=binary,sganno=sganno,sgmatrix=sgmatrix, signatures=signatures,Nsample=Nsample, beta_gc=beta_gc, para=para, rho=rho,hot=hot,hmm=hmm,sc=sc)
+		simdata <- simulate_1funcv96(binary=binary,sganno=sganno,sgmatrix=sgmatrix, signatures=signatures,Nsample=Nsample, beta_gc=beta_gc, para=para, rho=rho,hot=hot,hmm=hmm,sc=sc)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
@@ -488,10 +492,10 @@ power_comparebase96 <- function(binary, Niter, sganno,sgmatrix,Nsample,para,sign
   m1.pvalue <- rep(1,Niter)
 	a=c()
 	b=c()
-
+	d=c()
 	for (iter in 1:Niter) {
 	  print(iter)
-		simdata <- simulate_1funcv(binary=binary,sganno=sganno,sgmatrix=sgmatrix, Nsample=Nsample, beta_gc=beta_gc, para=para,signatures=signatures, rho,hot=hot,hmm=hmm,sc=sc)
+		simdata <- simulate_1funcv96(binary=binary,sganno=sganno,sgmatrix=sgmatrix, Nsample=Nsample, beta_gc=beta_gc, para=para,signatures=signatures, rho,hot=hot,hmm=hmm,sc=sc)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
@@ -506,12 +510,16 @@ power_comparebase96 <- function(binary, Niter, sganno,sgmatrix,Nsample,para,sign
 		res.m1 <- ddmodel_binary(mut,e,mr,fe)
 		}
 		m1.pvalue[iter] <-  res.m1$pvalue
-		parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
-		a=rbind(a,parameters)
+		#m1.pvalue <-  res.m1$pvalue
+		all=res.m1$all
+		#parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
+		#a=rbind(a,parameters)
 		nummut=sum(mut)
 		b=c(b,nummut)
-  }
-   return(list("parameters"=a, "m1.pvalue" =m1.pvalue,"#mut"=b))
+		d=rbind(d,all)
+		#input=list("mut"=mut,"e"=e,"bmr"=mr,"fe"=fe)
+}
+   return(list("m1.pvalue" =m1.pvalue,"estimates"=d,"real"=para,"#mut"=b))
   }
 
 
@@ -521,10 +529,10 @@ power_comparediff96 <- function(binary, Niter, sganno,sgmatrix,Nsample,para,sign
   m1.pvalue <- rep(1,Niter)
 	a=c()
 	b=c()
-
+	d=c()
 	for (iter in 1:Niter) {
 	  print(iter)
-		simdata <- simulate_1funcv(binary=binary,sganno=sganno,sgmatrix=sgmatrix, Nsample=Nsample, beta_gc=beta_gc, para=para,signatures=signatures, rho,hot=hot,hmm=hmm,sc=sc)
+		simdata <- simulate_1funcv96(binary=binary,sganno=sganno,sgmatrix=sgmatrix, Nsample=Nsample, beta_gc=beta_gc, para=para,signatures=signatures, rho,hot=hot,hmm=hmm,sc=sc)
 		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
@@ -539,12 +547,17 @@ power_comparediff96 <- function(binary, Niter, sganno,sgmatrix,Nsample,para,sign
 		res.m1 <- ddmodel_binary(mut,e,mr,fe)
 		}
 		m1.pvalue[iter] <-  res.m1$pvalue
-		parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
-		a=rbind(a,parameters)
+		#m1.pvalue <-  res.m1$pvalue
+		#parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
+		#a=rbind(a,parameters)
 		nummut=sum(mut)
 		b=c(b,nummut)
-  }
-   return(list("parameters"=a, "m1.pvalue" =m1.pvalue,"#mut"=b))
+		all=res.m1$all
+		d=rbind(d,all) 
+		#input=list("mut"=mut,"e"=e,"bmr"=mr,"fe"=fe)
+ 
+}
+   return(list("m1.pvalue" =m1.pvalue,"estimates"=d,"real"=para,"#mut"=b))
   }
 
 
