@@ -116,21 +116,21 @@ power_comparebasei <- function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrp
 		fe <- ef$avFe
 		mr <- bmrmtx
 		if (sum(mut) ==0) {
-	return(list("mut"=mut,"e"=e,"mr"=mr,"fe"=fe)) 
+		next()
 }
 		if (binary==F){
 		res.m1 <- ddmodel(mut,e, mr, fe)
 		}else{
 		res.m1 <- ddmodel_binary_simple(mut,e,mr,fe)
 		}
-		#m1.pvalue[iter] <-  res.m1$pvalue
-		#parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
-		#a=rbind(a,parameters)
-		#nummut=sum(mut)
-		#b=c(b,nummut)
+		m1.pvalue[iter] <-  res.m1$pvalue
+		parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
+		a=rbind(a,parameters)
+		nummut=sum(mut)
+		b=c(b,nummut)
   }
-	#return(list("parameters"=a, "m1.pvalue" =m1.pvalue,"#mut"=b))
-	return(list("mut"=mut,"e"=e,"mr"=mr,"fe"=fe,"output"=res.m1)) 
+	return(list("parameters"=a, "m1.pvalue" =m1.pvalue,"#mut"=b))
+	#return(list("mut"=mut,"e"=e,"mr"=mr,"fe"=fe,"output"=res.m1)) 
 }
 
 

@@ -29,8 +29,8 @@ else{
 #' @export
 #'
 #' @examples
-q_pos <- function(b, zpost, rate.s0, ll.n){
-  ll.s <- get_ll_s(b, rate.s0)
+q_pos <- function(b, zpost, rate.s0, ll.n, mutidx){
+  ll.s <- get_ll_s(b, rate.s0, mutidx)
   q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
   return(q)
 }
@@ -46,11 +46,11 @@ q_pos <- function(b, zpost, rate.s0, ll.n){
 #' @export
 #'
 #' @examples
-dd_loglik <- function(p, rate.s0, ll.n, mut, e){
+dd_loglik <- function(p, rate.s0, ll.n, mutidx,e){
   beta0 <- p[1]
   alpha <- p[2:3]
   pi <- get_pi(alpha, e)
-  ll.s <- get_ll_s(beta0, mut, rate.s0)
+  ll.s <- get_ll_s(beta0, rate.s0, mutidx)
   ll <- sum(log(pi * exp(ll.s) + (1-pi) * exp(ll.n)))
 }
 
@@ -67,22 +67,21 @@ dd_loglik <- function(p, rate.s0, ll.n, mut, e){
 #' @export
 #'
 #' @examples
-dd_EM_update <- function(p, rate.n, rate.s0, ll.n, type = c("null", "alt"),mut,e){
+dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"),mut,e){
   # p: beta0, alpha
   beta0 <- p[1]
   alpha <- p[2:3]
 
   # update z_i
-  ll.s <- get_ll_s(beta0, rate.s0)
+  ll.s <- get_ll_s(beta0, rate.s0, mutidx)
   pi <- get_pi(alpha, e)
   zpost <- cbind(pi * exp(ll.s) , (1-pi) * exp(ll.n)) # 1st column selection, 2nd column neutral
   zpost <- zpost/rowSums(zpost)
 
   # update beta0
-  #bi=(nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F])
-  #beta0.init <- ifelse( bi>0, log(bi),rnorm(1))
- beta0.init <- 0  
-res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, ll.n = ll.n, method = "BFGS", control=list(fnscale=-1))
+  bi=(nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F])
+  beta0.init <- ifelse( bi>0, log(bi),rnorm(1))
+  res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, ll.n = ll.n, mutidx = mutidx, method = "BFGS", control=list(fnscale=-1))
   beta0 <- res$par
 
   # update alpha
@@ -164,12 +163,12 @@ dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mut
 #' @export
 #'
 #' @examples
-dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, type = c("null", "alt"), mut,e, maxit = 100, tol = 1e-3){
+dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"), mut,e, maxit = 100, tol = 1e-3){
 
   # initialize
   p <- c(beta0, alpha)
   # EM
-  res <- SQUAREM::squarem(p=p, rate.n = rate.n, rate.s0=rate.s0, ll.n=ll.n, type = type,mut=mut,e=e, fixptfn=dd_EM_update, control=list(tol=tol, maxiter = maxit))
+  res <- SQUAREM::squarem(p=p, rate.n = rate.n, rate.s0=rate.s0, ll.n=ll.n, mutidx=mutidx, type = type,mut=mut,e=e, fixptfn=dd_EM_update, control=list(tol=tol, maxiter = maxit))
   p <- res$par
   ll <- dd_loglik(p, rate.s0, ll.n, mutidx,e)
 
@@ -186,26 +185,15 @@ dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, type = 
 #'  should match the rows of \code{mut} and \code{mr}
 #' @export
 ddmodel <- function(mut, e, mr, fe, ...){
-  rate.n <- exp(mr)
-  rate.s0 <- exp(fe) * rate.n
-## generate labels for duplicate rows in rate.n and rate.s0
-label=as.factor(rate.s0[,1])
-## aggregate the duplicate rows 
-rate.n <- aggregate(rate.n,by=list(label),sum,na.rm=T)[,-c(1)]
-rate.s0 <- aggregate(rate.s0,by=list(label),sum,na.rm=T)[,-c(1)]
-mut <- aggregate(as.matrix(mut),by=list(label),sum,na.rm=T)[,-c(1)]
-#mut <- t(sapply(by(mut,label,colSums),identity))
-## delete the label
-
-## Poisson likelihood 
-  #ll.n <- colSums(log(rate.n * mut +  (1-rate.n) * (1-mut)))
-ll.n <- colSums(log(rate.n^(mut)/factorial(mut)*exp(-rate.n)))  
-#mutidx <- which(mut!=0, arr.ind = T)
+  rate.n <- as.matrix(exp(mr))
+  rate.s0 <- as.matrix(exp(fe) * rate.n)
+  ll.n <- colSums(log(rate.n * mut +  (1-rate.n) * (1-mut)))
+  mutidx <- which(mut!=0, arr.ind = T)
 
   # res.null <- dd_EM_ordinary(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "null", ...)
-  res.null <- dd_squarEM(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, type = "null",mut=mut,e=e, ...)
+  res.null <- dd_squarEM(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "null",mut=mut,e=e, ...)
   # res.alt <- dd_EM_ordinary(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "alt",  ...)
-  res.alt <- dd_squarEM(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, type = "alt",mut=mut,e=e, ...)
+  res.alt <- dd_squarEM(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "alt",mut=mut,e=e, ...)
   teststat<- -2*(res.null$loglikelihood - res.alt$loglikelihood)
   pvalue <- pchisq(teststat, df=1, lower.tail=FALSE)
   res <- list("pvalue"=pvalue, "res.null" = res.null, "res.alt"=res.alt)
@@ -473,22 +461,4 @@ pi= exp(eta)/(1+exp(eta))
   pvalue <- pchisq(teststat,df=1,lower.tail=FALSE)
   res <- list("pvalue"=pvalue, "null.eta0" = resn$par, "alt.eta"=resa$par, "null.ll"= resn$value, "alt.ll" = resa$value)
   return(res)
-}
-#' Title
-#'
-#' @param b
-#' @param rate.s0
-#' @param mutidx
-#'
-#' @return
-#' @export
-#'
-#' @examples
-get_ll_s <- function(b, mut, rate_s0){
-  rate_s <- rate_s0 * exp(b)
-  #rmtx <- log(1-rate_s)
-  #rmtx[mutidx] <- log(rate_s[mutidx])
-  rmtx=log((rate_s0)^mut/factorial(mut)*exp(-rate_s0))
-  # log likelihood for each sample under selection
-  colSums(rmtx) # faster than `colSums(log(rate.s * mut +  (1-rate.s) * (1-mut)))`
 }
