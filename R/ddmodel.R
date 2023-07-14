@@ -29,8 +29,8 @@ else{
 #' @export
 #'
 #' @examples
-q_pos <- function(b, zpost, rate.s0, ll.n){
-  ll.s <- get_ll_s(b, rate.s0)
+q_pos <- function(b, zpost, rate.s0, mut,ll.n){
+  ll.s <- get_ll_s(b,mut, rate.s0)
   q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
   return(q)
 }
@@ -73,7 +73,7 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, type = c("null", "alt"),mut,e
   alpha <- p[2:3]
 
   # update z_i
-  ll.s <- get_ll_s(beta0, rate.s0)
+  ll.s <- get_ll_s(beta0,mut, rate.s0)
   pi <- get_pi(alpha, e)
   zpost <- cbind(pi * exp(ll.s) , (1-pi) * exp(ll.n)) # 1st column selection, 2nd column neutral
   zpost <- zpost/rowSums(zpost)
@@ -81,8 +81,8 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, type = c("null", "alt"),mut,e
   # update beta0
   #bi=(nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F])
   #beta0.init <- ifelse( bi>0, log(bi),rnorm(1))
- beta0.init <- 0  
-res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, ll.n = ll.n, method = "BFGS", control=list(fnscale=-1))
+ beta0.init <- 1 
+res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, mut=mut,ll.n = ll.n, method = "BFGS", control=list(fnscale=-1))
   beta0 <- res$par
 
   # update alpha
@@ -171,7 +171,7 @@ dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, type = 
   # EM
   res <- SQUAREM::squarem(p=p, rate.n = rate.n, rate.s0=rate.s0, ll.n=ll.n, type = type,mut=mut,e=e, fixptfn=dd_EM_update, control=list(tol=tol, maxiter = maxit))
   p <- res$par
-  ll <- dd_loglik(p, rate.s0, ll.n, mutidx,e)
+  ll <- dd_loglik(p, rate.s0, ll.n, mut,e)
 
   return(list("loglikelihood" = ll, "beta0" = p[1], "alpha" = p[2:3]))
 }
@@ -185,11 +185,11 @@ dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, type = 
 #' @param fe, a vector, increased mutation rate at each position, depending on e (log scale),
 #'  should match the rows of \code{mut} and \code{mr}
 #' @export
-ddmodel <- function(mut, e, mr, fe, ...){
+ddmodel <- function(mut, e, mr, fe,label, ...){
   rate.n <- exp(mr)
   rate.s0 <- exp(fe) * rate.n
 ## generate labels for duplicate rows in rate.n and rate.s0
-label=as.factor(rate.s0[,1])
+#label=as.factor(rate.s0[,1])
 ## aggregate the duplicate rows 
 rate.n <- aggregate(rate.n,by=list(label),sum,na.rm=T)[,-c(1)]
 rate.s0 <- aggregate(rate.s0,by=list(label),sum,na.rm=T)[,-c(1)]

@@ -27,6 +27,7 @@ simulate_1funcvi <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsampl
 	betagc=c(beta_gc,hmm[9])
 	mutRate <- list()
 	foldlist <- list()
+        modelmatrix <- list()
 	for (t in 1:length(sganno)) {
 	  hotseqt=merge(sganno[[t]],hotseq,by="start")$seqt
 	  selename=names(beta_gc)
@@ -48,6 +49,8 @@ simulate_1funcvi <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsampl
 		}
 		countlist[[t]] <- c(sum(mutlist[[t]]))
 		bmrmtxlist[[t]] <- matrix(bmrpars[t]+betaf0, ncol = ncol(mutlist[[t]]), nrow = nrow(mutlist[[t]])) # background mutation matrix for nytype=t
+		modelmatrix[[t]] <- ssgdata
+		
 }
 
 # The forllowings are the ture parameters (???)
@@ -55,7 +58,7 @@ simulate_1funcvi <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsampl
 	avFe <- rep(log(mean(fold[[1]])*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
 	diffFe <-  log(fold[[1]]*Nsample.ps/Nsample + Nsample.neu/Nsample)
 
-	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold, "annodata" = sganno, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = betagc, "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
+	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold, "annodata" = modelmatrix, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = betagc, "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
 	return(simdata)
 }
 
@@ -141,20 +144,21 @@ power_comparediffi <-function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrpa
   m1.pvalue <- rep(1,Niter)
 	a=c()
 	b=c()
-
 	for (iter in 1:Niter) {
 		print(iter)
 		simdata <- simulate_1funcvi(binary=binary,sganno,sgmatrix, bmrpars, betaf0, Nsample, beta_gc, para,hot,hmm)
-		ssgdata=simdata$annodata
 		mut <- do.call(rbind, simdata$mutlist)
 		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
+		ssgdata=do.call(rbind,simdata$annodata)
+		indexmtx=cbind(bmrmtx[,1],ssgdata)
+		label=factor(interaction(indexmtx))	
 		e <- simdata$pheno
 		ef <- simdata$efsize
 		fe <- ef$diffFe
 		mr <- bmrmtx
 		if (sum(mut) ==0) {next}
 		if (binary == F){
-		res.m1 <- ddmodel(mut,e, mr, fe)
+		res.m1 <- ddmodel(mut,e, mr, fe,label)
 		}else{
 		res.m1 <- ddmodel_binary_simple(mut,e,mr,fe)
 		}
