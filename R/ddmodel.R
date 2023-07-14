@@ -488,7 +488,7 @@ get_ll_s <- function(b, mut, rate_s0){
   rate_s <- rate_s0 * exp(b)
   #rmtx <- log(1-rate_s)
   #rmtx[mutidx] <- log(rate_s[mutidx])
-  rmtx=log((rate_s0)^mut/factorial(mut)*exp(-rate_s0))
+  rmtx=log((rate_s)^mut/factorial(mut)*exp(-rate_s))
   # log likelihood for each sample under selection
   colSums(rmtx) # faster than `colSums(log(rate.s * mut +  (1-rate.s) * (1-mut)))`
 }
