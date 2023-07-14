@@ -168,8 +168,9 @@ power_comparediffi <-function(binary, Niter, sganno,sgmatrix, Nsample,para,bmrpa
 		nummut=sum(mut)
 		b=c(b,nummut)
   }
-   return(list("parameters"=a, "m1.pvalue" =m1.pvalue,"#mut"=b))
-  }
+   #return(list("parameters"=a, "m1.pvalue" =m1.pvalue,"#mut"=b))
+	return(res.m1)  
+}
 
 
 
