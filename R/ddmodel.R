@@ -61,8 +61,7 @@ dd_loglik <- function(p, rate.s0, ll.n,mutidx, mut, e){
 #' @param rate.s0
 #' @param ll.n
 #' @param mutidx
-#' @param type
-#'
+#' @param type'
 #' @return
 #' @export
 #'
@@ -81,7 +80,8 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"
   # update beta0
   #bi=(nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F])
   #beta0.init <- ifelse( bi>0, log(bi),rnorm(1))
- beta0.init <- 1 
+ beta0.init <- 1
+aa=q_pos(beta0.init, zpost, rate.s0, mut,mutidx,ll.n)
 res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, mut=mut,ll.n = ll.n, mutidx,method = "BFGS", control=list(fnscale=-1))
   beta0 <- res$par
 
@@ -167,9 +167,14 @@ dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mut
 dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n,mutidx, type = c("null", "alt"), mut,e, maxit = 100, tol = 1e-3){
 
   # initialize
-  p <- c(beta0, alpha)
+beta0=0
+alpha=c(0,0)
+ p <- c(beta0, alpha)
+#p <- c(0,0,0)
+  # initialize
+ 
   # EM
-  res <- SQUAREM::squarem(p=p, rate.n = rate.n, rate.s0=rate.s0, ll.n=ll.n,mutidx, type = type,mut=mut,e=e, fixptfn=dd_EM_update, control=list(tol=tol, maxiter = maxit))
+  res <- SQUAREM::squarem(p=p, rate.n = rate.n, rate.s0=rate.s0, ll.n=ll.n, mutidx, type = type,mut=mut,e=e, fixptfn=dd_EM_update, control=list(tol=tol, maxiter = maxit))
   p <- res$par
   ll <- dd_loglik(p, rate.s0, ll.n, mut,e)
 
@@ -479,12 +484,11 @@ pi= exp(eta)/(1+exp(eta))
 #' Title
 #'
 #' @param b
-#' @param rate.s0
+#' @param mut
 #' @param mutidx
-#'
+#' @param rate.s0
 #' @return
-#' @export
-#'
+#' @export'
 #' @examples
 #get_ll_s <- function(b, mut, rate_s0){
 #  rate_s <- rate_s0 * exp(b)
