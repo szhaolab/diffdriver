@@ -36,8 +36,8 @@ simulate_1funcvi <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsampl
 		pp.neu=rep(exp(bmrpars[t])*exp(betaf0),nrow(ssgdata))
 		fold=exp(as.matrix(ssgdata)%*%betagc)
 		fold[hotindex]=exp(hmm[9])
-		if (any(2*fold<1)){stop("Error:inappropriate parameter settings!")}
-		fold=2*fold-1
+		#if (any(2*fold<1)){stop("Error:inappropriate parameter settings!")}
+		fold=ifelse(2*fold-1>0,2*fold-1,1)
 		pp.ps=ifelse(pp.neu*fold<1,pp.neu*fold,1)
 		foldlist[[t]]=data.table(fold=fold)
 		mutps=replicate(Nsample.ps,rbinom(length(pp.ps),size=1,pp.ps))
