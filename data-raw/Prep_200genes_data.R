@@ -44,3 +44,5 @@ load('./data-raw/codeSignature.Rd')
 
 usethis::use_data(codeSignature,overwrite = T)
 
+og=fread("OG.txt",header=F)
+usethis::use_data(og,overwrite=T)

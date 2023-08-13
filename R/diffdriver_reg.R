@@ -93,7 +93,7 @@ for (t in 1:length(matrixlist)){
   bmrallg <- split(bmrdt, ri$genename)
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
-save(fannoallg,file="~/fannoallg.Rd")
+#save(fannoallg,file="~/fannoallg.Rd")
 #save(riallg,file="~/riallg.Rd")
   # run diffdriver for each gene
   res <- list()
@@ -109,14 +109,14 @@ save(fannoallg,file="~/fannoallg.Rd")
     ## hotspot
     hotspots=read.table(file = hotf)
     hmm=readRDS(paste0(drivermapsdir, "hmmOGpar_ASHmean.rds"))
-  for (g in names(bmrallg)) {
+for (g in names(bmrallg)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
     mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
     mutmtx= as.matrix(mutmtx)
-    save(mutmtx,file=paste0("mutmtx_",g,".Rd"))
+    #save(mutmtx,file=paste0("mutmtx_",g,".Rd"))
 hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
     hotmat=rep(0,nrow(rig))
     hotmat[hotg$ridx]=1
@@ -134,18 +134,17 @@ hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
       betaf0 <-  Fpars[["TP53"]]["beta_f0"]
     } # if OG/TSG unknown, use TSG parameters.
     ganno <- fannoallg[[g]]
-save(ganno,file=paste0("fanno_",g,".Rd"))
+#save(ganno,file=paste0("fanno_",g,".Rd"))
     fe1 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
     fe2 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
  	indexmtx=cbind(bmrmtx[,1],ganno)
 		label=factor(interaction(indexmtx))	
-  
-#fe <- if(g %in% og[,1]){
-#	fe=fe1
-#	}else{
-#	fe=fe2
-#	}
-fe=fe1
+ 
+fe <- if(g %in% og[,1]){
+	fe=fe1
+	}else{
+	fe=fe2
+	}
     resg <- list()
     e=canno[[j]]
     phename=colnames(canno)[j]
@@ -157,11 +156,11 @@ fe=fe1
     resg[["binom"]] <- genebinom(mutmtx, e_binary)
     resg[["lr"]] <- genelr(mutmtx, e_binary)
     res[[g]] <- resg
-    #save(mutmtx,canno,bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,"_",phename,"_", g, ".Rd")))
-    #setEPS()
-    #postscript(file=paste0(outputbase,".",phename,".", g, "mut_status.eps"), width=9, height=4)
-    #plot_mut(mutmtx, canno,j, bmrmtx, ganno)
-    #dev.off()
+    save(mutmtx,canno,bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,"_",phename,"_", g, ".Rd")))
+    setEPS()
+    postscript(file=paste0(outputbase,".",phename,".", g, "mut_status.eps"), width=9, height=4)
+    plot_mut(mutmtx, canno,j, bmrmtx, ganno)
+    dev.off()
   }
 
   return(res)

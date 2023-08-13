@@ -38,14 +38,14 @@ simulate_1funcvi <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsampl
 		pp.neu=rep(exp(bmrpars[t])*exp(betaf0),nrow(ssgdata))
 		fold=exp(as.matrix(ssgdata)%*%betagc)
 		fold[hotindex]=exp(hmm[9])
-		fold=(Nsample/Nsample.ps)*fold-Nsamplen/Nsample.ps
+		fold=(Nsample/Nsample.ps)*fold-Nsample.neu/Nsample.ps
 		if (any(fold<0)){stop("Error:inappropriate parameter settings!")}
 		pp.ps=ifelse(pp.neu*fold<1,pp.neu*fold,1)
 		foldlist[[t]]=data.table(fold=fold)
 		
 		foldFix=exp(as.matrix(ssgdata)%*%betagcFix)
 		foldFix[hotindex]=exp(hmm[9])
-		foldFix=(Nsample/Nsample.ps)*foldFix-Nsamplen/Nsample.ps
+		foldFix=(Nsample/Nsample.ps)*foldFix-Nsample.neu/Nsample.ps
 		if (any(foldFix<0)){stop("Error:inappropriate parameter settings!")}
 		foldlistFix[[t]]=data.table(fold=foldFix)
 		
