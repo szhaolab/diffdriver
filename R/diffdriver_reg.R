@@ -137,7 +137,7 @@ hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
 #save(ganno,file=paste0("fanno_",g,".Rd"))
     fe1 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
     fe2 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
- 	indexmtx=cbind(bmrmtx[,1],ganno)
+ 	indexmtx=cbind(bmrmtx[,1],ganno[,names(betaf),with=F])
 		label=factor(interaction(indexmtx))	
  
 fe <- if(g %in% og[,1]){

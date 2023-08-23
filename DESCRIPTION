@@ -9,11 +9,13 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports:
-  Matrix,
-  stats,
-  matrixStats,
-  plyr,
-  resample
+	Matrix,
+	stats,
+	matrixStats,
+	plyr,
+	fastTopics,
+	data.table,
+	resample
 Suggests: 
     knitr,
     rmarkdown,
