@@ -93,7 +93,6 @@ for (t in 1:length(matrixlist)){
   bmrallg <- split(bmrdt, ri$genename)
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
-  #browser()
 #save(fannoallg,file="~/fannoallg.Rd")
 #save(riallg,file="~/riallg.Rd")
   # run diffdriver for each gene
@@ -110,15 +109,15 @@ for (t in 1:length(matrixlist)){
     ## hotspot
     hotspots=read.table(file = hotf)
     hmm=readRDS(paste0(drivermapsdir, "hmmOGpar_ASHmean.rds"))
-  for (g in names(bmrallg)) {
+for (g in names(bmrallg)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
     mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
     mutmtx= as.matrix(mutmtx)
-
-    hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
+    #save(mutmtx,file=paste0("mutmtx_",g,".Rd"))
+hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
     hotmat=rep(0,nrow(rig))
     hotmat[hotg$ridx]=1
     if (sum(mutmtx) ==0) {next}
@@ -127,7 +126,7 @@ for (t in 1:length(matrixlist)){
     bmr0g=as.matrix(bmrallg[[g]])
     bmrg=as.data.table(bmr0g[,rep(1,nrow(canno))])
     bmrmtx <-as.matrix(sweep(bmrg, 2, bmrsc, "+"))
-if (any(is.na(bmrmtx))) {stop("bmr missing")}
+   if (any(is.na(bmrmtx))) {stop("bmr missing")}
     betaf <- Fpars[[g]][names(Fpars[[g]]) != "beta_f0"]
     betaf0 <- Fpars[[g]]["beta_f0"]
     if (is.null(betaf)){
@@ -135,30 +134,33 @@ if (any(is.na(bmrmtx))) {stop("bmr missing")}
       betaf0 <-  Fpars[["TP53"]]["beta_f0"]
     } # if OG/TSG unknown, use TSG parameters.
     ganno <- fannoallg[[g]]
+#save(ganno,file=paste0("fanno_",g,".Rd"))
     fe1 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
- fe2 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
+    fe2 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
+ 	indexmtx=cbind(bmrmtx[,1],ganno[,names(betaf),with=F])
+		label=factor(interaction(indexmtx))	
+ 
 fe <- if(g %in% og[,1]){
 	fe=fe1
 	}else{
 	fe=fe2
 	}
-
     resg <- list()
     e=canno[[j]]
     phename=colnames(canno)[j]
-    resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1])
+    resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1],label)
     resg[["mlr"]] <- mlr(mutmtx, e)
     resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
     e_binary=ifelse(e>mean(e),1,0)
-   resg[["fisher"]] <- genefisher(mutmtx, e_binary)
+    resg[["fisher"]] <- genefisher(mutmtx, e_binary)
     resg[["binom"]] <- genebinom(mutmtx, e_binary)
     resg[["lr"]] <- genelr(mutmtx, e_binary)
     res[[g]] <- resg
     save(mutmtx,canno,bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,"_",phename,"_", g, ".Rd")))
-    #setEPS()
-    #postscript(file=paste0(outputbase,".",phename,".", g, "mut_status.eps"), width=9, height=4)
-    #plot_mut(mutmtx, canno,j, bmrmtx, ganno)
-    #dev.off()
+    setEPS()
+    postscript(file=paste0(outputbase,".",phename,".", g, "mut_status.eps"), width=9, height=4)
+    plot_mut(mutmtx, canno,j, bmrmtx, ganno)
+    dev.off()
   }
 
   return(res)

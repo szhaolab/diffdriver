@@ -37,7 +37,7 @@ for (i in 1:nsample) {
     index=anno[start==Position & ref==Ref &alt==Alt & chrom==Chromosome ,]$nttypecode
     if (length(index)!=1){
       ll=length(index)
-      print(paste("sample:",i,"mutation:",ii,"hits:", ll, sep = " "))
+     # print(paste("sample:",i,"mutation:",ii,"hits:", ll, sep = " "))
     }else{
       ymatrix[i,index]=ymatrix[i,index]+1
     }

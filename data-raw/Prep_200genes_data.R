@@ -2,9 +2,10 @@
 
 library(devtools)
 load_all("~/SimingLab/jiezhou/diffdriver/")
+browser()
 #drivermapsdir <- "~/cancer_somatic/maps/"
 #drivermapsdir <- "~/SimingLab/library/diffdriver_anno/"
-drivermapsdir <- "~/driverMAPS/data/"
+drivermapsdir <- "~/SimingLab/jiezhou/driverMAPS/data/"
 Totalnttype <- 9
 #Adirbase < paste0(drivermapsdir, "quicktest_data/")
 Adirbase <- drivermapsdir
@@ -43,3 +44,5 @@ load('./data-raw/codeSignature.Rd')
 
 usethis::use_data(codeSignature,overwrite = T)
 
+og=fread("OG.txt",header=F)
+usethis::use_data(og,overwrite=T)

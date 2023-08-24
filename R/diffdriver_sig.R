@@ -115,7 +115,6 @@ for (i in 1:length(shared)) {
   mutation=cbind(mutation,log(mui))
     }
 if (any(is.na(mutation))) {stop("bmr missing")}
-browser()
   riallg <- split(ri,ri$genename)
   fannoallg <- split(fanno,ri$genename)
 bmrallg <- split(mutation,ri$genename)
@@ -126,7 +125,7 @@ rm(ri,mutation,fanno)
   hotspots=read.table(file = hotf)
   hmm=readRDS(paste0(drivermapsdir, "hmmOGpar_ASHmean.rds"))
   for (g in names(bmrallg)) {
-    print(paste0("Start to process gene: ", g))
+  print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
@@ -151,6 +150,11 @@ rm(ri,mutation,fanno)
     ganno <- fannoallg[[g]]
    fe1 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
   fe2 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
+
+	indexmtx=cbind(bmrmtx[,1],ganno[,names(betaf),with=F])
+	#	label=factor(interaction(indexmtx))	
+ label=factor(1:nrow(bmrmtx))
+
  fe <- if(g %in% og[,1]){
          fe=fe1
          }else{
@@ -162,20 +166,21 @@ rm(ri,mutation,fanno)
     resg <- list()
     e=canno[[j]]
 phename=colnames(canno)[j]
-    #resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1])
-    #resg[["mlr"]] <- mlr(mutmtx, e)
-    #resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
+    resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1],label=label)
+    resg[["mlr"]] <- mlr(mutmtx, e)
+    resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
     e_binary=ifelse(e>mean(e),1,0)
-    #resg[["fisher"]] <- genefisher(mutmtx, e_binary)
-    #resg[["binom"]] <- genebinom(mutmtx, e_binary)
-    #resg[["lr"]] <- genelr(mutmtx, e_binary)
+    resg[["fisher"]] <- genefisher(mutmtx, e_binary)
+    resg[["binom"]] <- genebinom(mutmtx, e_binary)
+    resg[["lr"]] <- genelr(mutmtx, e_binary)
     res[[g]] <- resg
 
-    save(mutmtx,bmrmtx,canno,fe, ganno, betaf, betaf0, file=paste0(paste0(outputbase,"_",phename,"_", g, ".Rd")))
-    #setEPS()
-    #postscript(file=paste0(outputbase,".",phename,".", g, "mut_status.eps"), width=9, height=4)
-    #plot_mut(mutmtx, canno,j, bmrmtx, ganno)
-    #dev.off()
+
+    save(mutmtx,canno,bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,"_",phename,"_", g, ".Rd")))
+    setEPS()
+    postscript(file=paste0(outputbase,".",phename,".", g, "mut_status.eps"), width=9, height=4)
+    plot_mut(mutmtx, canno,j, bmrmtx, ganno)
+
   }
 
   return(res)

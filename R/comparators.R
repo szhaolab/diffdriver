@@ -41,10 +41,11 @@ genebinom <- function(mut, e){
 
 #' @title gene level logistic regression
 #' @export
-genelr <- function(mut, e,covariates=NULL){
+genelr <- function(mut, e,covariates=rep(1,length(e))){
   # logistic regression on gene level
   dstatus <- colSums(mut)
   dstatus[which(dstatus>0)] <- 1
+  #if (all(covariates==1)){covariates=rep(1,length(e))}
   glrfit <- glm(e ~ dstatus+ covariates, family = binomial(link = "logit"))
   #glrfit <- glm(e ~ dstatus, family = binomial(link = "logit"))
   glrres <- summary(glrfit)
