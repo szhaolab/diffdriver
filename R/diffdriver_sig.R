@@ -14,8 +14,8 @@ diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputd
   afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
                     header = c("chrom","start","end","ref","alt","genename","functypecode","nttypecode","expr","repl","hic","mycons","sift","phylop100","MA","ssp","wggerp"),
                     coltype = c("character","numeric","numeric","character","character","character","character","factor","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric"))
-  totalnttype <- 96
-  Totalnttype <- 96
+  totalnttype <<- 96
+  Totalnttype <<- 96
   bmvars <- c("nttypecode", "expr", "repl", "hic")
   bmmuttype <- "functypecode == 6"
   funcvars <- c("functypecode", "mycons", "sift", "phylop100", "MA")
@@ -24,7 +24,7 @@ diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputd
   readinvars <- c("genename", "ssp", bmvars, funcvars) # This is optional, if not given, then will read all columns
   bmreadinvars <- c("genename", "ssp","nttypecode",bmvars, funcvars)
   qnvars = c("expr","repl","hic") # all the rest will be normalized, except for nttypecode
-  outputbase <- paste0(outputdir, "/", outputname)
+  outputbase <<- paste0(outputdir, "/", outputname)
   paramdir <- paste0(drivermapsdir, "/param/")
   fixmusdfile <-  paste0(paramdir, "colmu_sd_funct78.Rdata")
 
@@ -167,8 +167,7 @@ rm(ri,mutation,fanno)
     e=canno[[j]]
 phename=colnames(canno)[j]
     resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1],label=label)
-    #resg[["dd_nl"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1])
-   resg[["mlr"]] <- mlr(mutmtx, e)
+    resg[["mlr"]] <- mlr(mutmtx, e)
     resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
     e_binary=ifelse(e>mean(e),1,0)
     resg[["fisher"]] <- genefisher(mutmtx, e_binary)
