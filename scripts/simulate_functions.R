@@ -30,27 +30,26 @@ simulate_1funcvi <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsampl
 	foldlist <- list()
 	foldlistFix <- list()
         modelmatrix <- list()
+
 	for (t in 1:length(sganno)) {
 	  hotseqt=merge(sganno[[t]],hotseq,by="start")$seqt
 	  selename=names(beta_gc)
 		ssgdata=cbind(sgmatrix[[t]][,..selename],hotseqt)
-	#	index=which(hotseqt==1)
-	#	if (length(index)>0){
-	#	for (i in index){
-	#	ssgdata[i,selename]=0}
 		hotindex=which(hotseqt==1)
 		pp.neu=rep(exp(bmrpars[t])*exp(betaf0),nrow(ssgdata))
 		fold=exp(as.matrix(ssgdata)%*%betagc)
 		fold=(Nsample/Nsample.ps)*fold-Nsample.neu/Nsample.ps	
 		fold[hotindex]=exp(hmm[9])
-		if (any(fold<0)){stop("Error:inappropriate parameter settings!")}
+		if (any(fold<0)){warning("Fold is negative!")}
+		fold[which(fold<0)]=min(fold[which(fold>0)])	
 		pp.ps=ifelse(pp.neu*fold<1,pp.neu*fold,1)
 		foldlist[[t]]=data.table(fold=fold)
 		
 		foldFix=exp(as.matrix(ssgdata)%*%betagcFix)
 		foldFix[hotindex]=exp(hmm[9])
 		foldFix=(Nsample/Nsample.ps)*foldFix-Nsample.neu/Nsample.ps
-		if (any(foldFix<0)){stop("Error:inappropriate parameter settings!")}
+		if (any(foldFix<0)){warning("Foldfix is negative!")}
+		foldFix[which(foldFix<0)]=min(foldFix[which(foldFix>0)])
 		foldlistFix[[t]]=data.table(fold=foldFix)
 		
 
@@ -288,7 +287,7 @@ power_comparediffiold <-function(binary, Niter, sganno,sgmatrix, Nsample,para,bm
 
 # Correlation 9 Case
 
-simulate_1funcv9 <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample, beta_gc, para,rho,tau,hot=0, hmm){
+simulate_1funcv9 <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsample, beta_gc,beta_gcFix=beta_gc, para,rho,tau,hot=0, hmm){
 	if (binary==T){ # generate binary phenotype
 		Nsamplec <- round(Nsample/2) # number of samples with phenotype E=1 (the rest will be 0)
 		Nsamplen <- Nsample-Nsamplec
@@ -340,8 +339,10 @@ simulate_1funcv9 <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsampl
 	annodata <- list() # a list of nine annotation data frames
 	bmrmtxlist <- list() # a list of nine background mutation matrices
 	betagc=c(beta_gc,hmm[9])
+	betagcFix=c(beta_gcFix,hmm[9])
 	mutRate <- list()
 	foldlist <- list()
+	foldlistFix <- list()
 	for (t in 1:length(sganno)) {
 	  hotseqt=merge(sganno[[t]],hotseq,by="start")$seqt
 	  selename=names(beta_gc)
@@ -350,11 +351,19 @@ simulate_1funcv9 <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsampl
 		pp.neu=matrix(rep(1,nrow(ssgdata)),ncol=1)%x%matrix(exp(bmrpars[t])*exp(betaf0)*bmrfold,nrow=1)
 		fold=as.vector(exp(as.matrix(ssgdata)%*%betagc))
 		fold[hotindex]=exp(hmm[9])
-		if (any(2*fold<1)){stop("Error:inappropriate parameter settings!")}
+		if (any(2*fold<1)){warning("Error:inappropriate parameter settings!")}
 		fold=2*fold-1
 		F=cbind(fold,1)%*%selection
 		pp.total=ifelse(F*pp.neu<1,F*pp.neu,0.99)
 		foldlist[[t]]=data.table::data.table(fold=fold)
+	
+		foldFix=as.vector(exp(as.matrix(ssgdata)%*%betagcFix))
+		foldFix[hotindex]=exp(hmm[9])
+		foldFix=Nsample/Nsample.ps*foldFix-Nsample.ps/Nsample.neu
+		if (any(foldFix<0)){warning("Error:inappropriate parameter settings!")}
+		foldlistFix[[t]]=data.table::data.table(fold=foldFix)
+
+
 		if (nrow(pp.total)>1) {
 		mutlist[[t]]=as(apply(pp.total,2,rbinom,n=nrow(pp.total),size=1),"sparseMatrix")
 		}else{
@@ -371,10 +380,13 @@ simulate_1funcv9 <- function(binary=F,sganno,sgmatrix, bmrpars, betaf0=2, Nsampl
 }
 # The forllowings are the ture parameters (???)
 	fold <- do.call(rbind,foldlist)
+	foldFix <- do.call(rbind,foldlistFix)
+
 	avFe <- rep(log(mean(fold[[1]])*Nsample.ps/Nsample + Nsample.neu/Nsample),nrow(fold))
 	diffFe <-  log(fold[[1]]*Nsample.ps/Nsample + Nsample.neu/Nsample)
+	diffFeFix <-  log(foldFix[[1]]*Nsample.ps/Nsample + Nsample.neu/Nsample)
 
-	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold,"bmrfold"=bmrfold, "annodata" = sganno, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = betagc, "avFe" = avFe, "diffFe" = diffFe),"nsample"=c(Nsample.ps,Nsample.neu))
+	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold,"bmrfold"=bmrfold, "annodata" = sganno, "bmrpars" = bmrpars, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list( "betaf0" = betaf0,  "beta_gc" = betagc, "avFe" = avFe, "diffFe" = diffFe,"diffFeFix"=diffFeFix),"nsample"=c(Nsample.ps,Nsample.neu))
 	return(simdata)
 }
 
@@ -451,6 +463,7 @@ power_comparebase9 <- function(binary, Niter, sganno,sgmatrix,Nsample,para,rho,t
 
 
 
+
 power_comparediff9 <- function(binary, Niter, sganno,sgmatrix,Nsample,para,rho,tau=1,bmrpars,betaf0,beta_gc,hot=0,hmm){
   m1.pvalue <- rep(1,Niter)
 	a=c()
@@ -464,6 +477,39 @@ power_comparediff9 <- function(binary, Niter, sganno,sgmatrix,Nsample,para,rho,t
 		e <- simdata$pheno
 		ef <- simdata$efsize
 		fe <- ef$diffFe
+		mr <- bmrmtx
+		if (sum(mut) ==0) {next}
+
+		if (binary == F){
+		res.m1 <- ddmodel(mut,e,mr, fe)
+		}else{
+		res.m1 <- ddmodel_binary(mut,e,mr,fe)
+		}
+		m1.pvalue[iter] <-  res.m1$pvalue
+		parameters=c(ef$beta_gc,ef$avbetaf1,ef$avbetaf2,ef$betaf1f2,ef$avbetaf1f2)
+		a=rbind(a,parameters)
+		nummut=sum(mut)
+		b=c(b,nummut)
+  }
+   return(list("parameters"=a, "m1.pvalue" =m1.pvalue,"#mut"=b))
+  }
+
+
+
+
+power_comparediff9Fix <- function(binary, Niter, sganno,sgmatrix,Nsample,para,rho,tau=1,bmrpars,betaf0,beta_gc,beta_gcFix=beta_gc,hot=0,hmm){
+  m1.pvalue <- rep(1,Niter)
+	a=c()
+	b=c()
+
+	for (iter in 1:Niter) {
+		simdata <- simulate_1funcv9(binary=binary,sganno=sganno,sgmatrix=sgmatrix, bmrpars=bmrpars, betaf0=betaf0, Nsample=Nsample, beta_gc=beta_gc,beta_gcFix=beta_gcFix, para=para,rho=rho,tau=tau,hot=hot,hmm=hmm)
+		ssgdata=simdata$annodata
+		mut <- do.call(rbind, simdata$mutlist)
+		bmrmtx <- do.call(rbind, simdata$bmrmtxlist)
+		e <- simdata$pheno
+		ef <- simdata$efsize
+		fe <- ef$diffFeFix
 		mr <- bmrmtx
 		if (sum(mut) ==0) {next}
 

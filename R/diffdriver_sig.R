@@ -167,7 +167,8 @@ rm(ri,mutation,fanno)
     e=canno[[j]]
 phename=colnames(canno)[j]
     resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1],label=label)
-    resg[["mlr"]] <- mlr(mutmtx, e)
+     resg[["dd_nl"]] <- ddmodel_nl(mutmtx, e, bmrmtx, fe[,1])
+ resg[["mlr"]] <- mlr(mutmtx, e)
     resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
     e_binary=ifelse(e>mean(e),1,0)
     resg[["fisher"]] <- genefisher(mutmtx, e_binary)
