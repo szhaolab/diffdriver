@@ -599,7 +599,7 @@ ddmodel_fixb <- function(mut, e, mr, fe){
     # Under H0 (null hypothesis), i.e. there is no differential selection, α1=0. The parameter we want to estimate is α0.
     alpha <- param[1]
     pi1 <- exp(alpha)/(1 + exp(alpha))
-    ll = sum(log(l.s * pi1 + l.n * (1-pi1)))
+    ll = sum(log(l.s * pi1 + l.n * (1-pi1)),na.rm=T)
     return(ll)
   }
 
@@ -610,7 +610,7 @@ ddmodel_fixb <- function(mut, e, mr, fe){
     alpha0 <- param[1]
     alpha1 <- param[2]
     pi1 <-  exp(alpha0 + alpha1 * e)/(1 + exp(alpha0 + alpha1 * e))
-    ll = sum(log(l.s * pi1 + l.n * (1-pi1)))
+    ll = sum(log(l.s * pi1 + l.n * (1-pi1)),na.rm=T)
     return(ll)
   }
 
@@ -650,7 +650,7 @@ ddmodel_binary <- function(mut, e, bmr, fe){
     b.pi[b.pi <= 0] <- 1e-8
     b.pi[b.pi >= 1] <- 1 - 1e-8
     llmtx <- (1- mut) * log(1 - b.pi) + mut * log(b.pi)
-    ll <- sum(llmtx)
+    ll <- sum(llmtx,na.rm=T)
     return(ll)
   }
 
@@ -666,10 +666,9 @@ ddmodel_binary <- function(mut, e, bmr, fe){
     b.pi1[b.pi1 >= 1] <- 1 - 1e-8
     b.pi <-  b.pi0 + e * (b.pi1- b.pi0)
     llmtx <- (1- mut.t) * log(1- b.pi) + mut.t * log(b.pi)
-    ll <- sum(llmtx)
+    ll <- sum(llmtx,na.rm=T)
     return(ll)
   }
-
   resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
   resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
   probnull <- mean(exp(resn$par)*(fe-1)*bmr+bmr)
@@ -725,7 +724,7 @@ index1=min(which(e==1))
 
     llmtx0 <- npos.e0 * log(1- b.pi0) + mutpos.e0 * log(b.pi0)
     llmtx1 <- npos.e1 * log(1- b.pi1) + mutpos.e1 * log(b.pi1)
-    ll <- sum(llmtx0)+sum(llmtx1)
+    ll <- sum(llmtx0,na.rm=T)+sum(llmtx1,na.rm=T)
     return(ll)
   }
 
@@ -798,7 +797,7 @@ aa=rbind(aa,c(ubmr[i],ubmr[i]*ufe[j]))
     b.pi1[b.pi1 <= 0] <- 1e-8
     b.pi1[b.pi1 >= 1] <- 1 - 1e-8
 pi= exp(eta)/(1+exp(eta))
-    ll <- sum(log(b.pi0+b.pi1))
+    ll <- sum(log(b.pi0+b.pi1),na.rm=T)
     return(ll)
   }
 
@@ -817,7 +816,7 @@ pi= exp(eta)/(1+exp(eta))
     b.pi1[b.pi1 >= 1] <- 1 - 1e-8
     llmtx0 <- npos.e0 * log(1- b.pi0) + mutpos.e0 * log(b.pi0)
     llmtx1 <- npos.e1 * log(1- b.pi1) + mutpos.e1 * log(b.pi1)
-    ll <- sum(llmtx0) + sum(llmtx1)
+    ll <- sum(llmtx0,na.rm=T) + sum(llmtx1,na.rm=T)
     return(ll)
   }
 

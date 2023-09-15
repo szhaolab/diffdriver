@@ -1,9 +1,9 @@
 #' @title plot mutations
 #' @export
-plot_mut <- function(mutmtx, canno,j, bmrmtx, ganno, ...){
+plot_mut <- function(mutmtx, canno, bmrmtx, ganno, ...){
   mycolorsori <- c("#FF3D2E","#2b8cbe","#fdae61","#41ab5d","pink","#8C2DA6","#a65628")
-  Phenotype=as.data.frame(canno)[,j]
-  df <- rbind(Phenotype,colSums(mutmtx), colSums(mutmtx[ganno$functypecode8>0,]), colSums(mutmtx[ganno$mycons>0,]),colSums(exp(bmrmtx)))
+  Phenotype=as.data.frame(canno)
+  df <-t(cbind(Phenotype,colSums(mutmtx), colSums(mutmtx[ganno$functypecode8>0,]), colSums(mutmtx[ganno$mycons>0,]),colSums(exp(bmrmtx))))
   rownames(df) <- c("Phenotype", "Nonsyn", "LoF", "Cons.", "BMR")
   df <- df[,order(df["Phenotype",])]
   par(mfrow=c(dim(df)[1],1), mar=c(0.5,5,0.5,1))

@@ -11,11 +11,8 @@ LazyData: true
 Imports:
 	Matrix,
 	stats,
-	matrixStats,
 	plyr,
-	fastTopics,
 	data.table,
-	resample
 Suggests: 
     knitr,
     rmarkdown,

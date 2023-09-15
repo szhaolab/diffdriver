@@ -180,7 +180,7 @@ phename=colnames(canno)[j]
     save(mutmtx,canno,bmrmtx, fe, ganno, betaf, betaf0, resg, file=paste0(paste0(outputbase,"_",phename,"_", g, ".Rd")))
     setEPS()
     postscript(file=paste0(outputbase,".",phename,".", g, "mut_status.eps"), width=9, height=4)
-    plot_mut(mutmtx, canno,j, bmrmtx, ganno)
+    plot_mut(mutmtx=mutmtx,canno=e, bmrmtx=bmrmtx, ganno=ganno)
 
   }
 
