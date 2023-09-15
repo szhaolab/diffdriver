@@ -11,8 +11,8 @@ LazyData: true
 Imports:
 	Matrix,
 	stats,
-	plyr,
 	data.table,
+	plyr
 Suggests: 
     knitr,
     rmarkdown,
