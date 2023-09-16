@@ -11,7 +11,7 @@ remotes::install_github("szhaolab/diffdriver",ref = "main")
 
 
 ## How to use
-Please visit the following website for the details of this pacakge, `https://szhaolab.github.io/diffdriver/`.
+Please visit the following website for the details of this pacakge, [Manual and Vignette](https://szhaolab.github.io/diffdriver/).
 We have included example scripts to run `diffdriver`. Please take a look at `scripts/` folder. 
 
 * `run_diffdriver.R` gives an example of how to run `diffdriver` using example files provided with the package. You can download this script and run it as `Rscript run_diffdriver.R` in command line. Note, we suggested to run drivermaps in your actual run in order to prepare the required inputs for diffdriver.
