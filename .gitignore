@@ -15,3 +15,4 @@ code/.*swp
 */*.bk
 *.bk
 inst/doc/
+inst/doc
