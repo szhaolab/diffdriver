@@ -2,8 +2,8 @@
 
 ## To install
 
-``` remotes::install_github("szhaolab/diffdriver",ref ="main") 
-
+```
+remotes::install_github("szhaolab/diffdriver",ref ="main") 
 ```
 
 ## How to use 
