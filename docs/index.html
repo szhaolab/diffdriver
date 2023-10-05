@@ -38,6 +38,12 @@
 <li class="nav-item">
   <a class="nav-link" href="reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="articles/How_to_use_diffdriver.html">How_to_use_diffdriver</a>
+  </div>
+</li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -56,15 +62,16 @@
 <div class="section level2">
 <h2 id="to-install">To install<a class="anchor" aria-label="anchor" href="#to-install"></a>
 </h2>
-<pre><code><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"szhaolab/diffdriver"</span>,ref <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></code></pre>
+<p>``` remotes::install_github(“szhaolab/diffdriver”,ref =“main”)</p>
+<p>```</p>
 </div>
 <div class="section level2">
 <h2 id="how-to-use">How to use<a class="anchor" aria-label="anchor" href="#how-to-use"></a>
 </h2>
-<p>We have included example scripts to run <code>diffdriver</code>. Please take a look at <code>scripts/</code> folder.</p>
+<p>Please visit the following website for the details of this pacakge, <a href="https://szhaolab.github.io/diffdriver/" class="external-link">diffdriver manual and vignette</a>. We have included example scripts to run <code>diffdriver</code>. Please take a look at <code>scripts/</code> folder.</p>
 <ul>
-<li><p><code>run_diffdriver.R</code> gives an example of how to run <code>diffdriver</code> using example files provided with the package. You can download this script and run it as <code>Rscript run_diffdriver.R</code> in command line. Note, we suggested to run drivermaps in your actual run in order to prepare the required inputs for diffdriver.</p></li>
-<li><p><code>run_simulate_singlegene.R</code> gives an example of how to perform simulations. We generate mutation and phenotype data for a single gene many times, assuming it is under differential selection or not, and check how many times we can detect it using. You can download this script and run it as <code>Rscript run_simulate_singlegene.R</code> in command line.</p></li>
+<li><p><code>run_nttype.R</code> gives an example of how to run <code>diffdriver</code> under regular model, where the annotation files are categorized into nine catogories based on its DNA mutation type. Another script <code>run_signature.R</code> givens an example of how to run <code>diffdriver</code> under sinature mode.You can run the scripts as `Rscript run_diffdriver.R. Note, we suggested to run drivermaps in your actual run in order to prepare the required inputs for diffdriver.</p></li>
+<li><p><code>simulate_functions.R</code> gives the functions for simulation studies of <code>diffdriver</code>. We generate mutation and phenotype data for a single gene many times, assuming it is under differential selection or not, and check how many times we can detect it using. Three scenarioes are considered in the simulations, one for phenotypes which are independent of backgound mutation, two for phenotypes which are correlated with background mutation.</p></li>
 </ul>
 </div>
 </div>

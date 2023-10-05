@@ -4,8 +4,7 @@
 #' get pi
 #' @param alpha
 #' @param e
-#' @return
-#' @export
+#' @noRd
 get_pi_nl <- function(alpha, e){
 alpha0 <- alpha[1]
   alpha1 <- alpha[2]
@@ -24,11 +23,8 @@ else{
 #' @param rate.s0
 #' @param ll.n
 #' @param mutidx
-#'
 #' @return
-#' @export
-#'
-#' @examples
+#' @noRd
 q_pos_nl <- function(b, zpost, rate.s0, ll.n, mutidx){
   ll.s <- get_ll_s_nl(b, rate.s0, mutidx)
   q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
@@ -41,11 +37,8 @@ q_pos_nl <- function(b, zpost, rate.s0, ll.n, mutidx){
 #' @param rate.s0
 #' @param ll.n
 #' @param mutidx
-#'
 #' @return
-#' @export
-#'
-#' @examples
+#' @noRd
 dd_loglik_nl <- function(p, rate.s0, ll.n, mutidx,e){
   beta0 <- p[1]
   alpha <- p[2:3]
@@ -55,7 +48,6 @@ dd_loglik_nl <- function(p, rate.s0, ll.n, mutidx,e){
 }
 
 #' Title
-#'
 #' @param p
 #' @param rate.n
 #' @param rate.s0
@@ -64,9 +56,9 @@ dd_loglik_nl <- function(p, rate.s0, ll.n, mutidx,e){
 #' @param type
 #'
 #' @return
-#' @export
 #'
 #' @examples
+#' @noRd
 dd_EM_update_nl <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"),mut,e){
   # p: beta0, alpha
   beta0 <- p[1]
@@ -126,9 +118,9 @@ dd_EM_update_nl <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "
 #' @param tol
 #'
 #' @return
-#' @export
 #'
-#' @examples
+
+#' @noRd
 #dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 100, tol = 1e-3,mut,e){
 #  ll_rec <- rep(0, maxit)
 #  p_rec <- NULL
@@ -154,7 +146,6 @@ dd_EM_update_nl <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "
 #
 
 #' Title
-#'
 #' @param beta0
 #' @param alpha
 #' @param rate.n
@@ -164,11 +155,9 @@ dd_EM_update_nl <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "
 #' @param type
 #' @param maxit
 #' @param tol
-#'
 #' @return
-#' @export
-#'
 #' @examples
+#' @noRd
 dd_squarEM_nl <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"), mut,e, maxit = 100, tol = 1e-3){
 
   # initialize
@@ -189,7 +178,7 @@ dd_squarEM_nl <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, muti
 #' @param mr a matrix, mutation rate of each sample at each mutation (log scale) that is not dependent on sample level factor
 #' @param fe, a vector, increased mutation rate at each position, depending on e (log scale),
 #'  should match the rows of \code{mut} and \code{mr}
-#' @export
+#' @noRd
 ddmodel_nl <- function(mut, e, mr, fe, ...){
   rate.n <- as.matrix(exp(mr))
   rate.s0 <- as.matrix(exp(fe) * rate.n)
@@ -208,12 +197,11 @@ ddmodel_nl <- function(mut, e, mr, fe, ...){
 
 
 
-
-#' get pi
+#' Title
 #' @param alpha
 #' @param e
 #' @return
-#' @export
+#' @noRd
 get_pi <- function(alpha, e){
 alpha0 <- alpha[1]
   alpha1 <- alpha[2]
@@ -226,7 +214,6 @@ else{
 }
 
 #' Title
-#'
 #' @param b
 #' @param zpost
 #' @param rate.s0
@@ -234,9 +221,8 @@ else{
 #' @param mutidx
 #'
 #' @return
-#' @export
 #'
-#' @examples
+#' @noRd
 q_pos <- function(b, zpost, rate.s0, mut,mutidx,ll.n){
   ll.s <- get_ll_s(b,mut,mutidx, rate.s0)
   q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
@@ -244,16 +230,14 @@ q_pos <- function(b, zpost, rate.s0, mut,mutidx,ll.n){
 }
 
 #' Title
-#'
 #' @param p
 #' @param rate.s0
 #' @param ll.n
 #' @param mutidx
 #'
 #' @return
-#' @export
-#'
 #' @examples
+#' @noRd
 dd_loglik <- function(p, rate.s0, ll.n,mutidx, mut, e){
   beta0 <- p[1]
   alpha <- p[2:3]
@@ -263,7 +247,6 @@ dd_loglik <- function(p, rate.s0, ll.n,mutidx, mut, e){
 }
 
 #' Title
-#'
 #' @param p
 #' @param rate.n
 #' @param rate.s0
@@ -271,9 +254,7 @@ dd_loglik <- function(p, rate.s0, ll.n,mutidx, mut, e){
 #' @param mutidx
 #' @param type'
 #' @return
-#' @export
-#'
-#' @examples
+#' @noRd
 dd_EM_updateold <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"),mut,e){
   # p: beta0, alpha
   beta0 <- p[1]
@@ -328,9 +309,7 @@ if (type == "null"){
 #' @param mutidx
 #' @param type'
 #' @return
-#' @export
-#'
-#' @examples
+#' @noRd
 dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"),mut,e){
   # p: beta0, alpha
   beta0 <- p[1]
@@ -392,9 +371,8 @@ if (type == "null"){
 #' @param tol
 #'
 #' @return
-#' @export
 #'
-#' @examples
+#' @noRd
 dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mutidx, type = c("null", "alt"), maxit = 100, tol = 1e-3,mut,e){
   ll_rec <- rep(0, maxit)
   p_rec <- NULL
@@ -432,9 +410,7 @@ dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mut
 #' @param tol
 #'
 #' @return
-#' @export
-#'
-#' @examples
+#' @noRd
 dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n,mutidx, type = c("null", "alt"), mut,e, maxit = 100, tol = 1e-3){
 
   # initialize
@@ -490,80 +466,81 @@ ll.n <- colSums(mut*log(rate.n)-rate.n)
   return(res)
 }
 
-
-#' Title
-#'
-#' @param beta0
-#' @param alpha
-#' @param rate.n
-#' @param rate.s0
-#' @param ll.n
-#' @param mutidx
-#' @param type
-#' @param maxit
-#' @param tol
-#'
-#' @return
-#' @export
-#'
-#' @examples
-dd_squarEMold <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n,mutidx, type = c("null", "alt"), mut,e, maxit = 100, tol = 1e-3){
-
-  # initialize
-#beta0=0
-#alpha=c(0,0)
- p <- c(beta0, alpha)
-#p <- c(0,0,0)
-  # initialize
- 
-  # EM
-  res <- SQUAREM::squarem(p=p, rate.n = rate.n, rate.s0=rate.s0, ll.n=ll.n, mutidx=mutidx, type = type,mut=mut,e=e, fixptfn=dd_EM_updateold, control=list(tol=tol, maxiter = maxit))
-  p <- res$par
-  ll <- dd_loglik(p=p, rate.s0=rate.s0, ll.n=ll.n, mutidx=mutidx,mut=mut,e=e)
-
-  return(list("loglikelihood" = ll, "beta0" = p[1], "alpha" = p[2:3]))
-}
-
-#' @title diffDriver model
-#' @description This model is applied on data of a single gene. It will infer effect size for both sample-level variable and positional level functional annotations. We used an EM algorithm to infer parameters.
-#' @param mut a matrix of mutation status 0 or 1, rows positions, columns are samples.
-#' @param e a vector,phenotype of each sample,
-#'  should match the columns of \code{mut} and \code{mr}
-#' @param mr a matrix, mutation rate of each sample at each mutation (log scale) that is not dependent on sample level factor
-#' @param fe, a vector, increased mutation rate at each position, depending on e (log scale),
-#'  should match the rows of \code{mut} and \code{mr}
-#' @export
-ddmodelold <- function(mut, e, mr, fe,label, ...){
-  rate.n <- exp(mr)
-  rate.s0 <- exp(fe) * rate.n
-## generate labels for duplicate rows in rate.n and rate.s0
-#label=as.factor(rate.s0[,1])
-## aggregate the duplicate rows 
-rate.n <- aggregate(rate.n,by=list(label),sum,na.rm=T)[,-c(1)]
-rate.s0 <- aggregate(rate.s0,by=list(label),sum,na.rm=T)[,-c(1)]
-mut <- aggregate(as.matrix(mut),by=list(label),sum,na.rm=T)[,-c(1)]
-mutidx <- which(mut!=0, arr.ind = T)
-#mut <- t(sapply(by(mut,label,colSums),identity))
-## delete the label
-
-## Poisson likelihood 
-  #ll.n <- colSums(log(rate.n * mut +  (1-rate.n) * (1-mut)))
-#ll.n <- colSums(log(rate.n^(mut)/factorial(mut)*exp(-rate.n))) 
-ll.n <- colSums(mut*log(rate.n)-rate.n) 
+#
+##' Title
+##'
+##' @param beta0
+##' @param alpha
+##' @param rate.n
+##' @param rate.s0
+##' @param ll.n
+##' @param mutidx
+##' @param type
+##' @param maxit
+##' @param tol
+##'
+##' @return
+##' @export
+##'
+##' @examples
+#dd_squarEMold <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n,mutidx, type = c("null", "alt"), mut,e, maxit = 100, tol = 1e-3){
+#
+#  # initialize
+##beta0=0
+##alpha=c(0,0)
+# p <- c(beta0, alpha)
+##p <- c(0,0,0)
+#  # initialize
+# 
+#  # EM
+#  res <- SQUAREM::squarem(p=p, rate.n = rate.n, rate.s0=rate.s0, ll.n=ll.n, mutidx=mutidx, type = type,mut=mut,e=e, fixptfn=dd_EM_updateold, control=list(tol=tol, maxiter = maxit))
+#  p <- res$par
+#  ll <- dd_loglik(p=p, rate.s0=rate.s0, ll.n=ll.n, mutidx=mutidx,mut=mut,e=e)
+#
+#  return(list("loglikelihood" = ll, "beta0" = p[1], "alpha" = p[2:3]))
+#}
+#
+#
+##' @title diffDriver model
+##' @description This model is applied on data of a single gene. It will infer effect size for both sample-level variable and positional level functional annotations. We used an EM algorithm to infer parameters.
+##' @param mut a matrix of mutation status 0 or 1, rows positions, columns are samples.
+##' @param e a vector,phenotype of each sample,
+##'  should match the columns of \code{mut} and \code{mr}
+##' @param mr a matrix, mutation rate of each sample at each mutation (log scale) that is not dependent on sample level factor
+##' @param fe, a vector, increased mutation rate at each position, depending on e (log scale),
+##'  should match the rows of \code{mut} and \code{mr}
+##' @export
+#ddmodelold <- function(mut, e, mr, fe,label, ...){
+#  rate.n <- exp(mr)
+#  rate.s0 <- exp(fe) * rate.n
+### generate labels for duplicate rows in rate.n and rate.s0
+##label=as.factor(rate.s0[,1])
+### aggregate the duplicate rows 
+#rate.n <- aggregate(rate.n,by=list(label),sum,na.rm=T)[,-c(1)]
+#rate.s0 <- aggregate(rate.s0,by=list(label),sum,na.rm=T)[,-c(1)]
+#mut <- aggregate(as.matrix(mut),by=list(label),sum,na.rm=T)[,-c(1)]
 #mutidx <- which(mut!=0, arr.ind = T)
-
-  # res.null <- dd_EM_ordinary(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "null", ...)
-  res.null <- dd_squarEMold(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n,mutidx=mutidx, type = "null",mut=mut,e=e, ...)
-  # res.alt <- dd_EM_ordinary(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "alt",  ...)
-  res.alt <- dd_squarEMold(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n,mutidx=mutidx, type = "alt",mut=mut,e=e, ...)
-  teststat<- -2*(res.null$loglikelihood - res.alt$loglikelihood)
-  pvalue <- pchisq(teststat, df=1, lower.tail=FALSE)
-  res <- list("pvalue"=pvalue, "res.null" = res.null, "res.alt"=res.alt)
-  return(res)
-}
-
-
-
+##mut <- t(sapply(by(mut,label,colSums),identity))
+### delete the label
+#
+### Poisson likelihood 
+#  #ll.n <- colSums(log(rate.n * mut +  (1-rate.n) * (1-mut)))
+##ll.n <- colSums(log(rate.n^(mut)/factorial(mut)*exp(-rate.n))) 
+#ll.n <- colSums(mut*log(rate.n)-rate.n) 
+##mutidx <- which(mut!=0, arr.ind = T)
+#
+#  # res.null <- dd_EM_ordinary(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "null", ...)
+#  res.null <- dd_squarEMold(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n,mutidx=mutidx, type = "null",mut=mut,e=e, ...)
+#  # res.alt <- dd_EM_ordinary(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n, mutidx=mutidx, type = "alt",  ...)
+#  res.alt <- dd_squarEMold(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n,mutidx=mutidx, type = "alt",mut=mut,e=e, ...)
+#  teststat<- -2*(res.null$loglikelihood - res.alt$loglikelihood)
+#  pvalue <- pchisq(teststat, df=1, lower.tail=FALSE)
+#  res <- list("pvalue"=pvalue, "res.null" = res.null, "res.alt"=res.alt)
+#  return(res)
+#}
+#
+#
+#
 
 
 
@@ -578,51 +555,51 @@ ll.n <- colSums(mut*log(rate.n)-rate.n)
 #' @param mr a matrix, mutation rate of each sample at each mutation (log scale) that is not dependent on sample level factor
 #' @param fe, a vector, increased mutation rate at each position, depending on e (log scale),
 #'  should match the rows of \code{mut} and \code{mr}
-#' @export
-ddmodel_fixb <- function(mut, e, mr, fe){
-  mr <- exp(mr)
-  fe <- exp(fe)
-
-  rate.s <- as.matrix(fe * mr)
-  rate.n <-  as.matrix(mr)
-  rate.s[rate.s <= 0] <- 0
-  rate.s[rate.s >= 1] <- 1
-  rate.n[rate.n <= 0] <- 0
-  rate.n[rate.n >= 1] <- 1
-  ll.s <- log(rate.s * mut +  (1-rate.s) * (1-mut)) # matrix, log likelihood for each (i,j) under selection
-  ll.n <- log(rate.n * mut +  (1-rate.n) * (1-mut)) # matrix, log likelihood for each (i,j) no selection
-  l.s <- exp(colSums(ll.s))
-  l.n <- exp(colSums(ll.n))
-
-  lln <- function(param){
-    # log likelihood under null
-    # Under H0 (null hypothesis), i.e. there is no differential selection, α1=0. The parameter we want to estimate is α0.
-    alpha <- param[1]
-    pi1 <- exp(alpha)/(1 + exp(alpha))
-    ll = sum(log(l.s * pi1 + l.n * (1-pi1)),na.rm=T)
-    return(ll)
-  }
-
-  lla <- function(param){
-    # log likelihood under alt
-    # Under H1 (alternative hypothesis), α1≠0, there are two parameters we want to estimate, α0 and α1
-
-    alpha0 <- param[1]
-    alpha1 <- param[2]
-    pi1 <-  exp(alpha0 + alpha1 * e)/(1 + exp(alpha0 + alpha1 * e))
-    ll = sum(log(l.s * pi1 + l.n * (1-pi1)),na.rm=T)
-    return(ll)
-  }
-
-  resn <- optim(c(0), lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
-  resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
-
-  teststat<- -2*(resn$value-resa$value)
-  pvalue <- pchisq(teststat,df=1,lower.tail=FALSE)
-  res <- list("pvalue"=pvalue, "null.param" = resn$par, "alt.param"=resa$par, "null.ll"= resn$value, "alt.ll" = resa$value)
-  return(res)
-}
-
+##' @noRd
+#ddmodel_fixb <- function(mut, e, mr, fe){
+#  mr <- exp(mr)
+#  fe <- exp(fe)
+#
+#  rate.s <- as.matrix(fe * mr)
+#  rate.n <-  as.matrix(mr)
+#  rate.s[rate.s <= 0] <- 0
+#  rate.s[rate.s >= 1] <- 1
+#  rate.n[rate.n <= 0] <- 0
+#  rate.n[rate.n >= 1] <- 1
+#  ll.s <- log(rate.s * mut +  (1-rate.s) * (1-mut)) # matrix, log likelihood for each (i,j) under selection
+#  ll.n <- log(rate.n * mut +  (1-rate.n) * (1-mut)) # matrix, log likelihood for each (i,j) no selection
+#  l.s <- exp(colSums(ll.s))
+#  l.n <- exp(colSums(ll.n))
+#
+#  lln <- function(param){
+#    # log likelihood under null
+#    # Under H0 (null hypothesis), i.e. there is no differential selection, α1=0. The parameter we want to estimate is α0.
+#    alpha <- param[1]
+#    pi1 <- exp(alpha)/(1 + exp(alpha))
+#    ll = sum(log(l.s * pi1 + l.n * (1-pi1)),na.rm=T)
+#    return(ll)
+#  }
+#
+#  lla <- function(param){
+#    # log likelihood under alt
+#    # Under H1 (alternative hypothesis), α1≠0, there are two parameters we want to estimate, α0 and α1
+#
+#    alpha0 <- param[1]
+#    alpha1 <- param[2]
+#    pi1 <-  exp(alpha0 + alpha1 * e)/(1 + exp(alpha0 + alpha1 * e))
+#    ll = sum(log(l.s * pi1 + l.n * (1-pi1)),na.rm=T)
+#    return(ll)
+#  }
+#
+#  resn <- optim(c(0), lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
+#  resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
+#
+#  teststat<- -2*(resn$value-resa$value)
+#  pvalue <- pchisq(teststat,df=1,lower.tail=FALSE)
+#  res <- list("pvalue"=pvalue, "null.param" = resn$par, "alt.param"=resa$par, "null.ll"= resn$value, "alt.ll" = resa$value)
+#  return(res)
+#}
+#
 
 
 #' @title diffDriver model only for binary phenotype.
@@ -760,6 +737,15 @@ index1=min(which(e==1))
 
 
 
+#' Title
+#' @NoRd
+#' @param mut
+#' @param e
+#' @param bmr
+#' @param fe
+#' @return
+#' @examples
+
 
 ddmodel_conti_simple <- function(mut, e, bmr, fe){
 
@@ -831,14 +817,15 @@ pi= exp(eta)/(1+exp(eta))
 
 
 #' Title
-#'
+#' 
 #' @param b
 #' @param mut
 #' @param mutidx
 #' @param rate.s0
 #' @return
-#' @export'
-#' @examples
+
+#' @noRd
+
 #get_ll_s <- function(b, mut, rate_s0){
 #  rate_s <- rate_s0 * exp(b)
 #  #rmtx <- log(1-rate_s)
@@ -859,15 +846,12 @@ get_ll_s <- function(b, mut, mutidx, rate_s0){
 
 
 #' Title
-#'
 #' @param b
 #' @param rate.s0
 #' @param mutidx
 #'
 #' @return
-#' @export
-#'
-#' @examples
+#' @noRd
 get_ll_s_nl <- function(b, rate_s0, mutidx){
   rate_s <- rate_s0 * exp(b)
   rmtx <- log(1-rate_s)

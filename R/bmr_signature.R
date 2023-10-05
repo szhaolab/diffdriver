@@ -4,10 +4,9 @@
 #' @param sigatures A 96 times m matrix M. Each column of it is a signaturee.
 #' @param rho Correlation between e and the loadings of first signature.
 #' @param s Scale parameter
+#' @keywords internal
 #' @return matrix bmr
-#' @export
-#'
-#' @examples
+#' @noRd
 bmrSignature=function(e,signatures,rho,sc=1,adjustment=F){
    if (adjustment==T) {
      w=(N+1)/sum((N+1))

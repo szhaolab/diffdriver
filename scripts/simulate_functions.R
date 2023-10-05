@@ -593,20 +593,20 @@ simulate_1funcv96 <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc,beta_gc
 		hotindex=which(hotseqt==1)
 		pp.neu=matrix(rep(1,nrow(ssgdata)),ncol=1)%x%matrix(bmrfold$bmr[t,],nrow=1)
 		fold=as.vector(exp(as.matrix(ssgdata)%*%betagc))
+		fold=(Nsample/Nsample.ps)*fold-Nsample.neu/Nsample.ps	
 		fold[hotindex]=exp(hmm[9])
-		if (any(2*fold<1)){stop("Error:inappropriate parameter settings!")}
-		fold=2*fold-1
-
+		#if (any(2*fold<1)){stop("Error:inappropriate parameter settings!")}
+		#fold=2*fold-1
+		if (any(fold<0)){warning("Fold is negative!")}
+		fold[which(fold<0)]=1	
 		foldFix=as.vector(exp(as.matrix(ssgdata)%*%betagcFix))
 		foldFix[hotindex]=exp(hmm[9])
+		foldFix=(Nsample/Nsample.ps)*foldFix-Nsample.neu/Nsample.ps
+		if (any(foldFix<0)){warning("Foldfix is negative!")}
+		foldFix[which(foldFix<0)]=1
+
 		#if (any(2*foldFix<1)){stop("Error:inappropriate parameter settings!")}
-		foldFix=2*foldFix-1
-
-
-
-
-
-
+		#foldFix=2*foldFix-1
 		F=cbind(fold,1)%*%selection
 		pp.total=ifelse(F*pp.neu<1,F*pp.neu,0.99)
 		foldlist[[t]]=data.table::data.table(fold=fold)

@@ -8,9 +8,7 @@
 #' @param target The target positions where the bmr's are computed
 #'
 #' @return
-#' @export
-#'
-#' @examples
+#' @noRd
 matrixlistToBMR=function(adirbase,mutf,BMRlist,k=5){
 annolist=vector("list",96)
 for (i in 1:96) {

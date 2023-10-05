@@ -1,6 +1,7 @@
 #' @param x  new data
 #' @param path to old file
-#' @return  
+#' @return 
+#' @noRd
 append.Rda <- function(x, file) {
      old.objects <- load(file)
      dd=eval(parse(text=old.objects[1]))

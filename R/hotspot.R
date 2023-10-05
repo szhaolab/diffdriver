@@ -4,7 +4,7 @@
 #' @description Generate hotspot sequence
 #' @param sgdata annotation list
 #' @return A n by 2  data frame. The first column start provide the position information, the second column seqt indicates whether this position being a hotspot.
-#' @export
+#' @noRd
 hotspotseq=function(hmm,sgdata){
   pos=sort(unique(do.call(rbind,sgdata)$start)) # distract the positions
   seqt=sample(x=c(0,1),size=1,prob =c(hmm[1],hmm[2])) # generate the inital state

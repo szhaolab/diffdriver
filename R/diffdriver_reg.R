@@ -7,8 +7,8 @@
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
 #' @param j The index of phenotype
 #' @import Matrix data.table
-#' @export
-diffdriver_reg <- function(genef, mutf, phenof,j,hotf, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
+#' @noRd
+diffdriver_reg <- function(genef, mutf, phenof,bmrf,j,hotf, drivermapsdir, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "nttypeXXX_annodata.txt", sep=""),
@@ -35,7 +35,8 @@ chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref
 #save(chrposmatrixlist,file="chrposmatrixlist9.Rd")
 #load("matrixlist9.Rd")
 #load("chrposmatrixlist9.Rd")
-BMRlist=BMRlist$UCS
+load(bmrf)
+BMRlist=BMRlist[[1]]
 
 for (t in 1:length(matrixlist)){
     b1 <- which(sapply(matrixlist[[t]][[3]], grepl, pattern="[;,|]"))
