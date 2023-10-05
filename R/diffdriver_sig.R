@@ -7,8 +7,8 @@
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
 #' @param j The index of phenotype
 #' @import Matrix data.table
-#' @export
-diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
+#' @noRd
+diffdriver_sig= function(genef, mutf, phenof,bmrf,j, hotf, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
@@ -35,7 +35,8 @@ diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputd
 #save(chrposmatrixlist,file="chrposmatrixlist96.Rd")
 #load("matrixlist96.Rd")
 #load("chrposmatrixlist96.Rd")
- BMRlist=BMRlist$UCS
+ load(bmrf)
+ BMRlist=BMRlist[[1]]
 
 
   for (t in 1:length(matrixlist)){
@@ -45,7 +46,7 @@ diffdriver_sig= function(genef, mutf, phenof,j, hotf, drivermapsdir,k=k, outputd
     chrposmatrixlist[[t]][[3]][b2,] <- unlist(lapply(sapply(matrixlist[[t]][[3]][b2,], strsplit, split="[;,|]"), function(x) intersect(x,allg)[1]))
 
   }
-  #------------------------------------------------------------------------------
+  ------------------------------------------------------------------------------
 
   # background mutation rate (bmrdt): data.table, each column correponds to one BMR label
 #target=vector("list",length(BMRlist))

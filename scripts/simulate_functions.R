@@ -587,26 +587,26 @@ simulate_1funcv96 <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc,beta_gc
 	for (t in 1:length(sganno)) {
 	  	size=c(size,nrow(sganno[[t]]))
 	  	if (nrow(sganno[[t]])==0) {next}
-	  	hotseqt= hotspot1sig[[t]]*hot
+	  	hotseqt= hotspot2sig[[t]]*hot
 	  	selename=names(beta_gc)
 		ssgdata=cbind(sgmatrix[[t]][,..selename],hotseqt)
 		hotindex=which(hotseqt==1)
 		pp.neu=matrix(rep(1,nrow(ssgdata)),ncol=1)%x%matrix(bmrfold$bmr[t,],nrow=1)
 		fold=as.vector(exp(as.matrix(ssgdata)%*%betagc))
+		fold=(Nsample/Nsample.ps)*fold-Nsample.neu/Nsample.ps	
 		fold[hotindex]=exp(hmm[9])
-		if (any(2*fold<1)){stop("Error:inappropriate parameter settings!")}
-		fold=2*fold-1
-
+		#if (any(2*fold<1)){stop("Error:inappropriate parameter settings!")}
+		#fold=2*fold-1
+		if (any(fold<0)){warning("Fold is negative!")}
+		fold[which(fold<0)]=1	
 		foldFix=as.vector(exp(as.matrix(ssgdata)%*%betagcFix))
 		foldFix[hotindex]=exp(hmm[9])
+		foldFix=(Nsample/Nsample.ps)*foldFix-Nsample.neu/Nsample.ps
+		if (any(foldFix<0)){warning("Foldfix is negative!")}
+		foldFix[which(foldFix<0)]=1
+
 		#if (any(2*foldFix<1)){stop("Error:inappropriate parameter settings!")}
-		foldFix=2*foldFix-1
-
-
-
-
-
-
+		#foldFix=2*foldFix-1
 		F=cbind(fold,1)%*%selection
 		pp.total=ifelse(F*pp.neu<1,F*pp.neu,0.99)
 		foldlist[[t]]=data.table::data.table(fold=fold)
@@ -630,7 +630,7 @@ simulate_1funcv96 <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc,beta_gc
  
 	avFe <-rep(mean(diffFe),nrow(fold))
 	#covariate=apply(bmrfold$bmr, 2, "%*%",size)
-	covariate=apply(bmrfold$loadings, 2, sum)
+	covariate=apply(bmrfold$bmr, 2,"%*%", size)
 	simdata <- list("mutlist"= mutlist, "pheno" = phenotype,"foldlist"=fold,"covariate"=covariate,"bmrfold"=bmrfold, "annodata" = sganno, "bmrmtxlist" = bmrmtxlist, "para"=para, "efsize" = list(  "avFe" = avFe, "diffFe" = diffFe,"diffFeFix"=diffFeFix),"nsample"=c(Nsample.ps,Nsample.neu))
 	return(simdata)
 }
@@ -656,7 +656,7 @@ m1.pvalue <- m2.pvalue <- m3.pvalue <- m4.pvalue<- m5.pvalue <- rep(1,Niter)
 		e_bisect=ifelse(e>mean(e),1,0)
 		ef <- simdata$efsize
 		if (sum(mut) ==0) {next}
-		res.m1 <- mlr(mut,e)
+		res.m1 <- mlr(mut,e,covariates= covariate)
 		res.m2 <- genefisher(mut,e_bisect)
 		res.m3 <- genebinom(mut,e_bisect)
 		res.m4 <- genelr(mut,e_bisect,covariates= covariate)
@@ -789,3 +789,37 @@ power_comparediff96Fix <- function(binary, Niter, sganno,sgmatrix,Nsample,para,s
 
 
 
+#' Title
+#'
+#' @param e phenotype vector
+#' @param sigatures A 96 times m matrix M. Each column of it is a signaturee.
+#' @param rho Correlation between e and the loadings of first signature.
+#' @param s Scale parameter
+#' @keywords internal
+#' @return matrix bmr
+#' @noRd
+bmrSignature=function(e,signatures,rho,sc=1,adjustment=F){
+   if (adjustment==T) {
+     w=(N+1)/sum((N+1))
+     }else{
+       w=rep(1,96)
+     } # weight based on the number of silent mutations
+nn=length(e) ## sample size
+if (nrow(signatures)!=96) {stop("Signature length should be 96!")}
+m=ncol(signatures) ## number of signatures
+cc= matrix(runif(m*nn),nrow = m, ncol = nn) ## loading matrix
+# for (i in 1:nrow(cc)) {
+#   cc[i,]=cc[i,]/mean(cc[i,])
+# }
+complement <- function(y, rho, x) {
+  if (missing(x)) x <-runif(length(y), min=0, max =1) # Optional: supply a default if `x` is not given
+  y.perp <- residuals(lm(x ~ y))
+  rho * sd(y.perp) * y + y.perp * sd(y) * sqrt(1 - rho^2)
+}
+b=complement(e,rho)
+b.new=b-min(b)+0.1
+cc[1,]=b.new/mean(b.new)
+yy=as.matrix(signatures)%*%as.matrix(cc)
+bmr=diag(1/w)%*%yy/sc
+return(list("bmr"=bmr,"loadings"=cc,"signatures"=signatures))
+}

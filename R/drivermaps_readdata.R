@@ -6,6 +6,7 @@
 #' @param genesubset Genes of interest
 #'
 #' @import data.table
+#' @noRd
 ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
   # genesubset is a file containing genenames, each line has one gene name
   # working in data.table > 1.10
@@ -47,9 +48,7 @@ ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
 #' @param genesubset
 #'
 #' @return A list
-#' @export
-#'
-#' @examples
+#' @noRd
 ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL, genesubset=NULL){
   matrixlist <- list()
   selectvars <- selectvars[selectvars !="nttypecode"] # nttypecode will always be included by reading data by type
@@ -81,9 +80,7 @@ ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars 
 #' @param checkcols
 #'
 #' @return A list
-#' @export
-#'
-#' @examples
+#' @noRd
 mlcoluniq <- function(matrixlist, checkcols = c("functypecode")){
 uniqvlist <- list()
   for (j in 1:totalnttype){
@@ -109,7 +106,7 @@ uniqvlist <- list()
 #' @param dt
 #'
 #' @return A warning sign
-
+#' @noRd
 dtcoldup <- function(dt){
 
   colsum <- lapply(dt, sum , na.rm = TRUE)
@@ -129,6 +126,7 @@ dtcoldup <- function(dt){
 #' @param functypecodelevel
 #'
 #' @return A list
+#' @noRd
 ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
 
   selectvars <- selectvars[selectvars !="nttypecode"]
@@ -165,7 +163,7 @@ ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
 #' @param fixmusd
 #'
 #' @return A list
-
+#' @noRd
 ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=c(-1.8,0.3), cvarimpute = 0, fixmusd=NULL){
 print("processing ...")
   print("for qnvars, filling in missing values ...")
@@ -230,7 +228,7 @@ print("processing ...")
 #' @param matrixlist
 #' @param cpgenelist
 #' @return A list
-
+#' @noRd
 splitddm <- function(matrixlist, cpgenelist){
   outmatrixlist <- vector("list", length(cpgenelist)+1)
   for (j in 1:totalnttype){
@@ -271,6 +269,7 @@ splitddm <- function(matrixlist, cpgenelist){
 #' @param fixmusd
 #'
 #' @return A list
+#' @noRd
 readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL,qnvars = c("expr","repl","hic"),functypecodelevel = NULL,qnvarimpute=c(-1.8,0.3), cvarimpute = 0, genesubset=NULL, fixmusd=NULL){
   # read data for a subset of genes. genesubset is a file containing gene names, one gene name per line.
   # fixmusd is a .Rd file when loaded contain allmu and allsd variables to be used in ddmprocess
@@ -296,9 +295,7 @@ readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readi
 #' @param fixpars
 #'
 #' @return A list
-#' @export
-#'
-#' @examples
+#' @noRd
 matrixlistToGLM_sig <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
   GLMlist <- list()
   chrposlist <- list()
@@ -345,6 +342,7 @@ genename <- matrixlist[[j]][[3]]
 #' @param vbeta
 #'
 #' @return A numerical vector
+#' @noRd
 convertbeta_sig <- function(j, vbeta){
   tbeta <- vbeta[j]
   ibeta <- vbeta[-c(1:totalnttype)]
@@ -365,6 +363,7 @@ convertbeta_sig <- function(j, vbeta){
 #' @param fixpars
 #'
 #' @return A list
+#' @noRd
 matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
   GLMlist <- list()
   chrposlist <- list()
@@ -410,6 +409,7 @@ matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s,
 #' @param vbeta
 #'
 #' @return A numerical vector
+#' @noRd
 convertbeta <- function(j, vbeta){
   tbeta <- vbeta[j]
   ibeta <- vbeta[-c(1:totalnttype)]
