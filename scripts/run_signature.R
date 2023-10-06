@@ -19,7 +19,7 @@ pheName=colnames(fread(phenof, header = "auto"))
 hotf=paste0(mutationdir,type,"/",type,"_hotpositions.txt")
 bmrf=paste0(mutationdir,type,"/","BMRlist.Rd")
 
-res <- diffdriver(genef, mutf, phenof,bmrf,j=i2+4,hotf, drivermapsdir = drivermapsdir,k=6,mode=2, outputdir = outputdir, outputname = outputname)
+res <- diffdriver(genef, mutf, phenof,bmrf,j=i2+3,hotf, drivermapsdir = drivermapsdir,k=6,mode=2, outputdir = outputdir, outputname = outputname)
 print(paste0(type,":",i2+4))
 save(res,file=paste0(outputdir,"/Results_",type,"_",pheName[i2+4],".Rd"))
 q("no")
