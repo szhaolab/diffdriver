@@ -587,7 +587,7 @@ simulate_1funcv96 <- function(binary=F,sganno,sgmatrix, Nsample, beta_gc,beta_gc
 	for (t in 1:length(sganno)) {
 	  	size=c(size,nrow(sganno[[t]]))
 	  	if (nrow(sganno[[t]])==0) {next}
-	  	hotseqt= hotspot1sig[[t]]*hot
+	  	hotseqt= hotspot2sig[[t]]*hot
 	  	selename=names(beta_gc)
 		ssgdata=cbind(sgmatrix[[t]][,..selename],hotseqt)
 		hotindex=which(hotseqt==1)
