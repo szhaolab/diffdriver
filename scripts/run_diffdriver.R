@@ -1,6 +1,6 @@
-library('devtools')
-load_all("../")
-library("logging")
+
+
+
 drivermapsdir<- "/dartfs/rc/lab/S/Szhao/library/diffdriver_anno/"
 outputdir <- "~/temp/"
 outputname <- "diffDriver_demo"

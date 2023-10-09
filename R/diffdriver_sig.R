@@ -8,7 +8,7 @@
 #' @param j The index of phenotype
 #' @import Matrix data.table
 #' @noRd
-diffdriver_sig= function(genef, mutf, phenof,bmrf,j, hotf, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
+diffdriver_sig= function(genef, mutf, phenof, bmrf, j, hotf, drivermapsdir,k=k, outputdir =".", outputname = "diffdriver_results"){
   # ------- read position level information (same as in drivermaps) ----------
   adirbase <-drivermapsdir
   afileinfo <- list(file = paste(adirbase, "TCGA-UCS_nttypeXXX_annodata.txt", sep=""),
@@ -150,16 +150,16 @@ rm(ri,mutation,fanno)
     } # if OG/TSG unknown, use TSG parameters.
     ganno <- fannoallg[[g]]
    fe1 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
-  fe2 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
+   fe2 <- as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
 
 	indexmtx=cbind(bmrmtx[,1],ganno[,names(betaf),with=F])
-	#	label=factor(interaction(indexmtx))	
+	#	label=factor(interaction(indexmtx))
  label=factor(1:nrow(bmrmtx))
 
  fe <- if(g %in% og[,1]){
          fe=fe1
          }else{
-         fe=fe2                                                                                                                                                                }
+         fe=fe2                                                                                               }
 
 
 
