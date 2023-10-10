@@ -3,7 +3,7 @@ library("data.table")
 library("brglm")
 drivermapsdir <- "/dartfs/rc/lab/S/Szhao/jiezhou/driverMAPS/data/"
 outputname <- "temp/diffDriver_demo"
-i1=1
+i1=2
 i2=1
 typee=list.files("/dartfs/rc/lab/S/Szhao/diffDriver/data_run_prs/tumor_specific_input/")
 type=typee[i1]

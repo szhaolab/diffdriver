@@ -82,6 +82,8 @@ for (t in 1:length(matrixlist)){
   index2=which(muts0$SampleID %in% shared)
   muts<- muts0[index2,]
   canno = canno0[index1,]
+  index=which(is.na(canno$Nsyn))
+  canno$Nsyn[index]=mean(canno$Nsyn,rm.na=T)
 
   # column index (ci): sampleID
   ci <- canno[,"SampleID"]
@@ -110,6 +112,7 @@ for (t in 1:length(matrixlist)){
     ## hotspot
     hotspots=read.table(file = hotf)
     hmm=readRDS(paste0(drivermapsdir, "hmmOGpar_ASHmean.rds"))
+    browser()
 for (g in names(bmrallg)) {
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
