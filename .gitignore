@@ -16,7 +16,6 @@ code/.*swp
 *.bk
 inst/doc/
 inst/doc
-inst
 /doc/
 /Meta/
 docs
