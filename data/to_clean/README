@@ -1,24 +1,24 @@
 BMRlist.rda All the parameters estimated from drivermap
 BMR.rda Nine background mutation rates
-codeSignature.rda The 96 nucleotide type and its number 
+codeSignature.rda The 96 nucleotide type and its number
 Fpars.rda
 genename200.rda 239 genes used to simulate data
-hmm.rda Hiden Markov model parameter 
+hmm.rda Hiden Markov model parameter
 hotseq0.rda Hotspot sequence with no hotspot
 hotseq1.rda Hotspot sequence with one hotspot
 hotseq2.rda Hotspot sequence with two hotspot
 hotseq3.rda Hotspot sequence with three hotspot
 hotseq6.rda Hotspot sequence with six hotspot
-hotseq.rda 
+hotseq.rda
 hotspot1sig.rda Hotspot sequence with one hotspot for signature model
 hotspot2sig.rda Hotspot sequence with two hotspots for signature model
-N.rda Number of silent mutations in 96 nucleotide types 
-ogParm.rda 
-parmASHmean.rda Parameters used to generate functional effects. 
+N.rda Number of silent mutations in 96 nucleotide types
+ogParm.rda
+parmASHmean.rda Parameters used to generate functional effects.
 sganno.rda Single gene annotation data
 sgmatrix.rda Single gene model matrix
-signatures.rda Four signatures used fomr GEL 1000 project
-sig.rda 
+signatures.rda Four signatures used from GEL 1000 project
+sig.rda
 testdataBinary.rda
 testdataCont.rda
 tsgParm.rda

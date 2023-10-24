@@ -22,10 +22,10 @@ ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
   names(colc2) <- unique(coltypetemp)
 
   if (is.null(genesubset)) {
-    ddm_j <- fread(readfile, header=TRUE, na.strings=".", colClasses= colc1, select=varlist)
+    ddm_j <- data.table::fread(readfile, header=TRUE, na.strings=".", colClasses= colc1, select=varlist)
   } else {
-    inheader <- colnames(fread(paste("head -n 1",readfile), header=T))
-    ddm_j <- fread(paste("LC_ALL=C grep -wf", genesubset, readfile), header=F, na.strings=".", colClasses= colc2,select= which(inheader %in% varlist), sep="\t")
+    inheader <- colnames(data.table::fread(paste("head -n 1",readfile), header=T))
+    ddm_j <- data.table::fread(paste("LC_ALL=C grep -wf", genesubset, readfile), header=F, na.strings=".", colClasses= colc2,select= which(inheader %in% varlist), sep="\t")
     if (is.null(varlist)){
       colnames(ddm_j) <- inheader
     } else {colnames(ddm_j) <- inheader[inheader %in% varlist]}
@@ -35,20 +35,6 @@ ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
 
 
 
-
-
-
-#' Read data
-#'
-#' @param afileinfo Annotation file
-#' @param yfileinfo
-#' @param selectvars
-#' @param selectmuttype
-#' @param readinvars
-#' @param genesubset
-#'
-#' @return A list
-#' @noRd
 ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL, genesubset=NULL){
   matrixlist <- list()
   selectvars <- selectvars[selectvars !="nttypecode"] # nttypecode will always be included by reading data by type
@@ -72,99 +58,29 @@ ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars 
 }
 
 
-
-#'  check if all column in one dt has at least two values, if not, stop script
-#'    check if all column in different lists have the same set of unique values
-
-#' @param matrixlist
-#' @param checkcols
-#'
-#' @return A list
-#' @noRd
-mlcoluniq <- function(matrixlist, checkcols = c("functypecode")){
-uniqvlist <- list()
-  for (j in 1:totalnttype){
-    anno <- matrixlist[[j]][[1]]
-    uniq <- lapply(anno, unique)
-    uniqvlist[[j]] <- lapply(uniq, sort, na.last = NA)
-    uniqc <- lapply(uniq, function (x) length(x[!is.na(x)]) )
-    if (length(uniq[uniqc < 2]) > 0){
-      badcol <- names(uniq[uniqc < 2])
-      warning(paste(c("the annotation data has only one value:", badcol, "nttype", j), collapse =" "))
-    }
-  }
-  for (c in checkcols){
-    if (length(unique(lapply(uniqvlist, `[[`, c))) > 1) stop(paste( "col", c, "have different values in different nttype"))
-    print(paste(c("col",c, unlist(unique(lapply(uniqvlist, `[[`, c)))), collapse = " "))
-  }
-}
-
-
-#'   check if any column is duplicate, if yes, stop script
-#'   Note this is a rough way (check sum)
-#'
-#' @param dt
-#'
-#' @return A warning sign
-#' @noRd
-dtcoldup <- function(dt){
-
-  colsum <- lapply(dt, sum , na.rm = TRUE)
-  colsum <- unlist(colsum)
-  if (length(unique(colsum)) < length(colsum)){
-    dname <- names(colsum[colsum %in% unique(colsum[duplicated(colsum)])])
-    warning(paste(c("duplicated columns found", dname), collapse = " "))
-  }
-}
-
-
-
 #'  Add intercept, if have functtypecode, then code and move to the front.
-#'
-#' @param matrixlist
-#' @param selectvars
-#' @param functypecodelevel
-#'
-#' @return A list
-#' @noRd
+#'  different from driverMAPS! only allows
+#'  functtypecode =7 ||8 when functypecode is included in selectvars.
 ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
-
   selectvars <- selectvars[selectvars !="nttypecode"]
   print("coding...")
-  mlcoluniq(matrixlist)
-  for (j in 1:Totalnttype){
+  for (j in 1:totalnttype){
     anno <- matrixlist[[j]][[1]]
     y <- matrixlist[[j]][[2]]
+    newanno <- data.table("(Intercept)"=rep(1,dim(y)[1]))
     if ("functypecode" %in% selectvars){
-      if (!is.null(functypecodelevel)) anno[,functypecode:= relevel(as.factor(anno[["functypecode"]]), ref = functypecodelevel)]
-      newfunctype <- model.matrix( ~ functypecode, model.frame(~ functypecode, anno, na.action=na.pass ))
+      newanno[anno$functypecode ==7, functypecode8:= 0]
+      newanno[anno$functypecode ==8, functypecode8:= 1]
       anno[,functypecode:=NULL]
-      newanno <- data.table(newfunctype)
-    } else {
-      newanno <- data.table("(Intercept)"=rep(1,dim(y)[1]))
     }
     newanno[, colnames(anno):= anno]
-    dtcoldup(newanno)
     matrixlist[[j]][[1]] <- newanno
   }
   return(matrixlist)
 }
 
 
-
-
-
-#' For vars in qnvars, will plug in normal distributed values for missing values using a normal distribution with width of qnvarimpute[2]  and a downshift of the mean by qnvarimpute[1] compared to distribution of all.
-# for others, should all be categorical and will assign the lowest level (which is 0 under default) for missing values and then normalize.
-#' @param matrixlist
-#' @param qnvars
-#' @param qnvarimpute
-#' @param cvarimpute
-#' @param fixmusd
-#'
-#' @return A list
-#' @noRd
-ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=c(-1.8,0.3), cvarimpute = 0, fixmusd=NULL){
+ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=c(0,0), cvarimpute = 0, fixmusd=NULL){
 print("processing ...")
   print("for qnvars, filling in missing values ...")
   print("for cvars (0/1 categories), filling in missing values ...")
@@ -175,14 +91,9 @@ print("processing ...")
     cvars <- innames[!(innames %in% qnvars)]
     cvars <- cvars[!(cvars %in% c("(Intercept)", "chrom","start","end","ref","alt"))]
     if (length(inqnvars) > 0){
-      genename <- matrixlist[[j]][[3]]
+      # a little different from driverMAPS
       for (qnvar in inqnvars){
-        NAgns <- unique(genename[which(is.na(anno[[qnvar]]))])[["genename"]]
-        vmean <- if (qnvar != "repl") qnvarimpute[1] else -qnvarimpute[1]
-        v <- rnorm(length(NAgns), vmean, qnvarimpute[2]) # if positions share same genename, use same inputed value
-        NAgnc <- table(genename[which(is.na(anno[[qnvar]]))])
-        vall <- rep(v, NAgnc[NAgns])
-        set(anno, which(is.na(anno[[qnvar]])), qnvar, vall)
+        set(anno, which(is.na(anno[[qnvar]])), qnvar, qnvarimpute[1])
       }
     }
     # for cvars (0/1 categories), filling in missing values ...
@@ -203,11 +114,12 @@ print("processing ...")
     allmu <- allsum/alllen
     allvarlist <- list()
     for (j in 1:totalnttype){
-      allvarlist[[j]] <- colVars(matrixlist[[j]][[1]],center=allmu) * dim(matrixlist[[j]][[1]])[1]
+      # Note this does't work with matrixStats anymore
+      allvarlist[[j]] <- matrixStats::colVars(matrixlist[[j]][[1]],center=allmu) * dim(matrixlist[[j]][[1]])[1]
       gc()
     }
     allsd <- sqrt(colSums(do.call(rbind, allvarlist))/(alllen-1))
-    save(allmu, allsd, file=paste0(Outputbase,"colmu_sd_funcv.Rdata"))
+    save(allmu, allsd, file=paste0(outputbase,"colmu_sd_funcv.Rdata"))
   } else {
     load(fixmusd)
   }
@@ -253,23 +165,6 @@ splitddm <- function(matrixlist, cpgenelist){
 }
 
 
-
-#' Read into data
-#'
-#' @param afileinfo
-#' @param yfileinfo
-#' @param selectvars
-#' @param selectmuttype
-#' @param readinvars
-#' @param qnvars
-#' @param functypecodelevel
-#' @param qnvarimpute
-#' @param cvarimpute
-#' @param genesubset
-#' @param fixmusd
-#'
-#' @return A list
-#' @noRd
 readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL,qnvars = c("expr","repl","hic"),functypecodelevel = NULL,qnvarimpute=c(-1.8,0.3), cvarimpute = 0, genesubset=NULL, fixmusd=NULL){
   # read data for a subset of genes. genesubset is a file containing gene names, one gene name per line.
   # fixmusd is a .Rd file when loaded contain allmu and allsd variables to be used in ddmprocess
@@ -282,88 +177,6 @@ readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readi
 
 
 
-
-
-
-#' Compute the bmr
-#'
-#' @param matrixlist
-#' @param chrposmatrixlist
-#' @param BMpars
-#' @param mu_g_s
-#' @param y_g_s
-#' @param fixpars
-#'
-#' @return A list
-#' @noRd
-matrixlistToGLM_sig <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
-  GLMlist <- list()
-  chrposlist <- list()
-  BMcol <- names(BMpars$fullpars)[-c(1:totalnttype,length(BMpars$fullpars)-1,length(BMpars$fullpars))]
-  fixcol <- names(fixpars)
-  alpha <- BMpars$fullpars["alpha"]
-  lambdaPM_g_s <- data.table(agg_var = mu_g_s$agg_var, lambdaPE = log((y_g_s$y + alpha)/(mu_g_s$V1 + alpha)), key = "agg_var")
-  BMvbeta <- BMpars$fullpars[1:(length(BMpars$fullpars)-2)]
-  for (j in seq(1:totalnttype)){
-    BMvbetasub <- convertbeta_sig(j, BMvbeta)
-    #BManno  <- matrixlist[[j]][[1]][,c("(Intercept)",BMcol), with=F]
-    BManno  <- matrixlist[[j]][[1]][,BMcol, with=F]
-    fixanno <- matrixlist[[j]][[1]][,fixcol, with =F]
-   # chrposanno <- cbind(chrposmatrixlist[[j]][[1]],chrposmatrixlist[[j]][[4]])
- chrposanno <- chrposmatrixlist[[j]][[1]]
-genename <- matrixlist[[j]][[3]]
-    genename2 <- chrposmatrixlist[[j]][[3]]
-    if (!identical(genename,genename2)) stop("matrixlist and chrpos not matching!")
-    chrposanno[,"genename" := genename]
-    lambdaPMit <- lambdaPM_g_s[genename]
-    muit <- as.matrix(BManno) %*% BMvbetasub
-    fixit <- as.numeric(as.matrix(fixanno) %*% as.numeric(fixpars))
-    out <- matrixlist[[j]][[1]]
-    out[, baseline:= rowSums(cbind(muit, lambdaPMit$lambdaPE, fixit))]
-    out[, y:= matrixlist[[j]][[2]]]
-    #out[, c("(Intercept)",BMcol,fixcol):= NULL]
-    GLMlist[[j]] <- out
-    chrposlist[[j]] <- chrposanno
-  }
-  glmdt <- do.call(rbind,GLMlist)
-  chrposdt <- do.call(rbind,chrposlist)
-  selectcol <- copy(colnames(glmdt))
-  glmdt[,colnames(chrposdt):= chrposdt]
-  glmdtsorted <- glmdt[order(chrom,genename,start)]
-  glmdt <- glmdtsorted[,selectcol,with = F]
-  glmdtchrpos <- glmdtsorted[,c("chrom","genename","start", colnames(chrposdt)), with =F]
-  return(list(glmdt,glmdtchrpos))
-}
-
-
-#' Create parameter vector for signature model
-#'
-#' @param j
-#' @param vbeta
-#'
-#' @return A numerical vector
-#' @noRd
-convertbeta_sig <- function(j, vbeta){
-  tbeta <- vbeta[j]
-  ibeta <- vbeta[-c(1:totalnttype)]
-  vbetasub <- c(tbeta,ibeta)
-  return(ibeta)
-}
-
-
-
-
-#' Functional mutation
-#'
-#' @param matrixlist
-#' @param chrposmatrixlist
-#' @param BMpars
-#' @param mu_g_s
-#' @param y_g_s
-#' @param fixpars
-#'
-#' @return A list
-#' @noRd
 matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
   GLMlist <- list()
   chrposlist <- list()
@@ -378,7 +191,7 @@ matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s,
     fixanno <- matrixlist[[j]][[1]][,fixcol, with =F]
     chrposanno <- cbind(data.table(chrposmatrixlist[[j]][[1]]),data.table(chrposmatrixlist[[j]][[4]]))
 # chrposanno <- chrposmatrixlist[[j]][[1]]
- genename <- matrixlist[[j]][[3]]
+    genename <- matrixlist[[j]][[3]]
     genename2 <- chrposmatrixlist[[j]][[3]]
     if (!identical(genename,genename2)) stop("matrixlist and chrpos not matching!")
     chrposanno[,"genename" := genename]
@@ -402,19 +215,59 @@ matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s,
   return(list(glmdt,glmdtchrpos))
 }
 
-
-#' Create parameter vector for regular model
-#'
-#' @param j
-#' @param vbeta
-#'
-#' @return A numerical vector
-#' @noRd
 convertbeta <- function(j, vbeta){
   tbeta <- vbeta[j]
   ibeta <- vbeta[-c(1:totalnttype)]
   vbetasub <- c(tbeta,ibeta)
   return(vbetasub)
+}
+
+
+### ----- clean up---------
+matrixlistToGLM_sig <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
+  GLMlist <- list()
+  chrposlist <- list()
+  BMcol <- names(BMpars$fullpars)[-c(1:totalnttype,length(BMpars$fullpars)-1,length(BMpars$fullpars))]
+  fixcol <- names(fixpars)
+  alpha <- BMpars$fullpars["alpha"]
+  lambdaPM_g_s <- data.table(agg_var = mu_g_s$agg_var, lambdaPE = log((y_g_s$y + alpha)/(mu_g_s$V1 + alpha)), key = "agg_var")
+  BMvbeta <- BMpars$fullpars[1:(length(BMpars$fullpars)-2)]
+  for (j in seq(1:totalnttype)){
+    BMvbetasub <- convertbeta_sig(j, BMvbeta)
+    #BManno  <- matrixlist[[j]][[1]][,c("(Intercept)",BMcol), with=F]
+    BManno  <- matrixlist[[j]][[1]][,BMcol, with=F]
+    fixanno <- matrixlist[[j]][[1]][,fixcol, with =F]
+    # chrposanno <- cbind(chrposmatrixlist[[j]][[1]],chrposmatrixlist[[j]][[4]])
+    chrposanno <- chrposmatrixlist[[j]][[1]]
+    genename <- matrixlist[[j]][[3]]
+    genename2 <- chrposmatrixlist[[j]][[3]]
+    if (!identical(genename,genename2)) stop("matrixlist and chrpos not matching!")
+    chrposanno[,"genename" := genename]
+    lambdaPMit <- lambdaPM_g_s[genename]
+    muit <- as.matrix(BManno) %*% BMvbetasub
+    fixit <- as.numeric(as.matrix(fixanno) %*% as.numeric(fixpars))
+    out <- matrixlist[[j]][[1]]
+    out[, baseline:= rowSums(cbind(muit, lambdaPMit$lambdaPE, fixit))]
+    out[, y:= matrixlist[[j]][[2]]]
+    #out[, c("(Intercept)",BMcol,fixcol):= NULL]
+    GLMlist[[j]] <- out
+    chrposlist[[j]] <- chrposanno
+  }
+  glmdt <- do.call(rbind,GLMlist)
+  chrposdt <- do.call(rbind,chrposlist)
+  selectcol <- copy(colnames(glmdt))
+  glmdt[,colnames(chrposdt):= chrposdt]
+  glmdtsorted <- glmdt[order(chrom,genename,start)]
+  glmdt <- glmdtsorted[,selectcol,with = F]
+  glmdtchrpos <- glmdtsorted[,c("chrom","genename","start", colnames(chrposdt)), with =F]
+  return(list(glmdt,glmdtchrpos))
+}
+
+convertbeta_sig <- function(j, vbeta){
+  tbeta <- vbeta[j]
+  ibeta <- vbeta[-c(1:totalnttype)]
+  vbetasub <- c(tbeta,ibeta)
+  return(ibeta)
 }
 
 

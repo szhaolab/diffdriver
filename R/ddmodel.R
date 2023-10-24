@@ -34,6 +34,7 @@ get_ll_s <- function(b, mut, mutidx, rate_s0){
   colSums(rmtx)
 }
 
+
 dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"),mut,e){
   # p: beta0, alpha
   beta0 <- p[1]
@@ -49,7 +50,6 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"
   #bi=(nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F])
   #beta0.init <- ifelse( bi>0, log(bi),rnorm(1))
   beta0.init <- 1
-  aa=q_pos(b=beta0.init, zpost=zpost, rate.s0=rate.s0, mut=mut,mutidx=mutidx,ll.n=ll.n)
   res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, mut=mut,ll.n = ll.n, mutidx=mutidx, control=list(fnscale=-1))
   beta0 <- res$par
 
@@ -61,7 +61,7 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"
     lg.x <- e
   }
 
-  alpha <- brglm(zpost~ lg.x,family="binomial")$coefficients
+  alpha <- brglm::brglm(zpost~ lg.x,family="binomial")$coefficients
 
   if (type == "null"){
     alpha <- c(alpha[1], 0)

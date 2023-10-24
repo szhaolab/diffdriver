@@ -65,7 +65,7 @@ dd_EM_update_nl <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "
     lg.x <- e
   }
 
-  alpha <- brglm(zpost~ lg.x,family="binomial")$coefficients
+  alpha <- brglm::brglm(zpost~ lg.x,family="binomial")$coefficients
   if (type == "null"){
      alpha <- c(alpha[1], 0)
    }
