@@ -43,6 +43,7 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
   }
 
   # ------- Read in data for target genes----------
+  print("Start to read in data for target genes ...")
   allg <- read.table(genef, stringsAsFactors = F)[,1]
 
   matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel, qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd= fixmusdfile)
@@ -176,6 +177,8 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
   resdf[ , paste0(meth,".fdr")] <- apply(resdf,2,p.adjust, method = "fdr")
   resdf[,c("mut.E1", "mut.E0", "E1", "E0")] <- do.call(rbind, lapply(lapply(res, '[[', "fisher"), '[[',"count"))
   write.table(resdf, file = paste0(outputbase,"_",phename, "_resdd.txt"))
+
+  print("Finished.")
 
   return(resdf)
 }

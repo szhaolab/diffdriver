@@ -223,7 +223,7 @@ convertbeta <- function(j, vbeta){
 }
 
 
-### ----- clean up---------
+### ----- TODO: clean up---------
 matrixlistToGLM_sig <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
   GLMlist <- list()
   chrposlist <- list()

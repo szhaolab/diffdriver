@@ -54,7 +54,7 @@ dd_EM_update_nl <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "
   # update beta0
   bi=(nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F])
   beta0.init <- ifelse( bi>0, log(bi),rnorm(1))
-  res <- optim(beta0.init, q_pos_nl, zpost = zpost, rate.s0 = rate.s0, ll.n = ll.n, mutidx = mutidx, method = "BFGS", control=list(fnscale=-1))
+  suppressWarnings(res <- optim(beta0.init, q_pos_nl, zpost = zpost, rate.s0 = rate.s0, ll.n = ll.n, mutidx = mutidx, method = "BFGS", control=list(fnscale=-1)))
   beta0 <- res$par
 
   # update alpha
@@ -65,7 +65,8 @@ dd_EM_update_nl <- function(p, rate.n, rate.s0, ll.n, mutidx, type = c("null", "
     lg.x <- e
   }
 
-  alpha <- brglm::brglm(zpost~ lg.x,family="binomial")$coefficients
+  suppressWarnings(alpha <- brglm::brglm(zpost~ lg.x,family="binomial")$coefficients)
+
   if (type == "null"){
      alpha <- c(alpha[1], 0)
    }

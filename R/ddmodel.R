@@ -50,7 +50,7 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"
   #bi=(nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F])
   #beta0.init <- ifelse( bi>0, log(bi),rnorm(1))
   beta0.init <- 1
-  res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, mut=mut,ll.n = ll.n, mutidx=mutidx, control=list(fnscale=-1))
+  suppressWarnings(res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, mut=mut,ll.n = ll.n, mutidx=mutidx, control=list(fnscale=-1)))
   beta0 <- res$par
 
   # update alpha
@@ -61,7 +61,7 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"
     lg.x <- e
   }
 
-  alpha <- brglm::brglm(zpost~ lg.x,family="binomial")$coefficients
+  suppressWarnings(alpha <- brglm::brglm(zpost~ lg.x,family="binomial")$coefficients)
 
   if (type == "null"){
     alpha <- c(alpha[1], 0)
@@ -192,8 +192,8 @@ ddmodel_binary <- function(mut, e, bmr, fe){
     ll <- sum(llmtx,na.rm=T)
     return(ll)
   }
-  resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
-  resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
+  suppressWarnings(resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1))) # BFGS has Error: non-finite finite-difference value [2]
+  suppressWarnings(resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1)))
   probnull <- mean(exp(resn$par)*(fe-1)*bmr+bmr)
   probalt1 <- mean(exp(resa$par[1])*(fe-1)*bmr+bmr)
   probalt2 <- mean(exp(resa$par[2])*(fe-1)*bmr+bmr)
@@ -270,8 +270,8 @@ index1=min(which(e==1))
     return(ll)
   }
 
-  resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
-  resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
+  suppressWarnings(resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1))) # BFGS has Error: non-finite finite-difference value [2]
+  suppressWarnings(resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1)))
 
   teststat<- -2*(resn$value-resa$value)
   pvalue <- pchisq(teststat,df=1,lower.tail=FALSE)
@@ -339,8 +339,8 @@ ddmodel_conti_simple <- function(mut, e, bmr, fe){
     return(ll)
   }
 
-  resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1)) # BFGS has Error: non-finite finite-difference value [2]
-  resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1))
+  suppressWarnings(resn <- optim(0, lln, method="Nelder-Mead", control=list(fnscale=-1))) # BFGS has Error: non-finite finite-difference value [2]
+  suppressWarnings(resa <- optim(c(0,0), lla, method="Nelder-Mead", control=list(fnscale=-1)))
 
   teststat<- -2*(resn$value-resa$value)
   pvalue <- pchisq(teststat,df=1,lower.tail=FALSE)
