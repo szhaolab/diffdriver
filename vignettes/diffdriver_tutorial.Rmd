@@ -64,21 +64,21 @@ outputname <- "testdiffdriver"
 outputdir <- "~/temp/output"
 ```
 
-With signature adjustment
+With signature adjustment, takes around 10min
 ```{r}
 res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir, k=6, BMRmode = "signature", outputdir = outputdir, outputname = outputname)
 res
 ```
 
 
-Without signature adjustment
+Without signature adjustment, takes around 20min.
 ```{r}
 res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir, k=6, BMRmode = "regular", outputdir = outputdir, outputname = outputname)
 res
 ```
 
 # Plot specific genes
-```{r plot, eval=F }
+```{r plot}
 load(file.path(outputdir,"testdiffdriver_SmokingCessation_resdd.Rd"))     # load the output file from diffdriver.
 g <- "TP53" # only need to change gene name.
 rig <- riallg[[g]]

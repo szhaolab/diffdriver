@@ -12,7 +12,11 @@ Imports:
 	Matrix,
 	stats,
 	data.table,
-	plyr
+	plyr,
+	brglm,
+  fasttopic,
+  topicmodels,
+  matrixStats
 Suggests: 
     knitr,
     rmarkdown,
