@@ -7,7 +7,7 @@
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
 #' @param j The index of phenotype
 #' @import Matrix data.table
-#' @noRd
+#' @export
 diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BMRmode = "signature", outputdir =".", outputname = "diffdriver_results"){
 
   # ------- SET UP ----------

@@ -22,10 +22,10 @@ ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
   names(colc2) <- unique(coltypetemp)
 
   if (is.null(genesubset)) {
-    ddm_j <- data.table::fread(readfile, header=TRUE, na.strings=".", colClasses= colc1, select=varlist)
+    ddm_j <- suppressMessages(data.table::fread(readfile, header=TRUE, na.strings=".", colClasses= colc1, select=varlist))
   } else {
-    inheader <- colnames(data.table::fread(paste("head -n 1",readfile), header=T))
-    ddm_j <- data.table::fread(paste("LC_ALL=C grep -wf", genesubset, readfile), header=F, na.strings=".", colClasses= colc2,select= which(inheader %in% varlist), sep="\t")
+    inheader <- suppressMessages(colnames(data.table::fread(paste("head -n 1",readfile), header=T)))
+    ddm_j <- suppressMessages(data.table::fread(paste("LC_ALL=C grep -wf", genesubset, readfile), header=F, na.strings=".", colClasses= colc2,select= which(inheader %in% varlist), sep="\t"))
     if (is.null(varlist)){
       colnames(ddm_j) <- inheader
     } else {colnames(ddm_j) <- inheader[inheader %in% varlist]}
