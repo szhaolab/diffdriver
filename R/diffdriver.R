@@ -17,7 +17,7 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
                       header = aheader,
                       coltype = acoltype)
     totalnttype <<- 96
-  } else {
+  } else if (BMRmode == "regular"){
     afileinfo <- list(file = file.path(annodir, "nttypeXXX_annodata.txt"),
                       header = aheader,
                       coltype = acoltype)
