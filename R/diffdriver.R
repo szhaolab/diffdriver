@@ -6,7 +6,8 @@
 #' @param mutf mutation list file, use the driverMAPS mutation input format
 #' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
 #' @param j The index of phenotype
-#' @import Matrix data.table
+#' @import Matrix
+#' @import data.table
 #' @export
 diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BMRmode = "signature", outputdir =".", outputname = "diffdriver_results"){
 
@@ -129,7 +130,7 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
-    mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
+    mutmtx <- Matrix::sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
 
     hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
     hotmat=rep(0,nrow(rig))
