@@ -105,7 +105,7 @@ print("processing ...")
     matrixlist[[j]][[1]] <- anno[complete.cases(anno),]
     matrixlist[[j]][[2]] <- matrixlist[[j]][[2]][complete.cases(anno),]
     matrixlist[[j]][[3]] <- matrixlist[[j]][[3]][complete.cases(anno),]
-    rm(anno, genename);gc()
+    rm(anno);gc()
   }
   if (is.null(fixmusd)){
     print("no mean or standard deviation file provided, will calculate from data ...")
