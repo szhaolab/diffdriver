@@ -64,14 +64,14 @@ outputname <- "testdiffdriver"
 outputdir <- "~/temp/output"
 ```
 
-With signature adjustment, takes around 10min
+With signature adjustment, takes around 10min for two genes. Each additional gene will take 3-4 minutes.
 ```{r}
 res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir, k=6, BMRmode = "signature", outputdir = outputdir, outputname = outputname)
 res
 ```
 
 
-Without signature adjustment, takes around 20min.
+Without signature adjustment, takes around 5min for two genes. Each additional gene will take 2 minutes.
 ```{r}
 res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir, k=6, BMRmode = "regular", outputdir = outputdir, outputname = outputname)
 res
@@ -86,7 +86,7 @@ rig$ridx <- 1:dim(rig)[1]
 muts <- data.table::fread(mutf, header = T)
 if (!grepl('chr', muts$Chromosome[1], fixed = T)) {muts$Chromosome <- paste0("chr",muts$Chromosome)}
 muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
-mutmtx <- sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
+mutmtx <- Matrix::sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
 bmrmtx= bmrallg[[g]]
 ganno <- fannoallg[[g]]
 

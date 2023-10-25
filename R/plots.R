@@ -1,4 +1,6 @@
 
+#' @title plot phenotype, mutation and annotation for a gene across samples
+#' @export
 plot_mut <- function(mutmtx, canno, bmrmtx, ganno, ...){
   mycolorsori <- c("#FF3D2E","#2b8cbe","#fdae61","#41ab5d","pink","#8C2DA6","#a65628")
   Phenotype=as.data.frame(canno)
