@@ -51,10 +51,18 @@ head(read.table(hotf, header = T))
 ```
 
   * Directory that contains annotation files
+We have two types of annotations, one has 96 annotation files: 
 ```{r}
-annodir = "~/temp/annodir"
+annodir = "~/temp/annodir96"
 list.files(annodir)
 ```
+One has 9 annotation files:
+
+```{r}
+annodir = "~/temp/annodir9"
+list.files(annodir, pattern = "_annodata.txt")
+```
+
 
 
 # Run diffdriver
@@ -65,16 +73,15 @@ outputname <- "testdiffdriver"
 outputdir <- "~/temp/output"
 ```
 
-With signature adjustment, takes around 10min for two genes. Each additional gene will take 3-4 minutes.
+With signature adjustment, takes around 10min for two genes. Each additional gene will take 3-4 minutes. Please use the provide the annotation folder with 96 annotation files. `j` is the column that will be used as the phenotype, e.g j=2 means the second column in the phenotype file will be used as phenotype. 
 ```{r}
-res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir, k=6, BMRmode = "signature", outputdir = outputdir, outputname = outputname)
+res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir = "~/temp/annodir96", k=6, BMRmode = "signature", outputdir = outputdir, outputname = outputname)
 res
 ```
 
-
-Without signature adjustment, takes around 5min for two genes. Each additional gene will take 2 minutes.
+Without signature adjustment, takes around 5min for two genes. Each additional gene will take 2 minutes.Please use the provide the annotation folder with 9 annotation files. 
 ```{r}
-res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir, BMRmode = "regular", outputdir = outputdir, outputname = outputname)
+res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir = "~/temp/annodir9", BMRmode = "regular", outputdir = outputdir, outputname = outputname)
 res
 ```
 

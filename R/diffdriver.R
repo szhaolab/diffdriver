@@ -12,9 +12,16 @@
 diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BMRmode = "signature", outputdir =".", outputname = "diffdriver_results"){
 
   # ------- SET UP ----------
-  afileinfo <- list(file = file.path(annodir, "TCGA-UCS_nttypeXXX_annodata.txt"),
-                    header = aheader,
-                    coltype = acoltype)
+  if (BMRmode == "signature"){
+    afileinfo <- list(file = file.path(annodir, "TCGA-UCS_nttypeXXX_annodata.txt"),
+                      header = aheader,
+                      coltype = acoltype)
+  } else {
+    afileinfo <- list(file = file.path(annodir, "nttypeXXX_annodata.txt"),
+                      header = aheader,
+                      coltype = acoltype)
+  }
+
 
   dir.create(outputdir)
 
