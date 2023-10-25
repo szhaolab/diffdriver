@@ -69,26 +69,25 @@ list.files(annodir, pattern = "_annodata.txt")
 
 ```{r}
 library(diffdriver)
-outputname <- "testdiffdriver"
 outputdir <- "~/temp/output"
 ```
 
 With signature adjustment, takes around 10min for two genes. Each additional gene will take 3-4 minutes. Please use the provide the annotation folder with 96 annotation files. `j` is the column that will be used as the phenotype, e.g j=2 means the second column in the phenotype file will be used as phenotype. 
 ```{r}
-res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir = "~/temp/annodir96", k=6, BMRmode = "signature", outputdir = outputdir, outputname = outputname)
+res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir = "~/temp/annodir96", k=6, BMRmode = "signature", outputdir = outputdir, outputname = "testdiffdriver_sig")
 res
 ```
 
 Without signature adjustment, takes around 5min for two genes. Each additional gene will take 2 minutes.Please use the provide the annotation folder with 9 annotation files. 
 ```{r}
-res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir = "~/temp/annodir9", BMRmode = "regular", outputdir = outputdir, outputname = outputname)
+res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir = "~/temp/annodir9", BMRmode = "regular", outputdir = outputdir, outputname = "testdiffdriver_reg")
 res
 ```
 
 # Plot specific genes
 ```{r plot}
-load(file.path(outputdir,"testdiffdriver_SmokingCessation_resdd.Rd"))     # load the output file from diffdriver.
-g <- "TP53" # only need to change gene name.
+load(file.path(outputdir,"testdiffdriver_SmokingCessation_reg_resdd.Rd"))     # load the output file from diffdriver.
+g <- "ARID1A" # only need to change gene name.
 rig <- riallg[[g]]
 rig$ridx <- 1:dim(rig)[1]
 muts <- data.table::fread(mutf, header = T)

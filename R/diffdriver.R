@@ -16,24 +16,19 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
     afileinfo <- list(file = file.path(annodir, "TCGA-UCS_nttypeXXX_annodata.txt"),
                       header = aheader,
                       coltype = acoltype)
+    totalnttype <<- 96
   } else {
     afileinfo <- list(file = file.path(annodir, "nttypeXXX_annodata.txt"),
                       header = aheader,
                       coltype = acoltype)
-  }
-
-
-  dir.create(outputdir)
-
-  outputbase <<- paste0(outputdir, "/", outputname)
-
-  if (BMRmode == "signature"){
-    totalnttype <<- 96
-  } else if (BMRmode == "regular"){
     totalnttype <<- 9
   } else{
     stop("Unknown BMR mode, options: signature, regular")
   }
+
+  dir.create(outputdir)
+
+  outputbase <<- paste0(outputdir, "/", outputname)
 
   # ------- load/estimate parameters in background mutation model (BMM)----------
 
