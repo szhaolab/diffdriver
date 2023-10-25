@@ -22,7 +22,7 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
                       header = aheader,
                       coltype = acoltype)
     totalnttype <<- 9
-  } else{
+  } else {
     stop("Unknown BMR mode, options: signature, regular")
   }
 
