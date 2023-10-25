@@ -5,7 +5,7 @@
 #' @param BMRlist The parameters from drivermaps
 #' @param target The target positions where the bmr's are computed
 #'
-#' @return
+#' @return A list
 #' @noRd
 matrixlistToBMR  <- function(afileinfo, mutf, BMRlist, k=6){
   # Read annotation files.

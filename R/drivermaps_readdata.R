@@ -133,38 +133,6 @@ print("processing ...")
 }
 
 
-#' divide matrixlist into groups defined in cpgenelist,
-#' if not in any group in cpggenelist,
-#' it is put in the last group. need to optimize almost hit 20G
-#'
-#' @param matrixlist
-#' @param cpgenelist
-#' @return A list
-#' @noRd
-splitddm <- function(matrixlist, cpgenelist){
-  outmatrixlist <- vector("list", length(cpgenelist)+1)
-  for (j in 1:totalnttype){
-    annoall <- matrixlist[[j]][[1]]
-    yall <- matrixlist[[j]][[2]]
-    geneall <- matrixlist[[j]][[3]]
-    for (m in 1:length(outmatrixlist)) {
-      if (m != length(outmatrixlist)) {
-        anno <- annoall[geneall[["genename"]] %in% cpgenelist[[m]]]
-        y <- yall[geneall[["genename"]] %in% cpgenelist[[m]]]
-        gene <- geneall[genename %in% cpgenelist[[m]]]
-      } else {
-        anno <- annoall[!(geneall[["genename"]] %in% as.matrix(unlist(cpgenelist)))]
-        y <- yall[!(geneall[["genename"]] %in% as.matrix(unlist(cpgenelist)))]
-        gene <- geneall[!(genename %in% as.matrix(unlist(cpgenelist)))]
-      }
-      outmatrixlist[[m]][[j]] <- list(anno, y,gene)
-      gc()
-    }
-  }
-  return(outmatrixlist)
-}
-
-
 readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL,qnvars = c("expr","repl","hic"),functypecodelevel = NULL,qnvarimpute=c(-1.8,0.3), cvarimpute = 0, genesubset=NULL, fixmusd=NULL){
   # read data for a subset of genes. genesubset is a file containing gene names, one gene name per line.
   # fixmusd is a .Rd file when loaded contain allmu and allsd variables to be used in ddmprocess
