@@ -6,7 +6,8 @@ title: "A tutorial to run diffdriver"
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  warning = FALSE, message = FALSE
+  warning = FALSE, 
+  message = FALSE
 )
 ```
 
@@ -86,8 +87,8 @@ res
 
 # Plot specific genes
 ```{r plot}
-load(file.path(outputdir,"testdiffdriver_SmokingCessation_reg_resdd.Rd"))     # load the output file from diffdriver.
-g <- "ARID1A" # only need to change gene name.
+load(file.path(outputdir,"testdiffdriver_reg_SmokingCessation_resdd.Rd"))     # load the output file from diffdriver.
+g <- "PIK3CA" # only need to change gene name.
 rig <- riallg[[g]]
 rig$ridx <- 1:dim(rig)[1]
 muts <- data.table::fread(mutf, header = T)
