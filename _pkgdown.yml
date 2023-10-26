@@ -1,4 +1,9 @@
-url: ~
-template:
-  bootstrap: 5
+destination: docs
 
+repo:
+    branch: main
+
+navbar:
+  right:
+    - text: "Source"
+      href: https://github.com/simingz/ctwas
