@@ -161,7 +161,7 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
 
     resg <- list()
     e=canno[[j]]
-    phename= sub(" ", "_", colnames(canno)[j])
+    phename= gsub(" ", "_", colnames(canno)[j])
     resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1], label=label)
     ## resg[["dd_nl"]] <- ddmodel_nl(mutmtx, e, bmrmtx, fe[,1])
     resg[["mlr"]] <- mlr(mutmtx, e)
