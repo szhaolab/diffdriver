@@ -26,8 +26,6 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
     stop("Unknown BMR mode, options: signature, regular")
   }
 
-  fixmusdfile <- system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
-
   dir.create(outputdir)
 
   outputbase <<- paste0(outputdir, "/", outputname)
@@ -50,6 +48,8 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
   print("Start to read in data for target genes ...")
   allg <- read.table(genef, stringsAsFactors = F)[,1]
 
+
+  fixmusdfile <- system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
   matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel, qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd= fixmusdfile)
   chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
 
@@ -161,7 +161,7 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
 
     resg <- list()
     e=canno[[j]]
-    phename=colnames(canno)[j]
+    phename= sub(" ", "_", colnames(canno)[j])
     resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1], label=label)
     ## resg[["dd_nl"]] <- ddmodel_nl(mutmtx, e, bmrmtx, fe[,1])
     resg[["mlr"]] <- mlr(mutmtx, e)

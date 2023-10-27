@@ -15,7 +15,6 @@ funcvmuttype <- "functypecode == 7 | functypecode == 8"
 readinvars <- c("genename", "ssp", bmvars, funcvars)
 bmreadinvars <- c("genename", "ssp","nttypecode",bmvars, funcvars)
 qnvars = c("expr","repl","hic") # will be normalized, except for nttypecode
-fixmusdfile <-  system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
 
 
 load( "inst/extdata/parmASHmean.Rdata")
@@ -29,7 +28,7 @@ hmm=readRDS("inst/extdata/hmmOGpar_ASHmean.rds")
 
 
 # nttype code (96)
-annodir <- "~/temp/annodir"
+annodir <- "~/temp/annodir96"
 sigmapping=read.table(file.path(annodir,"config_annotation.txt"))[,-2]
 sigmapping[1:10,]
 v11=strsplit(sigmapping[,1],split = ",")
@@ -47,8 +46,8 @@ sigmapping=sigmapping[order(V2),]
 colnames(sigmapping)=c("context","alt_allele","index")
 
 ## compute the number of silent mutation for each of 96 mutation types.
-annolist=vector("list", totalnttype)
-for (i in 1:totalnttype) {
+annolist=vector("list", 96)
+for (i in 1:96) {
   print(paste0("read annotation file: ",i))
   annoi=fread(paste0(annodir,"/TCGA-UCS_nttype",i,"_annodata.txt"))
   annolist[[i]]=annoi[functypecode==6]
@@ -65,7 +64,7 @@ W[which(W==0)] = max(W)
 usethis::use_data(OGs, TSGs, OGpars, TSGpars, hmm,
                   aheader, acoltype, bmvars, bmmuttype,
                   funcvars, functypecodelevel, funcvmuttype,
-                  readinvars, bmreadinvars, qnvars, fixmusdfile,
+                  readinvars, bmreadinvars, qnvars,
                   sigmapping, W,
                   internal = TRUE,overwrite = TRUE)
 
