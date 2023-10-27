@@ -26,6 +26,8 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
     stop("Unknown BMR mode, options: signature, regular")
   }
 
+  fixmusdfile <- system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
+
   dir.create(outputdir)
 
   outputbase <<- paste0(outputdir, "/", outputname)
