@@ -114,9 +114,11 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
     bmr=data.table()
     for (i in 1:nrow(ci)){
       id <- ci[i,"SampleID"][[1]]
+      glambda <- bmrsig$genesp[ri$genename, lambda]
+      glambda[which(is.na(glambda))] <- 1
       mui <- bmrsig$yn[id] * bmrsig$sigmtx[id,ri$nttypecode] *
         exp(as.matrix(fanno[, c("expr","repl","hic")]) %*% bmrsig$BMvbeta) *
-        bmrsig$genesp[ri$genename, lambda]/bmrsig$at[ri$nttypecode]
+        glambda/bmrsig$at[ri$nttypecode]
         bmr=cbind(bmr,log(mui))
     }
     if (any(is.na(bmr))) {stop("bmr missing")}
