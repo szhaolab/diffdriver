@@ -65,7 +65,7 @@ matrixlistToBMR  <- function(afileinfo, mutf, BMRlist, k=6){
 
   # get positional adjustment for each nt type, based on driverMAPS estimate
   fixmusdfile <-  system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
-  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, bmvars, bmmuttype, c("genename", bmvars , "functypecode"), qnvars, functypecodelevel = NULL, qnvarimpute=c(NA,NA), fixmusd= fixmusdfile) # note normalization of qnvar is approximately right.
+  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, bmvars, bmmuttype, c("genename", bmvars , "functypecode"), qnvars, functypecodelevel = NULL, qnvarimpute=c(0,0), fixmusd= fixmusdfile) # note normalization of qnvar is approximately right.
 
   BMcol <- c("expr","repl","hic")
   alpha=BMRlist$BMpars$fullpars[c("alpha")]
