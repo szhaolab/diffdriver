@@ -152,7 +152,7 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
     if (g %in% OGs[,1]){
       betaf <- OGpars[names(OGpars) != "beta_f0"]
       betaf0 <- OGpars["beta_f0"]
-      fe <-  as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[8]+ betaf0
+      fe <-  as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + hotmat*hmm[9] + betaf0
     } else {
       betaf <- TSGpars[names(TSGpars) != "beta_f0"]
       betaf0 <- TSGpars["beta_f0"]
