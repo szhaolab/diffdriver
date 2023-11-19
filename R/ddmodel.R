@@ -48,7 +48,7 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"
   zpost <- zpost/rowSums(zpost)
 
   # update beta0
-  suppressWarnings(res <- optim(beta0, q_pos, zpost = zpost, rate.s0 = rate.s0, mut=mut,ll.n = ll.n, mutidx=mutidx, control=list(fnscale=-1)))
+  suppressWarnings(res <- optim(1, q_pos, zpost = zpost, rate.s0 = rate.s0, mut=mut,ll.n = ll.n, mutidx=mutidx, control=list(fnscale=-1))) # init with beta0 = 1.
   beta0 <- res$par
 
   # update alpha
