@@ -52,9 +52,12 @@ matrixlistToBMR  <- function(afileinfo, mutf, BMRlist, k=6){
   # ff <- t(posterior(fit)$terms)
 
   # Alternative: fasttopic
-  fit =fastTopics::fit_poisson_nmf(ymatrix,k = k,numiter = 100)
+  colnames(ymatrix) <- 1: totalnttype
+  fit =fastTopics::fit_topic_model(ymatrix, k = k)
   ll = fit$L
-  ff = fit$F
+  fftemp = fit$F
+  ff = matrix(min(fftemp)/2, nrow = totalnttype, ncol = k )
+  ff[as.numeric(rownames(fftemp)), ] <- fftemp
 
   colnames(ll)=paste("weight",1:k, sep = "")
   colnames(ff)=paste("factor",1:k,sep="")

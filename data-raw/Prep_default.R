@@ -45,27 +45,27 @@ sigmapping=sigmapping[substr(Subtype,2,2)=="C" | substr(Subtype,2,2)=="T",]
 sigmapping=sigmapping[order(V2),]
 colnames(sigmapping)=c("context","alt_allele","index")
 
-## compute the number of silent mutation for each of 96 mutation types.
-annolist=vector("list", 96)
-for (i in 1:96) {
-  print(paste0("read annotation file: ",i))
-  annoi=fread(paste0(annodir,"/TCGA-UCS_nttype",i,"_annodata.txt"))
-  annolist[[i]]=annoi[functypecode==6]
-  rm(annoi)
-}
-anno=do.call(rbind,annolist)
-rm(annolist)
-W=c()
-for (i in 1:totalnttype) {
-  W[i]=anno[functypecode==6 & nttypecode==i,.N,]
-}
-W[which(W==0)] = max(W)
+# ## compute the number of silent mutation for each of 96 mutation types.
+# annolist=vector("list", 96)
+# for (i in 1:96) {
+#   print(paste0("read annotation file: ",i))
+#   annoi=fread(paste0(annodir,"/TCGA-UCS_nttype",i,"_annodata.txt"))
+#   annolist[[i]]=annoi[functypecode==6]
+#   rm(annoi)
+# }
+# anno=do.call(rbind,annolist)
+# rm(annolist)
+# W=c()
+# for (i in 1:96) {
+#   W[i]=anno[functypecode==6 & nttypecode==i,.N,]
+# }
+# W[which(W==0)] = max(W)
 
 usethis::use_data(OGs, TSGs, OGpars, TSGpars, hmm,
                   aheader, acoltype, bmvars, bmmuttype,
                   funcvars, functypecodelevel, funcvmuttype,
                   readinvars, bmreadinvars, qnvars,
-                  sigmapping, W,
+                  sigmapping,
                   internal = TRUE,overwrite = TRUE)
 
 

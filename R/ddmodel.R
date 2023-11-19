@@ -11,18 +11,19 @@ get_pi <- function(alpha, e){
 }
 
 
-q_pos <- function(b, zpost, rate.s0, mut,mutidx,ll.n){
+q_pos <- function(b, zpost, rate.s0, mut, mutidx,ll.n){
   ll.s <- get_ll_s(b,mut,mutidx, rate.s0)
   q <- sum(zpost[ ,1] * ll.s + zpost[ ,2] * ll.n)
   return(q)
 }
 
-dd_loglik <- function(p, rate.s0, ll.n,mutidx, mut, e){
+dd_loglik <- function(p, rate.s0, ll.n, mutidx, mut, e){
   beta0 <- p[1]
   alpha <- p[2:3]
   pi <- get_pi(alpha, e)
   ll.s <- get_ll_s(beta0, mut,mutidx, rate.s0)
   ll <- sum(log(pi * exp(ll.s) + (1-pi) * exp(ll.n)))
+  ll
 }
 
 
@@ -47,10 +48,7 @@ dd_EM_update <- function(p, rate.n, rate.s0, ll.n, mutidx,type = c("null", "alt"
   zpost <- zpost/rowSums(zpost)
 
   # update beta0
-  #bi=(nrow(mutidx) - sum(rate.n %*% zpost[,2,drop=F]))/sum(rate.s0 %*% zpost[,1,drop=F])
-  #beta0.init <- ifelse( bi>0, log(bi),rnorm(1))
-  beta0.init <- 1
-  suppressWarnings(res <- optim(beta0.init, q_pos, zpost = zpost, rate.s0 = rate.s0, mut=mut,ll.n = ll.n, mutidx=mutidx, control=list(fnscale=-1)))
+  suppressWarnings(res <- optim(beta0, q_pos, zpost = zpost, rate.s0 = rate.s0, mut=mut,ll.n = ll.n, mutidx=mutidx, control=list(fnscale=-1)))
   beta0 <- res$par
 
   # update alpha
@@ -100,8 +98,7 @@ dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mut
 
 dd_squarEM <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n,mutidx, type = c("null", "alt"), mut,e, maxit = 100, tol = 1e-3){
 
-  # initialize
- p <- c(beta0, alpha)
+  p <- c(beta0, alpha)
 
   # EM
   res <- SQUAREM::squarem(p=p, rate.n = rate.n, rate.s0=rate.s0, ll.n=ll.n, mutidx=mutidx, type = type,mut=mut,e=e, fixptfn=dd_EM_update, control=list(tol=tol, maxiter = maxit))
@@ -134,9 +131,13 @@ ddmodel <- function(mut, e, mr, fe, label, ...){
 
   ll.n <- colSums(mut*log(rate.n)-rate.n)
 
-  res.null <- dd_squarEM(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n,mutidx=mutidx, type = "null",mut=mut,e=e, ...)
+  # initialize
+  # bi=(nrow(mutidx) - sum(rate.n)/sum(rate.s0)
+  #beta0.init <- ifelse( bi>0, log(bi),rnorm(1))
+  beta0.init <- 0
+  res.null <- dd_squarEM(beta0 = beta0.init, rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n,mutidx=mutidx, type = "null",mut=mut,e=e, ...)
 
-  res.alt <- dd_squarEM(rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n,mutidx=mutidx, type = "alt",mut=mut,e=e, ...)
+  res.alt <- dd_squarEM(beta0 = beta0.init, rate.n = rate.n, rate.s0 = rate.s0, ll.n=ll.n,mutidx=mutidx, type = "alt",mut=mut,e=e, ...)
 
   ## Get p value
 
