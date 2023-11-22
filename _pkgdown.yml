@@ -6,4 +6,4 @@ repo:
 navbar:
   right:
     - text: "Source"
-      href:https://github.com/szhaolab/diffdriver/
+      href: https://github.com/szhaolab/diffdriver/
