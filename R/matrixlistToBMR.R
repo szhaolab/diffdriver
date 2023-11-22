@@ -53,18 +53,22 @@ matrixlistToBMR  <- function(afileinfo, mutf, BMRlist, k=6){
 
   # Alternative: fasttopic
   colnames(ymatrix) <- 1: totalnttype
+  rownames(ymatrix) <- id
+  ymatrix <- ymatrix[rowSums(ymatrix) >= 5, ] # if the sample has too few mutations, use cohort-wise average.
+
   fit =fastTopics::fit_topic_model(ymatrix, k = k)
-  ll = fit$L
+  lltemp = fit$L
   fftemp = fit$F
   ff = matrix(min(fftemp)/2, nrow = totalnttype, ncol = k )
   ff[as.numeric(rownames(fftemp)), ] <- fftemp
+  ll = matrix(rep(colMeans(lltemp), nsample), nrow = nsample, byrow =T)
+  rownames(ll) <- id
+  ll[rownames(lltemp),] <- lltemp
 
   colnames(ll)=paste("weight",1:k, sep = "")
   colnames(ff)=paste("factor",1:k,sep="")
   ff=cbind(sigmapping[,c("context","alt_allele")],ff)
-  sigmtx=ll%*%t(ff[,-c(1,2)])
-
-  rownames(sigmtx) <- id # rows are samples, column is nttypecode
+  sigmtx=ll%*%t(ff[,-c(1,2)]) # rows are samples, column is nttypecode
 
   # get positional adjustment for each nt type, based on driverMAPS estimate
   fixmusdfile <-  system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
