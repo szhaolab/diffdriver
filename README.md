@@ -15,5 +15,5 @@ remotes::install_github("szhaolab/diffdriver", ref ="main")
 
 ## How to use 
 
-Please checkout [package website](https://szhaolab.github.io/diffdriver/)
+Please checkout the tutorial on the [package website](https://szhaolab.github.io/diffdriver/).
 
