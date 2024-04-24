@@ -175,7 +175,13 @@ diffdriver= function(genef, mutf, phenof, bmrf = NULL, j, hotf, annodir, k=6, BM
     res[[g]] <- resg
   }
 
-  save(e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , phename, "_resdd.Rd"))
+
+  if (BMRmode == "signature") {
+    fastopicfit <- bmrsig$fit
+    save( fasttopicfit, e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , phename, "_resdd.Rd"))
+  } else {
+    save(e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , phename, "_resdd.Rd"))  
+  }
 
   meth <- c("dd", "mlr", "mlr.v2", "fisher", "binom", "lr")
   resdf <- data.frame(lapply(meth, function(x)unlist(lapply(lapply(res,'[[',x),'[[','pvalue'))))
