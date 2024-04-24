@@ -96,7 +96,8 @@ matrixlistToBMR  <- function(afileinfo, mutf, BMRlist, k=6){
               genesp = genesp,
               ll = ll,
               ff = ff,
-              yn = yn))
+              yn = yn,
+              fit = fit))
 }
 
 
