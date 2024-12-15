@@ -7,7 +7,7 @@
 #'
 #' @return A list
 #' @noRd
-matrixlistToBMR  <- function(afileinfo, mutf, BMRmode, k=6){
+matrixlistToBMR  <- function(afileinfo, mutf, BMRmode, k=6, ...){
   # Read annotation files.
   matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, bmvars, bmmuttype, bmreadinvars, qnvars, functypecodelevel = NULL, qnvarimpute=c(-1.8))
 
@@ -64,10 +64,14 @@ matrixlistToBMR  <- function(afileinfo, mutf, BMRmode, k=6){
   nbeta <- dim(matrixlist[[1]][[1]])[2] -1
   initpars <- c(betabaseline0, rep(0, nbeta), 0, 2)
   fixstatus <- c(rep(T, Totalnttype), rep(F, nbeta), T, F)
-  Y_g_s_0 <- data.table(agg_var = character(), y = numeric(), key = "agg_var")
-  Mu_g_s_0 <- data.table(agg_var = character(), V1 = numeric(), key = "agg_var")
-  BMRreg <- optifix(initpars, fixstatus, loglikfn, matrixlist= Matrixlist, y_g_s_in=Y_g_s_0, mu_g_s_in=Mu_g_s_0, method = "BFGS", control=list(trace=6, fnscale=-1), hessian=T)
-  names(BMRreg$fullpars) <- c(paste("nttype", 1:Totalnttype, sep=""), colnames(Matrixlist[[1]][[1]])[-1], "beta_f0", "alpha")
+  Y_g_s_0 <- data.table::data.table(agg_var = character(), y = numeric(), key = "agg_var")
+  Mu_g_s_0 <- data.table::data.table(agg_var = character(), V1 = numeric(), key = "agg_var")
+  BMRpars <- optifix(initpars, fixstatus, loglikfn, matrixlist= matrixlist, y_g_s_in=Y_g_s_0, mu_g_s_in=Mu_g_s_0, method = "BFGS", control=list(trace=6, fnscale=-1), hessian=T)
+  names(BMRpars$fullpars) <- c(paste("nttype", 1:Totalnttype, sep=""), colnames(Matrixlist[[1]][[1]])[-1], "beta_f0", "alpha")
+
+  BMRreg <- list(BMpars, Y_g_s_all, Mu_g_s_all, "nsyn" = sum(ysample), ysample)
+  # BMRregout <- paste0(outputbase,"_BMRreg.Rdata")
+  # save(BMRreg, file = BMRregout)
 
   # Adjust for mutational signature in signature mode.
   BMRsig <- NULL
@@ -125,13 +129,16 @@ matrixlistToBMR  <- function(afileinfo, mutf, BMRmode, k=6){
                    genesp = genesp,
                    ll = ll,
                    ff = ff,
-                  ysample =ysample,
+                   ysample =ysample,
                    fit = fit)
   }
 
-  bmrres <- list("reg" = BMRreg, "sig" = BMRsig)
+  BMRres <- list("reg" = BMRreg, "sig" = BMRsig)
 
-  return(bmrres)
+  BMRfile <- paste0(outputbase,"_BMRres.Rdata")
+  save(BMRres, file = BMRfile)
+
+  return(BMRres)
 }
 
 

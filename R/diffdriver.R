@@ -17,13 +17,15 @@
 #' @param pheno A data frame containing sample phenotypes. The format is:
 #' #' \describe{
 #'   \item{SampleID}{<chr>}
-#'   \item{Phenotype}{<dbl>}
+#'   \item{Phenotype1}{<dbl>}
+#'   \item{Phenotype2}{<dbl>}
+#'   \item{...}{...}
 #' }
 #' Example:
 #' \preformatted{
-#' SampleID SmokingCessation
-#' 1 TCGA-N5-A4R8-01A-11D-A28R-08 0.5319630
-#' 2 TCGA-N5-A4RD-01A-11D-A28R-08 0.0448991
+#' SampleID SmokingCessation BMI
+#' TCGA-N5-A4R8-01A-11D-A28R-08 0.5319630 20.0
+#' TCGA-N5-A4RD-01A-11D-A28R-08 0.0448991 24.4
 #' }
 #'
 #' @param anno_dir The path to the directory with all the annotation files.
@@ -67,16 +69,16 @@ diffdriver= function(gene,
 
   dir.create(outputdir)
 
-  outputbase <<- paste0(outputdir, "/", outputname)
+  outputbase <<- paste0(output_dir, "/", output_prefix)
 
   # Read in silent mutation data and infer BMR
   # note silent mutations from all samples in `mut` are used in getting
   # BMR parameter estimates, not just the ones with phenotype info.
   print("Infer parameters in background mutation rate model, adjusting for \
-        inter individual mutational signature difference ...")
-  BMRres <- matrixlistToBMR(afileinfo, mut, BMRmode, k=k)
+        inter-individual mutational signature difference ...")
+  BMRres <- matrixlistToBMR(afileinfo, mut, BMRmode, k=k, outputbase)
 
-  BMRlist <- BMRres[[1]]
+  BMRreg <- BMRres[[1]]
 
   if (BMRmode == "signature"){
     bmrsig <- BMRres[[2]]
@@ -102,11 +104,11 @@ diffdriver= function(gene,
 
   matrixlisttemp <- copy(matrixlist)
   chrposmatrixlisttemp <- copy(chrposmatrixlist)
-  y_g_s <- BMRlist$Y_g_s_all[allg][,1:2, with=F]
+  y_g_s <- BMRreg$Y_g_s_all[allg][,1:2, with=F]
   y_g_s[is.na(y_g_s)] <- 0
-  mu_g_s <- BMRlist$Mu_g_s_all[allg][,1:2, with=F]
+  mu_g_s <- BMRreg$Mu_g_s_all[allg][,1:2, with=F]
   mu_g_s[is.na(mu_g_s)] <- 0
-  glmdtall <- matrixlistToGLM(matrixlisttemp, chrposmatrixlisttemp, BMRlist$BMpars, mu_g_s, y_g_s, fixpars=NULL)
+  glmdtall <- matrixlistToGLM(matrixlisttemp, chrposmatrixlisttemp, BMRreg$BMpars, mu_g_s, y_g_s, fixpars=NULL)
   rm(matrixlisttemp,chrposmatrixlisttemp,matrixlist,chrposmatrixlist); gc()
 
   # functional annotation (fanno) :data.table, each row has functional annotation for each possible mutation
@@ -135,17 +137,16 @@ diffdriver= function(gene,
   ci <- canno[,"SampleID"]
   ci[,"cidx" := 1:dim(canno)[1]]
 
-  # hotspot: TODO add a function mutf2hotspot
-  # hotspots <- mutf2hotspot(mutf)
-  hotspots=read.table(file = hotf, header =T)
+  # add hotspots
+  hotspots <- mut2hotspot(muts)
 
   ## ------- Get BMR (log scale mu_ij) for target genes -----------------------------
 
   if (BMRmode == "regular"){
     bmrdt <- data.table()
     bmrdt[,"BMR":= glmdtall[[1]]$baseline]
-    BMRlist[["nsyn"]] <- sum(canno$Nsyn)
-    bmrsc <- log(canno$Nsyn/BMRlist$nsyn)
+    BMRreg[["nsyn"]] <- sum(canno$Nsyn)
+    bmrsc <- log(canno$Nsyn/BMRreg$nsyn)
     bmrmtx_uni <- as.matrix(bmrdt[,rep(1,nrow(canno)), with = F])
     bmrmtx <-as.data.table(sweep(bmrmtx_uni, 2, bmrsc, "+"))
     bmrallg <- split(bmrmtx, ri$genename)
@@ -178,10 +179,10 @@ diffdriver= function(gene,
     muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
     mutmtx <- Matrix::sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
 
-    hotg= na.omit(rig[hotspots,on=c("chrom"="chrom","start"="start")])
+    hotg= na.omit(rig[hotspots,on=c("chrom"="Chromosome","start" = "Position")])
     hotmat=rep(0,nrow(rig))
     hotmat[hotg$ridx]=1
-    if (sum(mutmtx) ==0) {
+    if (sum(mutmtx) == 0) {
       next
     }
 
