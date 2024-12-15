@@ -52,7 +52,7 @@ ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars 
     y <- dataselect[ , "y", with = F]
     genename <- dataselect[ , "genename", with = F]
     nttypecode <- dataselect[,"nttypecode",with=F]
-    matrixlist[[j]] <- list(anno, y, genename,nttypecode)
+    matrixlist[[j]] <- list(anno, y, genename, nttypecode)
   }
   return(matrixlist)
 }
@@ -80,7 +80,7 @@ ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
 }
 
 
-ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=c(0,0), cvarimpute = 0, fixmusd=NULL){
+ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=c(-1.8), cvarimpute = 0, fixmusd=NULL){
 print("processing ...")
   print("for qnvars, filling in missing values ...")
   print("for cvars (0/1 categories), filling in missing values ...")
@@ -91,9 +91,14 @@ print("processing ...")
     cvars <- innames[!(innames %in% qnvars)]
     cvars <- cvars[!(cvars %in% c("(Intercept)", "chrom","start","end","ref","alt"))]
     if (length(inqnvars) > 0){
-      # a little different from driverMAPS
+      # minor difference from driverMAPS
       for (qnvar in inqnvars){
-        set(anno, which(is.na(anno[[qnvar]])), qnvar, qnvarimpute[1])
+        if (qnvar != "repl"){
+          set(anno, which(is.na(anno[[qnvar]])), qnvar, qnvarimpute[1])
+        }
+        else{
+          set(anno, which(is.na(anno[[qnvar]])), qnvar, -qnvarimpute[1])
+        }
       }
     }
     # for cvars (0/1 categories), filling in missing values ...
