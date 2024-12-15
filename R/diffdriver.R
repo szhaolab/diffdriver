@@ -1,51 +1,87 @@
-# TODO: mutation hotspot, quantitative phenotype
-# Notes: syn data prepared from direct join of mutation list to annodata is different from used in driverMAPS BMR estimation: 1. 5% syn are ssp are included. 2. BMR estimation from old driverMAPS run has different annodata. 3. genes without expr/hic/rep were removed in BMR driverMAPS estimation.
-#' @title Run diffDriver given input files
-#' @description This is the function to run diffDriver. We first need to set up: run driverMAPS for groups with potential different BMR, assign BMR labels for each sample. then BMR for each sample will be scaled based on driverMAPS results.
-#' @param genef file for name of genes to be included in the analysis
-#' @param mutf mutation list file, use the driverMAPS mutation input format
-#' @param phenof phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.
-#' @param j The index of phenotype
+#' @title Run diffDriver with Input Files
+#' @description This function runs diffDriver.
+#' @param gene A vector of genes to be included in the analysis.
+#' @param mut A data frame containing all somatic mutations from the cohort. The format is:
+#' \describe{
+#'   \item{Chromosome}{<int>}
+#'   \item{Position}{<int>}
+#'   \item{Ref}{<chr>}
+#'   \item{Alt}{<chr>}
+#'   \item{SampleID}{<chr>}
+#' }
+#' Example:
+#' \preformatted{
+#' Chromosome Position Ref Alt SampleID
+#' 1 19 55653236 C T TCGA-N6-A4VE-01A-11D-A28R-08
+#' }
+#' @param pheno A data frame containing sample phenotypes. The format is:
+#' #' \describe{
+#'   \item{SampleID}{<chr>}
+#'   \item{Phenotype}{<dbl>}
+#' }
+#' Example:
+#' \preformatted{
+#' SampleID SmokingCessation
+#' 1 TCGA-N5-A4R8-01A-11D-A28R-08 0.5319630
+#' 2 TCGA-N5-A4RD-01A-11D-A28R-08 0.0448991
+#' }
+#'
+#' @param anno_dir The path to the directory with all the annotation files.
+#'  Please download from Zenodo.The default is current folder
+#'
+#' @param k The number of topics used in modeling background mutation rate.
+#'  The default is 6.
+#'
+#' @param BMRmode There are two modes to run diffdriver. One is "signature",
+#' this will model individual level BMR, this is the default. The second one is
+#' "regular", this assumes BMR is the same across individuals, only models
+#' position-level difference.
+#'
+#' @param output_dir The path to output directory
+#'
+#' @param output_prefix The prefix being added to the output file names.
+#'
 #' @import Matrix
 #' @import data.table
 #' @export
-#'
-#'
-#'
-diffdriver= function(gene, mutation, pheno, bmrf = NULL, j, hotf, annodir, k=6, BMRmode = "signature", outputdir =".", outputname = "diffdriver_results"){
+
+diffdriver= function(gene,
+                     mut,
+                     pheno,
+                     anno_dir = ".",
+                     k = 6,
+                     BMRmode = c("signature", "regular"),
+                     output_dir =".",
+                     output_prefix = "diffdriver_results"){
 
   # ------- SET UP ----------
-  if (BMRmode == "signature"){
-    afileinfo <- list(file = file.path(annodir, "TCGA-UCS_nttypeXXX_annodata.txt"),
-                      header = aheader,
-                      coltype = acoltype)
-    totalnttype <<- 96
-  } else if (BMRmode == "regular"){
-    afileinfo <- list(file = file.path(annodir, "nttypeXXX_annodata.txt"),
-                      header = aheader,
-                      coltype = acoltype)
-    totalnttype <<- 9
-  } else {
+  BMRmode <- match.arg(BMRmode)
+  if (!(BMRmode %in% c("regular", "signature"))){
     stop("Unknown BMR mode, options: signature, regular")
   }
+
+  afileinfo <- list(file = file.path(annodir, "anno96_nttypeXXX_annodata.txt"),
+                      header = aheader,
+                      coltype = acoltype)
+  totalnttype <<- 96
 
   dir.create(outputdir)
 
   outputbase <<- paste0(outputdir, "/", outputname)
 
-  # ------- load/estimate parameters in background mutation model (BMM)----------
+  # Read in silent mutation data and infer BMR
+  # note silent mutations from all samples in `mut` are used in getting
+  # BMR parameter estimates, not just the ones with phenotype info.
+  print("Infer parameters in background mutation rate model, adjusting for \
+        inter individual mutational signature difference ...")
+  BMRres <- matrixlistToBMR(afileinfo, mut, BMRmode, k=k)
 
-  if (!is.null(bmrf)){
-    load(bmrf)
-  } # if bmrf is not given, will use gene level BMR parameter from TCGA-UCS.
-
-  BMRlist=BMRlist[[1]]
+  BMRlist <- BMRres[[1]]
 
   if (BMRmode == "signature"){
-    # note all mutations from all samples are used in getting parameter estiamtes, not just the ones with phenotype info.
-    print("Infer parameters in background mutation rate model, adjusting for inter individual mutational signature difference ...")
-    bmrsig <- matrixlistToBMR(afileinfo, mutf, BMRlist, k=k)
+    bmrsig <- BMRres[[2]]
   }
+
 
   # ------- Read in data for target genes----------
   print("Start to read in data for target genes ...")
@@ -53,7 +89,7 @@ diffdriver= function(gene, mutation, pheno, bmrf = NULL, j, hotf, annodir, k=6, 
 
 
   fixmusdfile <- system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
-  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel, qnvarimpute=c(0,0), cvarimpute = 0, genesubset=genef, fixmusd= fixmusdfile)
+  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel, qnvarimpute=c(-1.8), cvarimpute = 0, genesubset=genef, fixmusd= fixmusdfile)
   chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
 
 
@@ -122,7 +158,7 @@ diffdriver= function(gene, mutation, pheno, bmrf = NULL, j, hotf, annodir, k=6, 
       mui <- bmrsig$yn[id] * bmrsig$sigmtx[id,ri$nttypecode] *
         exp(as.matrix(fanno[, c("expr","repl","hic")]) %*% bmrsig$BMvbeta) *
         glambda/bmrsig$at[ri$nttypecode]
-        bmr=cbind(bmr,log(mui))
+      bmr=cbind(bmr,log(mui))
     }
     if (any(is.na(bmr))) {stop("bmr missing")}
     bmrallg <- split(bmr,ri$genename)
@@ -160,7 +196,7 @@ diffdriver= function(gene, mutation, pheno, bmrf = NULL, j, hotf, annodir, k=6, 
       betaf <- TSGpars[names(TSGpars) != "beta_f0"]
       betaf0 <- TSGpars["beta_f0"]
       fe <-  as.matrix(ganno[ ,names(betaf), with =F]) %*% betaf + betaf0
-      } # if OG/TSG unknown, use TSG parameters.
+    } # if OG/TSG unknown, use TSG parameters.
 
     label=factor(1:nrow(bmrmtx))
 
