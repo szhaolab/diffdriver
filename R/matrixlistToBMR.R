@@ -1,47 +1,41 @@
 
-#'
-#' @param annodir The path of the directory that contains annotation files
-#' @param mutf The path to the mutation files
-#' @param BMRlist The parameters from drivermaps
-#' @param target The target positions where the bmr's are computed
+#' @param BMRmode "regular" or "signature". In regular mode, number of signatures (k) is not used.
 #'
 #' @return A list
 #' @noRd
-matrixlistToBMR  <- function(afileinfo, mutf, BMRmode, k=6, ...){
+matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular"), k=6, outputbase = "."){
+
+  BMRmode <- match.arg(BMRmode)
+
   # Read annotation files.
-  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, bmvars, bmmuttype, bmreadinvars, qnvars, functypecodelevel = NULL, qnvarimpute=c(-1.8))
+  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, bmvars, bmmuttype, bmreadinvars, qnvars, functypecodelevel = NULL, qnvarimpute=c(NA))
 
-  # Read mutation data.
-  mutfile <- data.table::fread(mutf, header = T)
+  # Mutation data to y
+  anno <- do.call(rbind, lapply(matrixlist, '[[', 5)) # Extract only chrom, pos, ref, alt and nttype info.
+  anno$nttypecode = do.call(rbind, lapply(matrixlist, '[[', 4))
+  anno$posidx = do.call(rbind, lapply(matrixlist, function(x) {if (nrow(x[[1]]) >0) data.table::data.table(posidx = 1:nrow(x[[1]]))}))
 
-  #  Mutation data to y
-  chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, selectvars = c("chrom", "start","ref","alt","nttypecode"), bmmuttype, readinvars = c("genename", "chrom", "start", "ref", "alt", "nttypecode", "functypecode"))
-
-  anno <- do.call(rbind, lapply(chrposmatrixlist, '[[', 1)) # Extract only chrom, pos, ref, alt and nttype info.
-  anno$nttypecode = do.call(rbind, lapply(chrposmatrixlist, '[[', 4))
-  anno$posidx = do.call(lapply(chrposmatrixlist, function(x) 1:nrow(x[[1]])))
-
-  id = unique(mutfile$SampleID)
+  id = unique(mut$SampleID)
   nsample = length(id)
     # `ymatrix` is no mut for nttype x sample.
+  totalnttype <- length(matrixlist)
   ymatrix = matrix(0, nrow = nsample, ncol = totalnttype)
   rownames(ymatrix) <- id
     # `ysample` is no. mut for each sample.
   ysample <- rep(0, nsample)
   names(ysample) <- id
 
-
   for (i in 1:nsample) {
-    idata = mutfile[SampleID==id[i]]
+    idata = mut[mut$SampleID==id[i],]
     ni = nrow(idata)
-    for (ii in 1:ni) {
-      Position = idata$Position[ii]
-      Ref = idata$Ref[ii]
-      Alt = idata$Alt[ii]
-      if (grepl('chr', idata$Chromosome[ii], fixed = TRUE)){
-        Chromosome = idata$Chromosome[ii]
+    for (imut in 1:ni) {
+      Position = idata$Position[imut]
+      Ref = idata$Ref[imut]
+      Alt = idata$Alt[imut]
+      if (grepl('chr', idata$Chromosome[imut], fixed = TRUE)){
+        Chromosome = idata$Chromosome[imut]
       } else{
-        Chromosome = paste0("chr",idata$Chromosome[ii])
+        Chromosome = paste0("chr",idata$Chromosome[imut])
       }
       mutanno = anno[start==Position & ref==Ref & alt==Alt & chrom==Chromosome, ]
       ntidx = mutanno$nttypecode
@@ -56,22 +50,31 @@ matrixlistToBMR  <- function(afileinfo, mutf, BMRmode, k=6, ...){
   }
 
   ysample[ysample < 3] <- 3 # if too few syn mutations force it to be 3.
-  # TODO: if matrixlist, if one nt got too few variants then add 1.
+
+  save(matrixlist, file =  paste0(outputbase,"bmrdebug9-temp.Rd.Rdata"))
 
   # Infer positional level BMM parameters.
-  betabaseline0 <-log(apply(rbind(unlist(lapply(lapply(matrixlist,'[[',2), colMeans)),
-                                  1/unlist(lapply(lapply(matrixlist,'[[',2), nrow))),2,max))
+  betabaseline0 <- log(unlist(lapply(lapply(matrixlist,'[[',2), colMeans)))
+  min_betabaseline0 <- min(betabaseline0[is.finite(betabaseline0)], na.rm = TRUE) # Replace Inf and NaN with the smallest finite value
+  betabaseline0[is.infinite(betabaseline0) | is.nan(betabaseline0)] <- min_betabaseline0
+
   nbeta <- dim(matrixlist[[1]][[1]])[2] -1
   initpars <- c(betabaseline0, rep(0, nbeta), 0, 2)
-  fixstatus <- c(rep(T, Totalnttype), rep(F, nbeta), T, F)
+  fixstatus <- c(rep(T, totalnttype), rep(F, nbeta), T, F)
   Y_g_s_0 <- data.table::data.table(agg_var = character(), y = numeric(), key = "agg_var")
   Mu_g_s_0 <- data.table::data.table(agg_var = character(), V1 = numeric(), key = "agg_var")
   BMRpars <- optifix(initpars, fixstatus, loglikfn, matrixlist= matrixlist, y_g_s_in=Y_g_s_0, mu_g_s_in=Mu_g_s_0, method = "BFGS", control=list(trace=6, fnscale=-1), hessian=T)
-  names(BMRpars$fullpars) <- c(paste("nttype", 1:Totalnttype, sep=""), colnames(Matrixlist[[1]][[1]])[-1], "beta_f0", "alpha")
+  names(BMRpars$fullpars) <- c(paste("nttype", 1:totalnttype, sep=""), colnames(matrixlist[[1]][[1]])[-1], "beta_f0", "alpha")
 
-  BMRreg <- list(BMpars, Y_g_s_all, Mu_g_s_all, "nsyn" = sum(ysample), ysample)
-  # BMRregout <- paste0(outputbase,"_BMRreg.Rdata")
-  # save(BMRreg, file = BMRregout)
+  Y_g_s_all <- gene_y(matrixlist)
+  Vbeta_s <- BMRpars$fullpars[1: length(BMRpars$fullpars)-1]
+  Mu_g_s_all <- gene_mu(Vbeta_s, matrixlist)
+
+  BMRreg <- list("BMRpars" = BMRpars,
+                 "Y_g_s_all" = Y_g_s_all,
+                 "Mu_g_s_all" = Mu_g_s_all,
+                 "nsyn" = sum(ysample),
+                 "ysample" = ysample)
 
   # Adjust for mutational signature in signature mode.
   BMRsig <- NULL
@@ -99,23 +102,23 @@ matrixlistToBMR  <- function(afileinfo, mutf, BMRmode, k=6, ...){
     ll[rownames(lltemp),] <- lltemp
 
     colnames(ll)=paste("weight",1:k, sep = "")
-    colnames(ff)=paste("factor",1:k,sep="")
-    ff=cbind(sigmapping[,c("context","alt_allele")],ff)
+    colnames(ff)=paste("factor",1:k, sep= "")
+    ff=cbind(sigmapping[ ,c("context","alt_allele")], ff)
     sigmtx=ll%*%t(ff[,-c(1,2)]) # rows are samples, column is nttypecode
 
-    # get positional adjustment for each nt type, based on driverMAPS estimate
-    fixmusdfile <-  system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
-    matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, bmvars, bmmuttype, c("genename", bmvars , "functypecode"), qnvars, functypecodelevel = NULL, qnvarimpute=c(0,0), fixmusd= fixmusdfile) # note normalization of qnvar is approximately right.
+    # # get positional adjustment for each nt type, based on driverMAPS estimate
+    # fixmusdfile <-  system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
+    # matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, bmvars, bmmuttype, c("genename", bmvars , "functypecode"), qnvars, functypecodelevel = NULL, qnvarimpute=c(0,0), fixmusd= fixmusdfile) # note normalization of qnvar is approximately right.
+    #
 
-    BMcol <- c("expr","repl","hic")
-    alpha=BMRlist$BMpars$fullpars[c("alpha")]
-    genesp=data.table(genename=BMRlist$Y_g_s_all$agg_var,
-                      lambda=(BMRlist$Y_g_s_all$y + alpha)/(BMRlist$Mu_g_s_all$V1 + alpha),
+    alpha= BMRreg$BMRpars$fullpars[c("alpha")]
+    genesp=data.table(genename=BMRreg$Y_g_s_all$agg_var,
+                      lambda=(BMRreg$Y_g_s_all$y + alpha)/(BMRreg$Mu_g_s_all$V1 + alpha),
                       key = "genename")
-    BMvbeta <- BMRlist$BMpars$fullpars[c("expr","repl","hic")]
+    BMvbeta <-  BMRreg$BMRpars$fullpars[qnvars]
     at <- c()
     for (j in (1:totalnttype)){
-      BManno  <- matrixlist[[j]][[1]][, BMcol, with=F]
+      BManno  <- matrixlist[[j]][[1]][, qnvars, with=F]
       genename <- matrixlist[[j]][[3]]
       at[j] <- sum(exp(as.matrix(BManno) %*% BMvbeta) * as.matrix(genesp[genename,"lambda"]), na.rm = T)
     }

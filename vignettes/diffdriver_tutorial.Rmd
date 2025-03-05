@@ -20,68 +20,50 @@ Need 16G memory to run diffdriver. The place that need the most memory is for pa
   * Gene file
 ```{r}
 genef = system.file("extdata", "example_gene.txt", package = "diffdriver")
-head(read.table(genef, header = F))
+gene <- read.table(genef, header = F)
+head(gene)
 ```
 
   * Mutation file
 ```{r}
 mutf = system.file("extdata/", "example_mutations.txt", package = "diffdriver")
-head(read.table(mutf, header = T)) 
+mut <- read.table(mutf, header = T)
+head(mut)
 ```
 
   * Phenotype file
-  
-Note: Nsyn is only required for when running diffdriver with mode "regular". TODO: update regular BMR so that this is not used.
+
+The first column is sample ID with column name "SampleID", the second column is phenotype with the phenotype name as column name (note no space or in tab in column names are allowed). 
 ```{r}
 phenof = system.file("extdata/", "example_phenotypes.txt", package = "diffdriver")
-head(read.table(phenof, header = T))
-```
-
-  * Background mutation file
-  
-TODO: add description about how to generate a background mutation file from driverMAPS output/ generate within diffdriver. 
-```{r}
-bmrf = system.file("extdata/", "example_BMRlist.Rd", package = "diffdriver")
-load(bmrf)
-```
-
-  * Hotspot file
-```{r}
-hotf = system.file("extdata/", "example_hotspot.txt", package = "diffdriver")
-head(read.table(hotf, header = T))
+pheno <- read.table(phenof, header = T)
+head(pheno)
 ```
 
   * Directory that contains annotation files
-We have two types of annotations, one has 96 annotation files: 
+
 ```{r}
 annodir = "~/temp/annodir96"
 list.files(annodir)
 ```
-One has 9 annotation files:
-
-```{r}
-annodir = "~/temp/annodir9"
-list.files(annodir, pattern = "_annodata.txt")
-```
-
 
 
 # Run diffdriver
 
 ```{r}
-library(diffdriver)
+# library(diffdriver)
 output_dir <- "~/temp/output"
 ```
 
 With signature adjustment, takes around 10min for two genes. Each additional gene will take 3-4 minutes. Please use the provide the annotation folder with 96 annotation files. `j` is the column that will be used as the phenotype, e.g j=2 means the second column in the phenotype file will be used as phenotype. 
 ```{r}
-res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir = "~/temp/annodir96", k=6, BMRmode = "signature", outputdir = outputdir, outputname = "testdiffdriver_sig")
+res <- diffdriver(gene = gene, mut= mut, pheno = pheno, anno_dir = "~/temp/annodir96", k=6, totalnttype = 96, BMRmode = "signature", output_dir = output_dir, output_prefix = "testdiffdriver_sig")
 res
 ```
 
 Without signature adjustment, takes around 5min for two genes. Each additional gene will take 2 minutes.Please use the provide the annotation folder with 9 annotation files. 
 ```{r}
-res <- diffdriver(genef, mutf, phenof, bmrf, j = 2, hotf, annodir = "~/temp/annodir9", BMRmode = "regular", outputdir = outputdir, outputname = "testdiffdriver_reg")
+res <- diffdriver(gene = gene, mut= mut, pheno = pheno,  anno_dir = "~/temp/annodir9", totalnttype = 9, BMRmode = "regular", output_dir = output_dir, output_prefix = "testdiffdriver_reg")
 res
 ```
 

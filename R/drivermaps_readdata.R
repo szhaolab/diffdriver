@@ -1,4 +1,3 @@
-#' Global variable Totalnttype, Outputdir
 #'
 #' @param fileinfo Anno file information
 #' @param j the number of nytype
@@ -16,16 +15,18 @@ ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
   coltypetemp <- fileinfo[["coltype"]][fileinfo[["header"]] %in% varlist]
   colc1 <- lapply(unique(coltypetemp),function(x) headertemp[which(coltypetemp==x)])
   names(colc1) <- unique(coltypetemp)
+  if (length(colc1) == 0) {colc1 <- NULL}
 
   headertemp2 <- paste0("V", 1:length(fileinfo[["header"]]))[fileinfo[["header"]] %in% varlist]
   colc2 <- lapply(unique(coltypetemp),function(x) headertemp2[which(coltypetemp==x)])
   names(colc2) <- unique(coltypetemp)
+  if (length(colc2) == 0) {colc2 <- NULL}
 
   if (is.null(genesubset)) {
     ddm_j <- suppressMessages(data.table::fread(readfile, header=TRUE, na.strings=".", colClasses= colc1, select=varlist))
   } else {
     inheader <- suppressMessages(colnames(data.table::fread(paste("head -n 1",readfile), header=T)))
-    ddm_j <- suppressMessages(data.table::fread(paste("LC_ALL=C grep -wf", genesubset, readfile), header=F, na.strings=".", colClasses= colc2,select= which(inheader %in% varlist), sep="\t"))
+    ddm_j <- suppressMessages(data.table::fread(paste("LC_ALL=C grep -wf", genesubset, readfile), header=F, na.strings=".", colClasses= colc2, select= which(inheader %in% varlist), sep="\t"))
     if (is.null(varlist)){
       colnames(ddm_j) <- inheader
     } else {colnames(ddm_j) <- inheader[inheader %in% varlist]}
@@ -34,10 +35,10 @@ ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
 }
 
 
-
-ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL, genesubset=NULL){
+ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL,  totalnttype =96, genesubset=NULL){
   matrixlist <- list()
   selectvars <- selectvars[selectvars !="nttypecode"] # nttypecode will always be included by reading data by type
+  totalnttype <- afileinfo$totalntype
   for (j in 1:totalnttype){
     dataall <- ddmread_j(afileinfo, j, varlist = readinvars, genesubset=genesubset)
     if (is.null(yfileinfo)){
@@ -51,8 +52,9 @@ ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars 
     anno <- dataselect[ , selectvars, with = F]
     y <- dataselect[ , "y", with = F]
     genename <- dataselect[ , "genename", with = F]
-    nttypecode <- dataselect[,"nttypecode",with=F]
-    matrixlist[[j]] <- list(anno, y, genename, nttypecode)
+    nttypecode <- dataselect[ ,"nttypecode",with=F]
+    other <- dataselect[ , intersect(c("chrom", "start","ref","alt"), readinvars), with=F]
+    matrixlist[[j]] <- list(anno, y, genename, nttypecode, other)
   }
   return(matrixlist)
 }
@@ -64,6 +66,7 @@ ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars 
 ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
   selectvars <- selectvars[selectvars !="nttypecode"]
   print("coding...")
+  totalnttype <- length(matrixlist)
   for (j in 1:totalnttype){
     anno <- matrixlist[[j]][[1]]
     y <- matrixlist[[j]][[2]]
@@ -80,8 +83,10 @@ ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
 }
 
 
-ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"), qnvarimpute=c(-1.8), cvarimpute = 0, fixmusd=NULL){
-print("processing ...")
+ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"),
+                       qnvarimpute=c(-1.8), cvarimpute = 0, fixmusd=NULL){
+  totalnttype <- length(matrixlist)
+  print("processing ...")
   print("for qnvars, filling in missing values ...")
   print("for cvars (0/1 categories), filling in missing values ...")
   for (j in 1:totalnttype){
@@ -110,23 +115,31 @@ print("processing ...")
     matrixlist[[j]][[1]] <- anno[complete.cases(anno),]
     matrixlist[[j]][[2]] <- matrixlist[[j]][[2]][complete.cases(anno),]
     matrixlist[[j]][[3]] <- matrixlist[[j]][[3]][complete.cases(anno),]
+    matrixlist[[j]][[4]] <- matrixlist[[j]][[4]][complete.cases(anno),]
+    if (nrow(matrixlist[[j]][[5]])!=0){
+      matrixlist[[j]][[5]] <- matrixlist[[j]][[5]][complete.cases(anno),]
+    }
+
     rm(anno);gc()
   }
-  if (is.null(fixmusd)){
-    print("no mean or standard deviation file provided, will calculate from data ...")
-    allsum <- colSums(do.call(rbind,lapply(matrixlist, function(x) x[[1]][,lapply(.SD,sum)])))
-    alllen <-  colSums(do.call(rbind,lapply(matrixlist, function(x) dim(x[[1]]))))[1]
-    allmu <- allsum/alllen
-    allvarlist <- list()
-    for (j in 1:totalnttype){
-      # Note this does't work with matrixStats anymore
-      allvarlist[[j]] <- matrixStats::colVars(matrixlist[[j]][[1]],center=allmu) * dim(matrixlist[[j]][[1]])[1]
-      gc()
-    }
-    allsd <- sqrt(colSums(do.call(rbind, allvarlist))/(alllen-1))
-    save(allmu, allsd, file=paste0(outputbase,"colmu_sd_funcv.Rdata"))
-  } else {
+  # if (is.null(fixmusd)){
+  #   print("no mean or standard deviation file provided, will calculate from data ...")
+  #   allsum <- colSums(do.call(rbind,lapply(matrixlist, function(x) x[[1]][,lapply(.SD,sum)])))
+  #   alllen <-  colSums(do.call(rbind,lapply(matrixlist, function(x) dim(x[[1]]))))[1]
+  #   allmu <- allsum/alllen
+  #   allvarlist <- list()
+  #   for (j in 1:totalnttype){
+  #     # Note this doesn't work with matrixStats anymore
+  #     allvarlist[[j]] <- matrixStats::colVars(matrixlist[[j]][[1]],center=allmu) * dim(matrixlist[[j]][[1]])[1]
+  #     gc()
+  #   }
+  #   allsd <- sqrt(colSums(do.call(rbind, allvarlist))/(alllen-1))
+  #   # save(allmu, allsd, file=paste0(outputbase,"colmu_sd_funcv.Rdata"))
+  # } else {
+  if (!is.null(fixmusd)){
     load(fixmusd)
+  } else {
+    print("missing mu and sd")
   }
   print("normalizing categorical variables in annotation matrix ...")
   for (j in 1:totalnttype){
@@ -134,14 +147,15 @@ print("processing ...")
     for (cvar in cvars) set(anno, j = cvar, value = (anno[[cvar]] - allmu[cvar])/allsd[cvar])
     gc()
   }
+
   return(matrixlist)
 }
 
 
-readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL,qnvars = c("expr","repl","hic"),functypecodelevel = NULL,qnvarimpute=c(-1.8,0.3), cvarimpute = 0, genesubset=NULL, fixmusd=NULL){
+readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL, qnvars = c("expr","repl","hic"),functypecodelevel = NULL,qnvarimpute=c(-1.8), cvarimpute = 0, genesubset=NULL, fixmusd=NULL){
   # read data for a subset of genes. genesubset is a file containing gene names, one gene name per line.
   # fixmusd is a .Rd file when loaded contain allmu and allsd variables to be used in ddmprocess
-  rawmlist <- ddmread(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars, genesubset)
+  rawmlist <- ddmread(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = readinvars, genesubset)
   rawmlist_code <- ddmcode(rawmlist, selectvars, functypecodelevel)
   rm(rawmlist); gc()
   matrixlist <- ddmprocess(rawmlist_code, qnvars, qnvarimpute, cvarimpute, fixmusd)
@@ -151,6 +165,7 @@ readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readi
 
 
 matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
+  totalnttype <- length(matrixlist)
   GLMlist <- list()
   chrposlist <- list()
   BMcol <- names(BMpars$fullpars)[-c(1:totalnttype,length(BMpars$fullpars)-1,length(BMpars$fullpars))]
@@ -159,7 +174,7 @@ matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s,
   lambdaPM_g_s <- data.table(agg_var = mu_g_s$agg_var, lambdaPE = log((y_g_s$y + alpha)/(mu_g_s$V1 + alpha)), key = "agg_var")
   BMvbeta <- BMpars$fullpars[1:(length(BMpars$fullpars)-2)]
   for (j in seq(1:totalnttype)){
-    BMvbetasub <- convertbeta(j, BMvbeta)
+    BMvbetasub <- convertbeta(j, BMvbeta, totalnttype)
     BManno  <- matrixlist[[j]][[1]][,c("(Intercept)",BMcol), with=F]
     fixanno <- matrixlist[[j]][[1]][,fixcol, with =F]
     chrposanno <- cbind(data.table(chrposmatrixlist[[j]][[1]]),data.table(chrposmatrixlist[[j]][[4]]))
@@ -188,62 +203,12 @@ matrixlistToGLM <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s,
   return(list(glmdt,glmdtchrpos))
 }
 
-convertbeta <- function(j, vbeta){
+convertbeta <- function(j, vbeta, totalnttype){
   tbeta <- vbeta[j]
   ibeta <- vbeta[-c(1:totalnttype)]
   vbetasub <- c(tbeta,ibeta)
   return(vbetasub)
 }
-
-
-### ----- TODO: clean up---------
-matrixlistToGLM_sig <- function(matrixlist, chrposmatrixlist, BMpars, mu_g_s, y_g_s, fixpars = NULL){
-  GLMlist <- list()
-  chrposlist <- list()
-  BMcol <- names(BMpars$fullpars)[-c(1:totalnttype,length(BMpars$fullpars)-1,length(BMpars$fullpars))]
-  fixcol <- names(fixpars)
-  alpha <- BMpars$fullpars["alpha"]
-  lambdaPM_g_s <- data.table(agg_var = mu_g_s$agg_var, lambdaPE = log((y_g_s$y + alpha)/(mu_g_s$V1 + alpha)), key = "agg_var")
-  BMvbeta <- BMpars$fullpars[1:(length(BMpars$fullpars)-2)]
-  for (j in seq(1:totalnttype)){
-    BMvbetasub <- convertbeta_sig(j, BMvbeta)
-    #BManno  <- matrixlist[[j]][[1]][,c("(Intercept)",BMcol), with=F]
-    BManno  <- matrixlist[[j]][[1]][,BMcol, with=F]
-    fixanno <- matrixlist[[j]][[1]][,fixcol, with =F]
-    # chrposanno <- cbind(chrposmatrixlist[[j]][[1]],chrposmatrixlist[[j]][[4]])
-    chrposanno <- chrposmatrixlist[[j]][[1]]
-    genename <- matrixlist[[j]][[3]]
-    genename2 <- chrposmatrixlist[[j]][[3]]
-    if (!identical(genename,genename2)) stop("matrixlist and chrpos not matching!")
-    chrposanno[,"genename" := genename]
-    lambdaPMit <- lambdaPM_g_s[genename]
-    muit <- as.matrix(BManno) %*% BMvbetasub
-    fixit <- as.numeric(as.matrix(fixanno) %*% as.numeric(fixpars))
-    out <- matrixlist[[j]][[1]]
-    out[, baseline:= rowSums(cbind(muit, lambdaPMit$lambdaPE, fixit))]
-    out[, y:= matrixlist[[j]][[2]]]
-    #out[, c("(Intercept)",BMcol,fixcol):= NULL]
-    GLMlist[[j]] <- out
-    chrposlist[[j]] <- chrposanno
-  }
-  glmdt <- do.call(rbind,GLMlist)
-  chrposdt <- do.call(rbind,chrposlist)
-  selectcol <- copy(colnames(glmdt))
-  glmdt[,colnames(chrposdt):= chrposdt]
-  glmdtsorted <- glmdt[order(chrom,genename,start)]
-  glmdt <- glmdtsorted[,selectcol,with = F]
-  glmdtchrpos <- glmdtsorted[,c("chrom","genename","start", colnames(chrposdt)), with =F]
-  return(list(glmdt,glmdtchrpos))
-}
-
-convertbeta_sig <- function(j, vbeta){
-  tbeta <- vbeta[j]
-  ibeta <- vbeta[-c(1:totalnttype)]
-  vbetasub <- c(tbeta,ibeta)
-  return(ibeta)
-}
-
-
 
 
 

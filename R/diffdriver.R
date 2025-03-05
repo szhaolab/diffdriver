@@ -31,6 +31,10 @@
 #' @param anno_dir The path to the directory with all the annotation files.
 #'  Please download from Zenodo.The default is current folder
 #'
+#' @param totalnttype either 9 or 96. Will look for annotation files
+#' anno9_ntypexxx_annodata.txt when totalnttype is 9 or anno96_ntypexxx_annodata
+#' when totalnttype is 96.
+#'
 #' @param k The number of topics used in modeling background mutation rate.
 #'  The default is 6.
 #'
@@ -52,38 +56,34 @@ diffdriver= function(gene,
                      pheno,
                      anno_dir = ".",
                      k = 6,
+                     totalnttype = 96,
                      BMRmode = c("signature", "regular"),
                      output_dir =".",
                      output_prefix = "diffdriver_results"){
 
   # ------- SET UP ----------
   BMRmode <- match.arg(BMRmode)
-  if (!(BMRmode %in% c("regular", "signature"))){
-    stop("Unknown BMR mode, options: signature, regular")
-  }
 
-  afileinfo <- list(file = file.path(annodir, "anno96_nttypeXXX_annodata.txt"),
+  afileinfo <- list(file = file.path(anno_dir, paste0("anno", totalnttype, "_nttypeXXX_annodata.txt")),
                       header = aheader,
-                      coltype = acoltype)
-  totalnttype <<- 96
+                      coltype = acoltype,
+                      totalntype = totalnttype)
 
-  dir.create(outputdir)
+  dir.create(output_dir)
 
-  outputbase <<- paste0(output_dir, "/", output_prefix)
+  outputbase <- paste0(output_dir, "/", output_prefix)
 
   # Read in silent mutation data and infer BMR
   # note silent mutations from all samples in `mut` are used in getting
   # BMR parameter estimates, not just the ones with phenotype info.
-  print("Infer parameters in background mutation rate model, adjusting for \
-        inter-individual mutational signature difference ...")
-  BMRres <- matrixlistToBMR(afileinfo, mut, BMRmode, k=k, outputbase)
+  print("Infer parameters in background mutation rate model")
+  BMRres <- matrixlistToBMR(afileinfo, mut = mut, BMRmode, k=k, outputbase)
 
   BMRreg <- BMRres[[1]]
 
   if (BMRmode == "signature"){
     bmrsig <- BMRres[[2]]
   }
-
 
   # ------- Read in data for target genes----------
   print("Start to read in data for target genes ...")
@@ -117,37 +117,35 @@ diffdriver= function(gene,
   # row index (ri): chr pos ref alt
   ri <- glmdtall[[2]][,.(chrom,genename,start,ref,alt,nttypecode)]
 
-  # mutations (muts): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
-  muts0 <- data.table::fread(mutf, header = T)
-  if (!grepl('chr', muts0$Chromosome[1], fixed = T)) {muts0$Chromosome <- paste0("chr",muts0$Chromosome)}
+  # mutations (mut): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
+  if (!grepl('chr', mut$Chromosome[1], fixed = T)) {mut$Chromosome <- paste0("chr",mut$Chromosome)}
 
-  # sample annotation (canno):data.table, with columns BMR label, No. syn and phenotype.
-  canno0 <- data.table::fread(phenof, header = "auto")
-  shared=intersect(muts0$SampleID,canno0$SampleID)
+  # sample annotation (pheno):data.table, with columns BMR label, No. syn and phenotype.
+  shared=intersect(mut$SampleID,pheno$SampleID)
   if (length(shared) < 10){
     stop("two few samples with both phenotype and mutation data.")
   }
-  index1=which(canno0$SampleID %in% shared)
-  index2=which(muts0$SampleID %in% shared)
+  index1=which(pheno$SampleID %in% shared)
+  index2=which(mut$SampleID %in% shared)
 
-  canno = canno0[index1,]
-  muts<- muts0[index2,]
+  pheno = pheno[index1,]
+  mut<- mut[index2,]
 
   # column index (ci): sampleID
-  ci <- canno[,"SampleID"]
-  ci[,"cidx" := 1:dim(canno)[1]]
+  ci <- pheno[,"SampleID"]
+  ci[,"cidx" := 1:dim(pheno)[1]]
 
   # add hotspots
-  hotspots <- mut2hotspot(muts)
+  hotspots <- mut2hotspot(mut)
 
   ## ------- Get BMR (log scale mu_ij) for target genes -----------------------------
 
   if (BMRmode == "regular"){
     bmrdt <- data.table()
     bmrdt[,"BMR":= glmdtall[[1]]$baseline]
-    BMRreg[["nsyn"]] <- sum(canno$Nsyn)
-    bmrsc <- log(canno$Nsyn/BMRreg$nsyn)
-    bmrmtx_uni <- as.matrix(bmrdt[,rep(1,nrow(canno)), with = F])
+    BMRreg[["nsyn"]] <- sum(pheno$Nsyn)
+    bmrsc <- log(pheno$Nsyn/BMRreg$nsyn)
+    bmrmtx_uni <- as.matrix(bmrdt[,rep(1,nrow(pheno)), with = F])
     bmrmtx <-as.data.table(sweep(bmrmtx_uni, 2, bmrsc, "+"))
     bmrallg <- split(bmrmtx, ri$genename)
   } else{
@@ -176,7 +174,7 @@ diffdriver= function(gene,
     print(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
-    muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
+    muti <- na.omit(ci[rig[mut, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
     mutmtx <- Matrix::sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
 
     hotg= na.omit(rig[hotspots,on=c("chrom"="Chromosome","start" = "Position")])
@@ -202,12 +200,12 @@ diffdriver= function(gene,
     label=factor(1:nrow(bmrmtx))
 
     resg <- list()
-    e=canno[[j]]
-    phename= gsub(" ", "_", colnames(canno)[j])
+    e=pheno[[j]]
+    phename= gsub(" ", "_", colnames(pheno)[j])
     resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1], label=label)
     ## resg[["dd_nl"]] <- ddmodel_nl(mutmtx, e, bmrmtx, fe[,1])
     resg[["mlr"]] <- mlr(mutmtx, e)
-    resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, canno$Nsyn)
+    resg[["mlr.v2"]] <- mlr.v2(mutmtx, e, pheno$Nsyn)
     e_binary=ifelse(e>mean(e),1,0)
     resg[["fisher"]] <- genefisher(mutmtx, e_binary)
     resg[["binom"]] <- genebinom(mutmtx, e_binary)

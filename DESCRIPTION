@@ -4,8 +4,7 @@ Title: Identify differential selection
 Version: 0.1.5
 Author: Siming Zhao, Jie Zhou
 Maintainer: The package maintainer <siming.zhao@dartmouth.edu>
-Description: This package implements a statistical method to detect differential
-selection of somatic mutations under different environments
+Description: This package implements a statistical method to detect differential selection of somatic mutations under different environments
 License: MIT 
 Encoding: UTF-8
 LazyData: true
@@ -16,7 +15,6 @@ Imports:
 	plyr,
 	brglm,
   fastTopics,
-  topicmodels,
   matrixStats
 Suggests: 
     knitr,

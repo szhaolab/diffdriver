@@ -1,5 +1,3 @@
-# library("reshape2")
-# global variables: Totalnttype
 
 loglik1_sub <- function(vbetasub, data, y){
   lastidx <- length(vbetasub)
@@ -8,8 +6,9 @@ loglik1_sub <- function(vbetasub, data, y){
 
 loglik1sum <- function(vbeta, matrixlist){
   ll1 <- 0
-  for (j in seq(1:Totalnttype)){
-    vbetasub <- convertbeta(j, vbeta)
+  totalnttype <- length(matrixlist)
+  for (j in 1:totalnttype){
+    vbetasub <- convertbeta(j, vbeta, totalnttype)
     anno <- matrixlist[[j]][[1]]
     y <- matrixlist[[j]][[2]]
     ddmyn  <- anno[which(y>0)]
@@ -47,32 +46,37 @@ gene_mu_sub <- function(vbetasub, data, gene){
 }
 
 gene_mu <- function(vbeta,matrixlist){
+  totalnttype <- length(matrixlist)
   mu_g <- data.table(agg_var = character(0), V1 = numeric(0))
-  for (j in seq(1:Totalnttype)){
-    vbetasub <- convertbeta(j, vbeta)
+  for (j in 1:totalnttype){
+    vbetasub <- convertbeta(j, vbeta, totalnttype)
     ddm <- matrixlist[[j]][[1]]
     gene <- matrixlist[[j]][[3]]
-    mu_g <- rbind(mu_g, gene_mu_sub(vbetasub, ddm, gene))
+    if (nrow(gene) >0) {
+      mu_g <- rbind(mu_g, gene_mu_sub(vbetasub, ddm, gene))
+    }
   }
-  mu_g <- aggregate_bysum(mu_g)
-  mu_g
+  aggregate_bysum(mu_g)
 }
 
 gene_y <- function(matrixlist){
+  totalnttype <- length(matrixlist)
   # generate y_g
   y_g <- data.table(agg_var = character(0), y = numeric(0))
-  for (j in seq(1:Totalnttype)){
+  for (j in 1:totalnttype){
     y <- matrixlist[[j]][[2]]
     gene <- matrixlist[[j]][[3]]
-    y<- data.table(y)
-    y$agg_var <- gene
-    y_g <- rbind(y_g, aggregate_bysum(y))
+    if (nrow(gene) > 0) {
+      y<- data.table(y)
+      y$agg_var <- gene
+      y_g <- rbind(y_g, aggregate_bysum(y))
+    }
   }
   aggregate_bysum(y_g)
 }
 
 
-# pars in loglikfn: 1-Totalnttype are beta_0t, last par is alpha,
+# pars in loglikfn: 1-totalnttype are beta_0t, last par is alpha,
 # the second to last is beta_f0
 loglikfn <- function(pars, matrixlist, y_g_s_in, mu_g_s_in){
   vbeta <-pars[1: length(pars)-1]
