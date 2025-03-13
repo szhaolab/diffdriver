@@ -51,9 +51,8 @@ matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular")
 
   ysample[ysample < 3] <- 3 # if too few syn mutations force it to be 3.
 
-  save(matrixlist, file =  paste0(outputbase,"bmrdebug9-temp.Rd.Rdata"))
-
   # Infer positional level BMM parameters.
+
   betabaseline0 <- log(unlist(lapply(lapply(matrixlist,'[[',2), colMeans)))
   min_betabaseline0 <- min(betabaseline0[is.finite(betabaseline0)], na.rm = TRUE) # Replace Inf and NaN with the smallest finite value
   betabaseline0[is.infinite(betabaseline0) | is.nan(betabaseline0)] <- min_betabaseline0
@@ -63,6 +62,7 @@ matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular")
   fixstatus <- c(rep(T, totalnttype), rep(F, nbeta), T, F)
   Y_g_s_0 <- data.table::data.table(agg_var = character(), y = numeric(), key = "agg_var")
   Mu_g_s_0 <- data.table::data.table(agg_var = character(), V1 = numeric(), key = "agg_var")
+
   BMRpars <- optifix(initpars, fixstatus, loglikfn, matrixlist= matrixlist, y_g_s_in=Y_g_s_0, mu_g_s_in=Mu_g_s_0, method = "BFGS", control=list(trace=6, fnscale=-1), hessian=T)
   names(BMRpars$fullpars) <- c(paste("nttype", 1:totalnttype, sep=""), colnames(matrixlist[[1]][[1]])[-1], "beta_f0", "alpha")
 
@@ -75,6 +75,10 @@ matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular")
                  "Mu_g_s_all" = Mu_g_s_all,
                  "nsyn" = sum(ysample),
                  "ysample" = ysample)
+
+  # ----debug----------------------
+  # load("~/temp/output/testdiffdriver_reg96_BMRres.Rdata")
+  # BMRreg <- BMRres[[1]]
 
   # Adjust for mutational signature in signature mode.
   BMRsig <- NULL
@@ -103,8 +107,8 @@ matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular")
 
     colnames(ll)=paste("weight",1:k, sep = "")
     colnames(ff)=paste("factor",1:k, sep= "")
-    ff=cbind(sigmapping[ ,c("context","alt_allele")], ff)
-    sigmtx=ll%*%t(ff[,-c(1,2)]) # rows are samples, column is nttypecode
+    ff=cbind(sigmapping[ ,c("context","ref", "alt")], ff)
+    sigmtx=ll%*%t(ff[, -c(1:3)]) # rows are samples, column is nttypecode
 
     # # get positional adjustment for each nt type, based on driverMAPS estimate
     # fixmusdfile <-  system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")

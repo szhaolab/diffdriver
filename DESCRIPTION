@@ -1,7 +1,7 @@
 Package: diffdriver
 Type: Package
 Title: Identify differential selection
-Version: 0.1.5
+Version: 0.1.6
 Author: Siming Zhao, Jie Zhou
 Maintainer: The package maintainer <siming.zhao@dartmouth.edu>
 Description: This package implements a statistical method to detect differential selection of somatic mutations under different environments

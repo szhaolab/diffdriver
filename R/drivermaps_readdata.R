@@ -35,7 +35,7 @@ ddmread_j <-function(fileinfo, j, varlist = NULL, genesubset = NULL){
 }
 
 
-ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL,  totalnttype =96, genesubset=NULL){
+ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL, genesubset=NULL){
   matrixlist <- list()
   selectvars <- selectvars[selectvars !="nttypecode"] # nttypecode will always be included by reading data by type
   totalnttype <- afileinfo$totalntype
@@ -155,7 +155,7 @@ ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"),
 readmodeldata <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = NULL, qnvars = c("expr","repl","hic"),functypecodelevel = NULL,qnvarimpute=c(-1.8), cvarimpute = 0, genesubset=NULL, fixmusd=NULL){
   # read data for a subset of genes. genesubset is a file containing gene names, one gene name per line.
   # fixmusd is a .Rd file when loaded contain allmu and allsd variables to be used in ddmprocess
-  rawmlist <- ddmread(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = readinvars, genesubset)
+  rawmlist <- ddmread(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars = readinvars, genesubset = genesubset)
   rawmlist_code <- ddmcode(rawmlist, selectvars, functypecodelevel)
   rm(rawmlist); gc()
   matrixlist <- ddmprocess(rawmlist_code, qnvars, qnvarimpute, cvarimpute, fixmusd)

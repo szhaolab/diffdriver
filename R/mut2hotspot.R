@@ -1,35 +1,23 @@
 
 
-mut2hotspot <- function(data){
-  # data is a data.table object
+mut2hotspot <- function(data) {
+  # Ensure data is a data.table
+  data.table::setDT(data)
 
-  # Initialize a vector to store the indices of rows to be selected
-  selected_indices <- integer(0)
+  # Create a shifted version of the data to compare positions
+  data_shifted <- copy(data)
+  data_shifted[, Position_shifted_right := Position + 3]
+  data_shifted[, Position_shifted_left := Position -3]
 
-  # Iterate over each row in the data table
-  for (i in 1:nrow(data)) {
-    chrom_i <- data[i, Chromosome]
-    start_i <- data[i, Position]
-    sampleID_i <- data[i, SampleID]
+  # Perform a non-equi join to find matching rows
+  result <- data[data_shifted, on = .(Chromosome, Position >= Position_shifted_left, Position <= Position_shifted_right),
+                 nomatch = 0, allow.cartesian = TRUE]
 
-    # Check for other rows with the same chrom, start difference within 3, and different sampleID
-    for (j in 1:nrow(data)) {
-      if (i != j) {
-        chrom_j <- data[j, Chromosome]
-        start_j <- data[j, Position]
-        sampleID_j <- data[j, SampleID]
-        # the criteria for defining hotspots
-        if (chrom_i == chrom_j && abs(start_i - start_j) <= 3 && sampleID_i != sampleID_j) {
-          selected_indices <- c(selected_indices, i)
-          break
-        }
-      }
-    }
-  }
+  # Filter out rows with the same SampleID
+  result <- result[SampleID != i.SampleID]
 
-  # Select the rows based on the indices
-  selected_rows <- data[selected_indices]
+  # Select unique rows based on the original data
+  selected_rows <- unique(result[, .(Chromosome, Position)])
 
   return(selected_rows)
-
 }

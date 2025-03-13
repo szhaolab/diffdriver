@@ -55,13 +55,13 @@ list.files(annodir)
 output_dir <- "~/temp/output"
 ```
 
-With signature adjustment, takes around 10min for two genes. Each additional gene will take 3-4 minutes. Please use the provide the annotation folder with 96 annotation files. `j` is the column that will be used as the phenotype, e.g j=2 means the second column in the phenotype file will be used as phenotype. 
+With signature adjustment (`BMRmode = "signature"`), which is the default mode, it will need around 20min to estimate parameters in background model. After that it takes around 5-10 min for two genes. Each additional gene will take ~ 3 minutes. Please use the provide the annotation folder with 96 annotation files when running with the "signature mode". 
 ```{r}
 res <- diffdriver(gene = gene, mut= mut, pheno = pheno, anno_dir = "~/temp/annodir96", k=6, totalnttype = 96, BMRmode = "signature", output_dir = output_dir, output_prefix = "testdiffdriver_sig")
 res
 ```
 
-Without signature adjustment, takes around 5min for two genes. Each additional gene will take 2 minutes.Please use the provide the annotation folder with 9 annotation files. 
+Without signature adjustment (`BMRmode = "regular"`), it will need around 20min to estimate parameters in background model. Then it takes around 5min for two genes. Each additional gene will take 2 minutes. You can use the provided the annotation folder with 9 annotation files or 96 annotations. The example below uses 9 annotation files.
 ```{r}
 res <- diffdriver(gene = gene, mut= mut, pheno = pheno,  anno_dir = "~/temp/annodir9", totalnttype = 9, BMRmode = "regular", output_dir = output_dir, output_prefix = "testdiffdriver_reg")
 res

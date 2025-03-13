@@ -6,15 +6,6 @@ load(BMparsfile)
 Totalnttype <- 9
 BMR <- exp(BMpars$fullpars[1:Totalnttype])/50
 
-# BMRlist (used in diffdriver demo)
-bmrdir <- "/home/simingz/cancer_somatic/data_run/combined_20170526_5/"
-BMRlist <- list()
-for (label in c("UCS")) {
-  bmr1f <- paste0(bmrdir, label, "/",label)
-  load(paste0(bmr1f,"_parameters_BMvar.Rdata"))
-  load(paste0(bmr1f,"_BM_y_mu_g.Rdata"))
-  BMRlist[[label]] <- list("BMpars" = BMpars, "Y_g_s_all" = Y_g_s_all, "Mu_g_s_all" = Mu_g_s_all, "nsyn" =  sum(Y_g_s_all$y)) # nsyn: total number of syn mut corresponding to this estimate
-}
 
 # Fe (used in simulation demo)
 drivermapsdir <- "~/cancer_somatic/maps/"
