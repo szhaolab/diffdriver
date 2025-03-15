@@ -7,15 +7,15 @@ aheader <- c("chrom","start","end","ref","alt","genename","functypecode","nttype
 
 acoltype <- c("character","numeric","numeric","character","character","character","character","factor","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric")
 
+qnvars = c("expr","repl","hic")
 bmvars <- c("nttypecode", "expr", "repl", "hic")
 bmmuttype <- "functypecode == 6"
 funcvars <- c("functypecode", "mycons", "sift", "phylop100", "MA")
 functypecodelevel <- "7"
 funcvmuttype <- "functypecode == 7 | functypecode == 8"
-readinvars <- c("genename", "ssp", bmvars, funcvars)
-bmreadinvars <- c("genename", "ssp","nttypecode",bmvars, funcvars)
-qnvars = c("expr","repl","hic") # will be normalized, except for nttypecode
-
+readinvars <- c("chrom", "start", "ref", "alt", "genename", "ssp", bmvars, funcvars)
+bmreadinvars <- c("chrom", "start", "ref", "alt", "genename", "ssp", bmvars, "functypecode")
+ # will be normalized, except for nttypecode
 
 load( "inst/extdata/parmASHmean.Rdata")
 TSGpars <- parmASHmean[[1]]
@@ -28,22 +28,13 @@ hmm=readRDS("inst/extdata/hmmOGpar_ASHmean.rds")
 
 
 # nttype code (96)
-annodir <- "~/temp/annodir96"
-sigmapping=read.table(file.path(annodir,"config_annotation.txt"))[,-2]
-sigmapping[1:10,]
-v11=strsplit(sigmapping[,1],split = ",")
-muttype=data.table()
-for (i in 1:length(v11)) {
-  a=v11[[i]]
-  aa=paste(substr(a[[1]],1,1),a[[2]],substr(a[[1]],3,3),sep = "")
-  bb=paste(a[[2]],">",substr(a[[1]],2,2), sep = "")
-  cc=data.table(Type=bb,Subtype=aa)
-  muttype=rbind(muttype,cc)
-}
-sigmapping=cbind(muttype,sigmapping[,2])
-sigmapping=sigmapping[substr(Subtype,2,2)=="C" | substr(Subtype,2,2)=="T",]
-sigmapping=sigmapping[order(V2),]
-colnames(sigmapping)=c("context","alt_allele","index")
+sigmapping=read.table("/dartfs-hpc/rc/home/m/f0052zm/szhao_lab_share/library/diffdriver_anno/coding_data_03212024.txt", header = T)
+sigmapping <- cbind(sigmapping, do.call(rbind, strsplit(sigmapping[,1],split = ",")))
+colnames(sigmapping)[2:4] <- c("index", "context", "alt")
+sigmapping$ref <- substring(sigmapping[,3],2,2)
+sigmapping <- sigmapping[order(sigmapping$index),]
+sigmapping <- sigmapping[seq(1,192,2), c("index", "context", "ref","alt")]
+
 
 # ## compute the number of silent mutation for each of 96 mutation types.
 # annolist=vector("list", 96)
@@ -63,9 +54,8 @@ colnames(sigmapping)=c("context","alt_allele","index")
 
 usethis::use_data(OGs, TSGs, OGpars, TSGpars, hmm,
                   aheader, acoltype, bmvars, bmmuttype,
-                  funcvars, functypecodelevel, funcvmuttype,
-                  readinvars, bmreadinvars, qnvars,
-                  sigmapping,
+                  funcvars, functypecodelevel, funcvmuttype, bmreadinvars,
+                  readinvars, qnvars, sigmapping,
                   internal = TRUE,overwrite = TRUE)
 
 
