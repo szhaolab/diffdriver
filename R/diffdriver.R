@@ -78,9 +78,9 @@ diffdriver= function(gene,
   # BMR parameter estimates, not just the ones with phenotype info.
   print("Infer parameters in background mutation rate model")
 
-  BMRres <- matrixlistToBMR(afileinfo, mut = mut, BMRmode, k=k, outputbase)
+  # BMRres <- matrixlistToBMR(afileinfo, mut = mut, BMRmode, k=k, outputbase)
   # ------ debug------------------
-  # load("~/temp/output/testdiffdriver_sig_BMRres.Rdata")
+  load("~/temp/output/testdiffdriver_sig_BMRres.Rdata")
 
   BMRreg <- BMRres[[1]]
 
@@ -88,76 +88,28 @@ diffdriver= function(gene,
     bmrsig <- BMRres[[2]]
   }
 
-  # ------- Read in data for target genes----------
-  print("Start to read in data for target genes ...")
-  gene <- data.frame(gene)
-  fixmusdfile <- system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
-  genef <- tempfile(output_prefix, tmpdir = output_dir )
-  write.table(gene, file = genef, col.names = F, quote = F, row.names = F)
-  matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, c(bmvars,funcvars), funcvmuttype, readinvars , qnvars, functypecodelevel, qnvarimpute=c(-1.8), cvarimpute = 0, genesubset=genef, fixmusd= fixmusdfile)
-  chrposmatrixlist <- ddmread(afileinfo, yfileinfo = NULL, c("chrom", "start","ref","alt","nttypecode"), funcvmuttype, c("genename", "chrom", "start", "ref", "alt", "functypecode", "ssp", "nttypecode"), genesubset=genef)
-  file.remove(genef)
+  # ------- Prep data for target genes----------
+  print("Start to prepare input data for target genes ...")
 
-  # ------ debug------------------
-  # save(matrixlist, chrposmatrixlist, file = '/dartfs-hpc/rc/home/m/f0052zm/temp/output/debug_glmdt_96_sig.Rd')
-  # load('/dartfs-hpc/rc/home/m/f0052zm/temp/output/debug_glmdt_96_sig.Rd')
+  rdata <- prep_positional_data(gene, afileinfo, BMRreg = BMRreg, output_prefix = output_prefix, output_dir =  output_dir)
+  fanno <-  rdata$fanno
+  ri <- rdata$ri
 
-  for (t in 1:length(matrixlist)){
-    b1 <- which(sapply(matrixlist[[t]][[3]], grepl, pattern="[;,|]"))
-    matrixlist[[t]][[3]][b1,] <- unlist(lapply(sapply(matrixlist[[t]][[3]][b1,], strsplit, split="[;,|]"), function(x) intersect(x,gene[,1])[1]))
-    b2 <- which(sapply(chrposmatrixlist[[t]][[3]], grepl, pattern="[;,|]"))
-    chrposmatrixlist[[t]][[3]][b2,] <- unlist(lapply(sapply(matrixlist[[t]][[3]][b2,], strsplit, split="[;,|]"), function(x) intersect(x,gene[,1])[1]))
-  }
-
-  matrixlisttemp <- copy(matrixlist)
-  chrposmatrixlisttemp <- copy(chrposmatrixlist)
-  y_g_s <- BMRreg$Y_g_s_all[gene][,1:2, with=F]
-  y_g_s[is.na(y_g_s)] <- 0
-  mu_g_s <- BMRreg$Mu_g_s_all[gene][,1:2, with=F]
-  mu_g_s[is.na(mu_g_s)] <- 0
-  glmdtall <- matrixlistToGLM(matrixlisttemp, chrposmatrixlisttemp, BMRreg$BMRpars, mu_g_s, y_g_s, fixpars=NULL)
-  rm(matrixlisttemp,chrposmatrixlisttemp,matrixlist,chrposmatrixlist); gc()
-
-  # ------ debug -------------------
-  # save(glmdtall, file = '/dartfs-hpc/rc/home/m/f0052zm/temp/output/debug_glmdt_96_sig.Rd')
-
-  # functional annotation (fanno) :data.table, each row has functional annotation for each possible mutation
-  fanno <- glmdtall[[1]]
-
-  # row index (ri): chr pos ref alt
-  ri <- glmdtall[[2]][,.(chrom,genename,start,ref,alt,nttypecode)]
-
-  # mutations (mut): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
-  if (!grepl('chr', mut$Chromosome[1], fixed = T)) {mut$Chromosome <- paste0("chr",mut$Chromosome)}
-
-  # sample annotation (pheno):data.table, with columns BMR label, No. syn and phenotype.
-  pheno <- data.table::data.table(pheno)
+  cdata <- prep_pheno_mut_data(mut, pheno)
+  mut <-cdata$mut
+  # add nsyn info.
   nsyndt <- data.table::data.table("SampleID" = names(BMRreg[["ysample"]]), "Nsyn" = BMRreg[["ysample"]])
-  pheno <- merge(pheno, nsyndt)
-
-  shared=intersect(mut$SampleID,pheno$SampleID)
-  if (length(shared) < 10){
-    stop("too few samples with both phenotype and mutation data.")
-  }
-  index1=which(pheno$SampleID %in% shared)
-  index2=which(mut$SampleID %in% shared)
-
-  pheno = pheno[index1,]
-  mut<- mut[index2,]
-
-  # column index (ci): sampleID
-  ci <- pheno[,"SampleID"]
-  ci[,"cidx" := 1:dim(pheno)[1]]
+  pheno <- merge(cdata$pheno, nsyndt)
+  ci <- cdata$ci
 
   # add hotspots
-  mut <- data.table::setDT(mut)
   hotspots <- mut2hotspot(mut)
 
   ## ------- Get BMR (log scale mu_ij) for target genes -----------------------------
 
   if (BMRmode == "regular"){
     bmrdt <- data.table()
-    bmrdt[,"BMR":= glmdtall[[1]]$baseline]
+    bmrdt[,"BMR":= rdata$BMRbaseline]
     bmrsc <- log(pheno$Nsyn/BMRreg$nsyn)
     bmrmtx_uni <- as.matrix(bmrdt[,rep(1,nrow(pheno)), with = F])
     bmrmtx <-as.data.table(sweep(bmrmtx_uni, 2, bmrsc, "+"))
@@ -230,7 +182,7 @@ diffdriver= function(gene,
 
   if (BMRmode == "signature") {
     fastopicfit <- bmrsig$fit
-    save( fastopicfit, e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , phename, "_resdd.Rd"))
+    save(fastopicfit, e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , phename, "_resdd.Rd"))
   } else {
     save(e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , phename, "_resdd.Rd"))
   }
@@ -240,7 +192,7 @@ diffdriver= function(gene,
   colnames(resdf) <- paste0(meth,".p")
   resdf[ , paste0(meth,".fdr")] <- apply(resdf,2,p.adjust, method = "fdr")
   resdf[,c("mut.E1", "mut.E0", "E1", "E0")] <- do.call(rbind, lapply(lapply(res, '[[', "fisher"), '[[',"count"))
-  write.table(resdf, file = paste0(outputbase,"_",phename, "_resdd.txt"), quote = F, col.names = T, row.names = F)
+  write.table(resdf, file = paste0(outputbase,"_",phename, "_resdd.txt"), quote = F, col.names = T, row.names = T)
 
   print("Finished.")
 

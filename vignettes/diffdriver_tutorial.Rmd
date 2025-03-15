@@ -55,34 +55,24 @@ list.files(annodir)
 output_dir <- "~/temp/output"
 ```
 
-With signature adjustment (`BMRmode = "signature"`), which is the default mode, it will need around 20min to estimate parameters in background model. After that it takes around 5-10 min for two genes. Each additional gene will take ~ 3 minutes. Please use the provide the annotation folder with 96 annotation files when running with the "signature mode". 
+With signature adjustment (`BMRmode = "signature"`), which is the default mode, it will need around 20min to estimate parameters in background model. Please use the provided the annotation folder with 96-annotation files when running with the "signature mode". 
 ```{r}
 res <- diffdriver(gene = gene, mut= mut, pheno = pheno, anno_dir = "~/temp/annodir96", k=6, totalnttype = 96, BMRmode = "signature", output_dir = output_dir, output_prefix = "testdiffdriver_sig")
 res
 ```
 
-Without signature adjustment (`BMRmode = "regular"`), it will need around 20min to estimate parameters in background model. Then it takes around 5min for two genes. Each additional gene will take 2 minutes. You can use the provided the annotation folder with 9 annotation files or 96 annotations. The example below uses 9 annotation files.
+Without signature adjustment (`BMRmode = "regular"`), it will need around 20min to estimate parameters in background model. You can use the provided the annotation folder with 9-annotation files or 96-annotation files. The example below uses 96-annotation files. When total number of mutations is low, one should use 9-annotation files.
 ```{r}
-res <- diffdriver(gene = gene, mut= mut, pheno = pheno,  anno_dir = "~/temp/annodir9", totalnttype = 9, BMRmode = "regular", output_dir = output_dir, output_prefix = "testdiffdriver_reg")
+res <- diffdriver(gene = gene, mut= mut, pheno = pheno,  anno_dir = "~/temp/annodir96", totalnttype = 96, BMRmode = "regular", output_dir = output_dir, output_prefix = "testdiffdriver_reg")
 res
 ```
 
 # Plot specific genes
+
+To visualize the data for specific genes, diffdriver has a plotting function: 
 ```{r plot}
-load(file.path(outputdir,"testdiffdriver_reg_SmokingCessation_resdd.Rd"))     # load the output file from diffdriver.
-g <- "PIK3CA" # only need to change gene name.
-rig <- riallg[[g]]
-rig$ridx <- 1:dim(rig)[1]
-muts <- data.table::fread(mutf, header = T)
-if (!grepl('chr', muts$Chromosome[1], fixed = T)) {muts$Chromosome <- paste0("chr",muts$Chromosome)}
-muti <- na.omit(ci[rig[muts, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
-mutmtx <- Matrix::sparseMatrix(i = muti$ridx, j = muti$cidx, dims = c(max(rig$ridx), max(ci$cidx)))
-bmrmtx= bmrallg[[g]]
-ganno <- fannoallg[[g]]
-
-diffdriver::plot_mut(mutmtx=mutmtx, canno=e, bmrmtx=bmrmtx, ganno=ganno)
+diffdriver::plot_mut(gene_name = "PIK3CA", mut= mut, pheno = pheno, totalnttype = 9, anno_dir = "~/temp/annodir9")
 ```
-
 
 ```{r}
 sessionInfo()

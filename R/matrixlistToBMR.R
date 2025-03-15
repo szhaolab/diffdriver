@@ -96,7 +96,7 @@ matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular")
     rownames(ymatrix) <- id
     ymatrix <- ymatrix[rowSums(ymatrix) >= 5, ] # if the sample has too few mutations, use cohort-wise average.
 
-    fit =fastTopics::fit_topic_model(ymatrix, k = k)
+    fit = fastTopics::fit_topic_model(ymatrix, k = k)
     lltemp = fit$L
     fftemp = fit$F
     ff = matrix(min(fftemp)/2, nrow = totalnttype, ncol = k )
@@ -110,11 +110,7 @@ matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular")
     ff=cbind(sigmapping[ ,c("context","ref", "alt")], ff)
     sigmtx=ll%*%t(ff[, -c(1:3)]) # rows are samples, column is nttypecode
 
-    # # get positional adjustment for each nt type, based on driverMAPS estimate
-    # fixmusdfile <-  system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
-    # matrixlist <- readmodeldata(afileinfo, yfileinfo = NULL, bmvars, bmmuttype, c("genename", bmvars , "functypecode"), qnvars, functypecodelevel = NULL, qnvarimpute=c(0,0), fixmusd= fixmusdfile) # note normalization of qnvar is approximately right.
-    #
-
+    # get positional adjustment for each nt type, based on driverMAPS estimate
     alpha= BMRreg$BMRpars$fullpars[c("alpha")]
     genesp=data.table(genename=BMRreg$Y_g_s_all$agg_var,
                       lambda=(BMRreg$Y_g_s_all$y + alpha)/(BMRreg$Mu_g_s_all$V1 + alpha),
