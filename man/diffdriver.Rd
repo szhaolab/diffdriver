@@ -2,31 +2,70 @@
 % Please edit documentation in R/diffdriver.R
 \name{diffdriver}
 \alias{diffdriver}
-\title{Run diffDriver given input files}
+\title{Run diffDriver with Input Files}
 \usage{
 diffdriver(
-  genef,
-  mutf,
-  phenof,
-  bmrf = NULL,
-  j,
-  hotf,
-  annodir,
+  gene,
+  mut,
+  pheno,
+  anno_dir = ".",
   k = 6,
-  BMRmode = "signature",
-  outputdir = ".",
-  outputname = "diffdriver_results"
+  totalnttype = 96,
+  BMRmode = c("signature", "regular"),
+  output_dir = ".",
+  output_prefix = "diffdriver_results"
 )
 }
 \arguments{
-\item{genef}{file for name of genes to be included in the analysis}
+\item{gene}{A vector of genes to be included in the analysis.}
 
-\item{mutf}{mutation list file, use the driverMAPS mutation input format}
+\item{mut}{A data frame containing all somatic mutations from the cohort. The format is:
+\describe{
+  \item{Chromosome}{<int>}
+  \item{Position}{<int>}
+  \item{Ref}{<chr>}
+  \item{Alt}{<chr>}
+  \item{SampleID}{<chr>}
+}
+Example:
+\preformatted{
+Chromosome Position Ref Alt SampleID
+1 19 55653236 C T TCGA-N6-A4VE-01A-11D-A28R-08
+}}
 
-\item{phenof}{phenptype file, SampleID <tab> Phenotype <tab> Nsyn. nsyn is number of syn mutations in this sample.}
+\item{pheno}{A data frame containing sample phenotypes. The format is:
+#' \describe{
+  \item{SampleID}{<chr>}
+  \item{Phenotype1}{<dbl>}
+  \item{Phenotype2}{<dbl>}
+  \item{...}{...}
+}
+Example:
+\preformatted{
+SampleID SmokingCessation BMI
+TCGA-N5-A4R8-01A-11D-A28R-08 0.5319630 20.0
+TCGA-N5-A4RD-01A-11D-A28R-08 0.0448991 24.4
+}}
 
-\item{j}{The index of phenotype}
+\item{anno_dir}{The path to the directory with all the annotation files.
+Please download from Zenodo.The default is current folder}
+
+\item{k}{The number of topics used in modeling background mutation rate.
+The default is 6.}
+
+\item{totalnttype}{either 9 or 96. Will look for annotation files
+anno9_ntypexxx_annodata.txt when totalnttype is 9 or anno96_ntypexxx_annodata
+when totalnttype is 96.}
+
+\item{BMRmode}{There are two modes to run diffdriver. One is "signature",
+this will model individual level BMR, this is the default. The second one is
+"regular", this assumes BMR is the same across individuals, only models
+position-level difference.}
+
+\item{output_dir}{The path to output directory}
+
+\item{output_prefix}{The prefix being added to the output file names.}
 }
 \description{
-This is the function to run diffDriver. We first need to set up: run driverMAPS for groups with potential different BMR, assign BMR labels for each sample. then BMR for each sample will be scaled based on driverMAPS results.
+This function runs diffDriver.
 }

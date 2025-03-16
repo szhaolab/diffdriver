@@ -82,42 +82,19 @@
     
     
 <div class="section level2">
-<h2 id="environment-requirement">Environment requirement<a class="anchor" aria-label="anchor" href="#environment-requirement"></a>
+<h2 id="environmental-requirement">Environmental requirement<a class="anchor" aria-label="anchor" href="#environmental-requirement"></a>
 </h2>
-<p>Need 16G memory to run diffdriver. The place that need the most memory is for parameter estimation for background mutation rate.</p>
+<p>Need 16G memory to run diffdriver. The place that needs the most memory is the parameter estimation for background mutation rate model.</p>
 </div>
 <div class="section level2">
 <h2 id="prepare-input">Prepare input<a class="anchor" aria-label="anchor" href="#prepare-input"></a>
 </h2>
+<p>Diffdriver requires three datasets from the user: phenotype or context of each individual tumor sample, somatic mutations identified from tumor samples and a list of driver gene names. Diffdriver will test the association between the phenotype/context with selection strength of each provided driver gene.</p>
 <ul>
-<li>Gene file</li>
+<li>Phenotype/Context</li>
 </ul>
+<p>Diffdriver needs phenotype or context of each individual tumor sample. A data frame should provided, in this data frame the first column is sample ID with column name “SampleID”, the second column is phenotype or context with the phenotype or context name as column name (note no space or in tab in column names are allowed). See an example below:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">genef</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example_gene.txt"</span>, package <span class="op">=</span> <span class="st">"diffdriver"</span><span class="op">)</span></span>
-<span><span class="va">gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">genef</span>, header <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gene</span><span class="op">)</span></span>
-<span><span class="co">#&gt;       V1</span></span>
-<span><span class="co">#&gt; 1   CHD4</span></span>
-<span><span class="co">#&gt; 2 PIK3CA</span></span></code></pre></div>
-<ul>
-<li>Mutation file</li>
-</ul>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mutf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/"</span>, <span class="st">"example_mutations.txt"</span>, package <span class="op">=</span> <span class="st">"diffdriver"</span><span class="op">)</span></span>
-<span><span class="va">mut</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">mutf</span>, header <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mut</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   Chromosome  Position Ref Alt                     SampleID</span></span>
-<span><span class="co">#&gt; 1         19  55653236   C   T TCGA-N6-A4VE-01A-11D-A28R-08</span></span>
-<span><span class="co">#&gt; 2         17  65134211   C   T TCGA-NA-A4R1-01A-11D-A28R-08</span></span>
-<span><span class="co">#&gt; 3         20  30354424   G   T TCGA-N8-A4PM-01A-11D-A28R-08</span></span>
-<span><span class="co">#&gt; 4          6  18215312   G   C TCGA-N8-A4PO-01A-11D-A28R-08</span></span>
-<span><span class="co">#&gt; 5          1 154186393   C   G TCGA-NA-A4R0-01A-11D-A28R-08</span></span>
-<span><span class="co">#&gt; 6         10  23003128   C   A TCGA-NF-A4X2-01A-11D-A28R-08</span></span></code></pre></div>
-<ul>
-<li>Phenotype file</li>
-</ul>
-<p>The first column is sample ID with column name “SampleID”, the second column is phenotype with the phenotype name as column name (note no space or in tab in column names are allowed).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">phenof</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/"</span>, <span class="st">"example_phenotypes.txt"</span>, package <span class="op">=</span> <span class="st">"diffdriver"</span><span class="op">)</span></span>
 <span><span class="va">pheno</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">phenof</span>, header <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pheno</span><span class="op">)</span></span>
@@ -128,6 +105,33 @@
 <span><span class="co">#&gt; 4 TCGA-N5-A4RJ-01A-11D-A28R-08        0.4229920</span></span>
 <span><span class="co">#&gt; 5 TCGA-N5-A4RM-01A-11D-A28R-08       -0.2830070</span></span>
 <span><span class="co">#&gt; 6 TCGA-N5-A4RN-01A-12D-A28R-08        0.7874080</span></span></code></pre></div>
+<ul>
+<li>Driver genes</li>
+</ul>
+<p>A vector of driver gene names. Diffdriver will test the association for each gene.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">genef</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example_gene.txt"</span>, package <span class="op">=</span> <span class="st">"diffdriver"</span><span class="op">)</span></span>
+<span><span class="va">gene</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">genef</span>, header <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">gene</span><span class="op">)</span></span>
+<span><span class="co">#&gt;       V1</span></span>
+<span><span class="co">#&gt; 1   CHD4</span></span>
+<span><span class="co">#&gt; 2 PIK3CA</span></span></code></pre></div>
+<ul>
+<li>Somatic mutations</li>
+</ul>
+<p>Diffdriver needs the somatic mutations identified for each tumor samples. Note this should include all somatic mutations identified, not just the ones in selected driver genes. Somatic mutations will be used to estimate background mutation rate and selection strength for selected genes. A data frame should be provided, see below for colnames of this data frame and example mutations.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mutf</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/"</span>, <span class="st">"example_mutations.txt"</span>, package <span class="op">=</span> <span class="st">"diffdriver"</span><span class="op">)</span></span>
+<span><span class="va">mut</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">mutf</span>, header <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mut</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Chromosome  Position Ref Alt                     SampleID</span></span>
+<span><span class="co">#&gt; 1         19  55653236   C   T TCGA-N6-A4VE-01A-11D-A28R-08</span></span>
+<span><span class="co">#&gt; 2         17  65134211   C   T TCGA-NA-A4R1-01A-11D-A28R-08</span></span>
+<span><span class="co">#&gt; 3         20  30354424   G   T TCGA-N8-A4PM-01A-11D-A28R-08</span></span>
+<span><span class="co">#&gt; 4          6  18215312   G   C TCGA-N8-A4PO-01A-11D-A28R-08</span></span>
+<span><span class="co">#&gt; 5          1 154186393   C   G TCGA-NA-A4R0-01A-11D-A28R-08</span></span>
+<span><span class="co">#&gt; 6         10  23003128   C   A TCGA-NF-A4X2-01A-11D-A28R-08</span></span></code></pre></div>
+<p>In addition to these datasets provided by the user, diffdriver also needs annotation files. See the package installation page for download links to these annotation files. Unless the number of tumor samples or number of mutations is very small, we suggest to use the 96-annotation files. Please download these files to a folder and provide the folder address to diffdriver.</p>
 <ul>
 <li>Directory that contains annotation files</li>
 </ul>
@@ -295,7 +299,7 @@
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by The package maintainer.</p>
+<p>Developed by Siming Zhao, Jie Zhou, Qirui Zhang.</p>
 </div>
 
 <div class="pkgdown">

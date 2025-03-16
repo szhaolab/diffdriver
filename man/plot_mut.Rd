@@ -4,7 +4,15 @@
 \alias{plot_mut}
 \title{plot phenotype, mutation and annotation for a gene across samples}
 \usage{
-plot_mut(mutmtx, canno, bmrmtx, ganno, ...)
+plot_mut(
+  gene_name,
+  mut,
+  pheno,
+  totalnttype = 96,
+  anno_dir = ".",
+  output_prefix = "plot",
+  output_dir = "."
+)
 }
 \description{
 plot phenotype, mutation and annotation for a gene across samples

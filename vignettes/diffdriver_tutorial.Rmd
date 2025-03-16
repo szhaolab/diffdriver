@@ -11,34 +11,43 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Environment requirement
+# Environmental requirement
 
-Need 16G memory to run diffdriver. The place that need the most memory is for parameter estimation for background mutation rate.
+Need 16G memory to run diffdriver. The place that needs the most memory is the parameter estimation for background mutation rate model.
 
 # Prepare input
 
-  * Gene file
+Diffdriver requires three datasets from the user: phenotype or context of each individual tumor sample, somatic mutations identified from tumor samples and a list of driver gene names. Diffdriver will test the association between the phenotype/context with selection strength of each provided driver gene.
+
+  * Phenotype/Context
+
+Diffdriver needs phenotype or context of each individual tumor sample. A data frame should provided, in this data frame the first column is sample ID with column name "SampleID", the second column is phenotype or context with the phenotype or context name as column name (note no space or in tab in column names are allowed).  See an example below: 
+```{r}
+phenof = system.file("extdata/", "example_phenotypes.txt", package = "diffdriver")
+pheno <- read.table(phenof, header = T)
+head(pheno)
+```
+
+  * Driver genes
+  
+A vector of driver gene names. Diffdriver will test the association for each gene.
 ```{r}
 genef = system.file("extdata", "example_gene.txt", package = "diffdriver")
 gene <- read.table(genef, header = F)
 head(gene)
 ```
 
-  * Mutation file
+  * Somatic mutations
+  
+Diffdriver needs the somatic mutations identified for each tumor samples. Note this should include all somatic mutations identified, not just the ones in selected driver genes. Somatic mutations will be used to estimate background mutation rate and selection strength for selected genes. A data frame should be provided, see below for colnames of this data frame and example mutations. 
+
 ```{r}
 mutf = system.file("extdata/", "example_mutations.txt", package = "diffdriver")
 mut <- read.table(mutf, header = T)
 head(mut)
 ```
 
-  * Phenotype file
-
-The first column is sample ID with column name "SampleID", the second column is phenotype with the phenotype name as column name (note no space or in tab in column names are allowed). 
-```{r}
-phenof = system.file("extdata/", "example_phenotypes.txt", package = "diffdriver")
-pheno <- read.table(phenof, header = T)
-head(pheno)
-```
+In addition to these datasets provided by the user, diffdriver also needs annotation files. See the package installation page for download links to these annotation files. Unless the number of tumor samples or number of mutations is very small, we suggest to use the 96-annotation files. Please download these files to a folder and provide the folder address to diffdriver. 
 
   * Directory that contains annotation files
 

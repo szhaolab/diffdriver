@@ -2,8 +2,12 @@ Package: diffdriver
 Type: Package
 Title: Identify differential selection
 Version: 0.1.6
-Author: Siming Zhao, Jie Zhou
-Maintainer: The package maintainer <siming.zhao@dartmouth.edu>
+Authors@R: c(
+    person("Siming", "Zhao", , "siming.zhao06@gmail.com", role = c("aut", "cre")),
+    person("Jie", "Zhou", role = "aut"),
+    person("Qirui", "Zhang", role = "aut")
+  )
+Maintainer: Siming Zhao <siming.zhao@dartmouth.edu>
 Description: This package implements a statistical method to detect differential selection of somatic mutations under different environments
 License: MIT 
 Encoding: UTF-8
