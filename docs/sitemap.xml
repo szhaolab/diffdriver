@@ -1,0 +1,20 @@
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/articles/diffdriver_tutorial.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/reference/ddmcode.html</loc></url>
+<url><loc>/reference/ddmodel.html</loc></url>
+<url><loc>/reference/ddmodel_binary.html</loc></url>
+<url><loc>/reference/ddmodel_binary_simple.html</loc></url>
+<url><loc>/reference/diffdriver.html</loc></url>
+<url><loc>/reference/genebinom.html</loc></url>
+<url><loc>/reference/genefisher.html</loc></url>
+<url><loc>/reference/genelr.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/mlr.html</loc></url>
+<url><loc>/reference/mlr.v2.html</loc></url>
+<url><loc>/reference/plot_mut.html</loc></url>
+</urlset>
+

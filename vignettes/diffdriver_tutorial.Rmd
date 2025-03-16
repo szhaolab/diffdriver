@@ -57,6 +57,7 @@ output_dir <- "~/temp/output"
 
 With signature adjustment (`BMRmode = "signature"`), which is the default mode, it will need around 20min to estimate parameters in background model. Please use the provided the annotation folder with 96-annotation files when running with the "signature mode". 
 ```{r}
+library(diffdriver)
 res <- diffdriver(gene = gene, mut= mut, pheno = pheno, anno_dir = "~/temp/annodir96", k=6, totalnttype = 96, BMRmode = "signature", output_dir = output_dir, output_prefix = "testdiffdriver_sig")
 res
 ```
