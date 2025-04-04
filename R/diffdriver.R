@@ -78,10 +78,10 @@ diffdriver= function(gene,
   # BMR parameter estimates, not just the ones with phenotype info.
   print("Infer parameters in background mutation rate model")
 
-  # BMRres <- matrixlistToBMR(afileinfo, mut = mut, BMRmode, k=k, outputbase)
+  BMRres <- matrixlistToBMR(afileinfo, mut = mut, BMRmode, k=k, outputbase)
 
   # ------ debug------------------
-  load("~/temp/output/debug_sig_BMRres.Rdata")
+  # load("~/temp/output/debug_sig_BMRres.Rdata")
 
   BMRreg <- BMRres[[1]]
 
