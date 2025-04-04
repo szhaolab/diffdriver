@@ -46,12 +46,19 @@ prep_positional_data <- function(gene, afileinfo, BMRreg = NULL, output_prefix =
 
 
 # mutations (mut): data.table, with columns Chromosome, Position, Ref, Alt, SampleID
-prep_pheno_mut_data <- function(mut, pheno){
+prep_pheno_mut_data <- function(mut, pheno, add_dt = NULL){
   mut <- data.table::data.table(mut)
   if (!grepl('chr', mut$Chromosome[1], fixed = T)) {mut$Chromosome <- paste0("chr",mut$Chromosome)}
 
   # sample annotation (pheno):data.table, with columns BMR label, No. syn and phenotype.
   pheno <- data.table::data.table(pheno)
+  pheno <- pheno[, 1:2]
+  print("Only keeping the first two columns of the phenotype data frame.")
+
+
+  colnames(pheno)[2] <- gsub(" ", "_", colnames(pheno)[2])
+  phename= colnames(pheno)[2]
+  print(paste0("phenotype name is ", phename ))
 
   shared=intersect(mut$SampleID,pheno$SampleID)
   if (length(shared) < 10){
@@ -67,9 +74,18 @@ prep_pheno_mut_data <- function(mut, pheno){
   ci <- pheno[,"SampleID"]
   ci[,"cidx" := 1:dim(pheno)[1]]
 
+  if (!is.null(add_dt)){
+    # add nsyn info.
+    pheno <- merge(pheno, add_dt)
+    pheno <- pheno[match(ci$SampleID, pheno$SampleID),]
+  }
+
+  print(paste0("number of samples shared in phenotype and mutation file: ", dim(pheno)[1]))
+
   return(list("pheno" = pheno,
               "mut"   = mut,
-              "ci"    = ci))
+              "ci"    = ci,
+              "phename" = phename))
 }
 
 

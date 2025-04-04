@@ -78,10 +78,10 @@ diffdriver= function(gene,
   # BMR parameter estimates, not just the ones with phenotype info.
   print("Infer parameters in background mutation rate model")
 
-  BMRres <- matrixlistToBMR(afileinfo, mut = mut, BMRmode, k=k, outputbase)
+  # BMRres <- matrixlistToBMR(afileinfo, mut = mut, BMRmode, k=k, outputbase)
 
   # ------ debug------------------
-  # load("~/temp/output/testdiffdriver_sig_BMRres.Rdata")
+  load("~/temp/output/debug_sig_BMRres.Rdata")
 
   BMRreg <- BMRres[[1]]
 
@@ -96,12 +96,11 @@ diffdriver= function(gene,
   fanno <-  rdata$fanno
   ri <- rdata$ri
 
-  cdata <- prep_pheno_mut_data(mut, pheno)
-  mut <-cdata$mut
-  # add nsyn info.
   nsyndt <- data.table::data.table("SampleID" = names(BMRreg[["ysample"]]), "Nsyn" = BMRreg[["ysample"]])
-  pheno <- merge(cdata$pheno, nsyndt)
+  cdata <- prep_pheno_mut_data(mut, pheno, add_dt = nsyndt)
+  mut <-cdata$mut
   ci <- cdata$ci
+  pheno <- cdata$pheno
 
   # add hotspots
   hotspots <- mut2hotspot(mut)
@@ -167,8 +166,7 @@ diffdriver= function(gene,
     label=factor(1:nrow(bmrmtx))
 
     resg <- list()
-    e=pheno[[2]] # the second column is E
-    phename= gsub(" ", "_", colnames(pheno)[2])
+    e=pheno[[cdata$phename]]
     resg[["dd"]] <- ddmodel(mutmtx, e, bmrmtx, fe[,1], label=label)
     ## resg[["dd_nl"]] <- ddmodel_nl(mutmtx, e, bmrmtx, fe[,1])
     resg[["mlr"]] <- mlr(mutmtx, e)
@@ -183,9 +181,9 @@ diffdriver= function(gene,
 
   if (BMRmode == "signature") {
     fastopicfit <- bmrsig$fit
-    save(fastopicfit, e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , phename, "_resdd.Rd"))
+    save(fastopicfit, e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , cdata$phename, "_resdd.Rd"))
   } else {
-    save(e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , phename, "_resdd.Rd"))
+    save(e, bmrallg, fannoallg, ci, riallg, res, file=paste0(outputbase, "_" , cdata$phename, "_resdd.Rd"))
   }
 
   meth <- c("dd", "mlr", "mlr.v2", "fisher", "binom", "lr")
@@ -193,7 +191,7 @@ diffdriver= function(gene,
   colnames(resdf) <- paste0(meth,".p")
   resdf[ , paste0(meth,".fdr")] <- apply(resdf,2,p.adjust, method = "fdr")
   resdf[,c("mut.E1", "mut.E0", "E1", "E0")] <- do.call(rbind, lapply(lapply(res, '[[', "fisher"), '[[',"count"))
-  write.table(resdf, file = paste0(outputbase,"_",phename, "_resdd.txt"), quote = F, col.names = T, row.names = T)
+  write.table(resdf, file = paste0(outputbase,"_", cdata$phename, "_resdd.txt"), quote = F, col.names = T, row.names = T)
 
   print("Finished.")
 
