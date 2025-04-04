@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">diffdriver</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.6</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.7</span>
       </span>
     </div>
 
@@ -204,6 +204,9 @@
 <span><span class="co">#&gt; [1] "for qnvars, filling in missing values ..."</span></span>
 <span><span class="co">#&gt; [1] "for cvars (0/1 categories), filling in missing values ..."</span></span>
 <span><span class="co">#&gt; [1] "normalizing categorical variables in annotation matrix ..."</span></span>
+<span><span class="co">#&gt; [1] "Only keeping the first two columns of the phenotype data frame."</span></span>
+<span><span class="co">#&gt; [1] "phenotype name is SmokingCessation"</span></span>
+<span><span class="co">#&gt; [1] "number of samples shared in phenotype and mutation file: 40"</span></span>
 <span><span class="co">#&gt; [1] "Start to process gene: CHD4"</span></span>
 <span><span class="co">#&gt; [1] "Start to process gene: PIK3CA"</span></span>
 <span><span class="co">#&gt; [1] "Finished."</span></span>
@@ -227,6 +230,9 @@
 <span><span class="co">#&gt; [1] "for qnvars, filling in missing values ..."</span></span>
 <span><span class="co">#&gt; [1] "for cvars (0/1 categories), filling in missing values ..."</span></span>
 <span><span class="co">#&gt; [1] "normalizing categorical variables in annotation matrix ..."</span></span>
+<span><span class="co">#&gt; [1] "Only keeping the first two columns of the phenotype data frame."</span></span>
+<span><span class="co">#&gt; [1] "phenotype name is SmokingCessation"</span></span>
+<span><span class="co">#&gt; [1] "number of samples shared in phenotype and mutation file: 40"</span></span>
 <span><span class="co">#&gt; [1] "Start to process gene: CHD4"</span></span>
 <span><span class="co">#&gt; [1] "Start to process gene: PIK3CA"</span></span>
 <span><span class="co">#&gt; [1] "Finished."</span></span>
@@ -248,11 +254,14 @@
 <span><span class="co">#&gt; [1] "processing ..."</span></span>
 <span><span class="co">#&gt; [1] "for qnvars, filling in missing values ..."</span></span>
 <span><span class="co">#&gt; [1] "for cvars (0/1 categories), filling in missing values ..."</span></span>
-<span><span class="co">#&gt; [1] "normalizing categorical variables in annotation matrix ..."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "normalizing categorical variables in annotation matrix ..."</span></span>
+<span><span class="co">#&gt; [1] "Only keeping the first two columns of the phenotype data frame."</span></span>
+<span><span class="co">#&gt; [1] "phenotype name is SmokingCessation"</span></span>
+<span><span class="co">#&gt; [1] "number of samples shared in phenotype and mutation file: 40"</span></span></code></pre></div>
 <p><img src="diffdriver_tutorial_files/figure-html/plot-1.png" width="700"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.4.2 (2024-10-31)</span></span>
+<span><span class="co">#&gt; R version 4.4.3 (2025-02-28)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-redhat-linux-gnu</span></span>
 <span><span class="co">#&gt; Running under: Red Hat Enterprise Linux 8.10 (Ootpa)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -274,17 +283,17 @@
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] diffdriver_0.1.6</span></span>
+<span><span class="co">#&gt; [1] diffdriver_0.1.7</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;  [1] cli_3.6.3          knitr_1.49         rlang_1.1.5        xfun_0.50         </span></span>
 <span><span class="co">#&gt;  [5] textshaping_1.0.0  jsonlite_1.8.9     data.table_1.16.4  brglm_0.7.2       </span></span>
 <span><span class="co">#&gt;  [9] SQUAREM_2021.1     htmltools_0.5.8.1  ragg_1.3.3         sass_0.4.9        </span></span>
-<span><span class="co">#&gt; [13] rmarkdown_2.29     grid_4.4.2         profileModel_0.6.1 evaluate_1.0.3    </span></span>
+<span><span class="co">#&gt; [13] rmarkdown_2.29     grid_4.4.3         profileModel_0.6.1 evaluate_1.0.3    </span></span>
 <span><span class="co">#&gt; [17] jquerylib_0.1.4    fastmap_1.2.0      yaml_2.3.10        lifecycle_1.0.4   </span></span>
-<span><span class="co">#&gt; [21] compiler_4.4.2     fs_1.6.5           htmlwidgets_1.6.4  systemfonts_1.2.1 </span></span>
+<span><span class="co">#&gt; [21] compiler_4.4.3     fs_1.6.5           htmlwidgets_1.6.4  systemfonts_1.2.1 </span></span>
 <span><span class="co">#&gt; [25] lattice_0.22-6     digest_0.6.37      R6_2.5.1           bslib_0.9.0       </span></span>
-<span><span class="co">#&gt; [29] Matrix_1.7-2       tools_4.4.2        pkgdown_2.1.1      cachem_1.1.0      </span></span>
+<span><span class="co">#&gt; [29] Matrix_1.7-2       tools_4.4.3        pkgdown_2.1.1      cachem_1.1.0      </span></span>
 <span><span class="co">#&gt; [33] desc_1.4.3</span></span></code></pre></div>
 </div>
   </div>

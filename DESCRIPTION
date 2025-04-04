@@ -1,7 +1,7 @@
 Package: diffdriver
 Type: Package
 Title: Identify differential selection
-Version: 0.1.6
+Version: 0.1.7
 Authors@R: c(
     person("Siming", "Zhao", , "siming.zhao06@gmail.com", role = c("aut", "cre")),
     person("Jie", "Zhou", role = "aut"),
