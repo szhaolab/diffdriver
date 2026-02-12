@@ -13,7 +13,7 @@ Then install diffdriver.
 remotes::install_github("szhaolab/diffdriver", ref ="main") 
 ```
 
-The package also relies on annotation files, there are two types of annotation files. 
+The package also relies on annotation files. There are two types of annotation files. 
 * 9-annotation files.
 * 96-annotation files.
 
