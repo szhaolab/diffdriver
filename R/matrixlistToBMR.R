@@ -12,8 +12,8 @@ matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular")
 
   # Mutation data to y
   anno <- do.call(rbind, lapply(matrixlist, '[[', 5)) # Extract only chrom, pos, ref, alt and nttype info.
-  anno$nttypecode = do.call(rbind, lapply(matrixlist, '[[', 4))
-  anno$posidx = do.call(rbind, lapply(matrixlist, function(x) {if (nrow(x[[1]]) >0) data.table::data.table(posidx = 1:nrow(x[[1]]))}))
+  anno$nttypecode <- unlist(lapply(matrixlist, function(x) x[[4]][[1]]))
+  anno$posidx <- unlist(lapply(matrixlist, function(x) {if (nrow(x[[1]]) > 0) 1:nrow(x[[1]])}))
 
   id = unique(mut$SampleID)
   nsample = length(id)
@@ -25,28 +25,37 @@ matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular")
   ysample <- rep(0, nsample)
   names(ysample) <- id
 
-  for (i in 1:nsample) {
-    idata = mut[mut$SampleID==id[i],]
-    ni = nrow(idata)
-    for (imut in 1:ni) {
-      Position = idata$Position[imut]
-      Ref = idata$Ref[imut]
-      Alt = idata$Alt[imut]
-      if (grepl('chr', idata$Chromosome[imut], fixed = TRUE)){
-        Chromosome = idata$Chromosome[imut]
-      } else{
-        Chromosome = paste0("chr",idata$Chromosome[imut])
-      }
-      mutanno = anno[start==Position & ref==Ref & alt==Alt & chrom==Chromosome, ]
-      ntidx = mutanno$nttypecode
-      posidx = mutanno$posidx
+  # Vectorized mutation matching via data.table keyed join
+  mut_dt <- data.table::data.table(
+    chrom = ifelse(grepl("chr", mut$Chromosome, fixed = TRUE),
+                   mut$Chromosome,
+                   paste0("chr", mut$Chromosome)),
+    start = mut$Position,
+    ref = mut$Ref,
+    alt = mut$Alt,
+    SampleID = mut$SampleID
+  )
+  data.table::setkey(anno, chrom, start, ref, alt)
+  matched <- anno[mut_dt, on = .(chrom, start, ref, alt), nomatch = NULL]
+  # Keep only unique matches (length(ntidx) == 1 in original)
+  matched[, n_match := .N, by = .(chrom, start, ref, alt, SampleID)]
+  matched <- matched[n_match == 1]
+  matched[, n_match := NULL]
 
-      if (length(ntidx) == 1){
-        ymatrix[i,ntidx]=ymatrix[i,ntidx] + 1
-        ysample[i] <-ysample[i] + 1
-        matrixlist[[ntidx]][[2]][posidx] <- matrixlist[[ntidx]][[2]][posidx] + 1
-      }
-    }
+  # Build ymatrix: count mutations per sample x nttype
+  ytab <- matched[, .N, by = .(SampleID, nttypecode)]
+  ymatrix[cbind(match(ytab$SampleID, id), ytab$nttypecode)] <- ytab$N
+
+  # Build ysample: total mutations per sample
+  ysamp_tab <- matched[, .N, by = SampleID]
+  ysample[ysamp_tab$SampleID] <- ysamp_tab$N
+
+  # Update matrixlist y counts: increment at matched positions
+  pos_tab <- matched[, .N, by = .(nttypecode, posidx)]
+  for (r in seq_len(nrow(pos_tab))) {
+    ntidx <- pos_tab$nttypecode[r]
+    pidx <- pos_tab$posidx[r]
+    matrixlist[[ntidx]][[2]][pidx] <- matrixlist[[ntidx]][[2]][pidx] + pos_tab$N[r]
   }
 
   ysample[ysample < 3] <- 3 # if too few syn mutations force it to be 3.
@@ -63,7 +72,10 @@ matrixlistToBMR  <- function(afileinfo, mut, BMRmode = c("signature", "regular")
   Y_g_s_0 <- data.table::data.table(agg_var = character(), y = numeric(), key = "agg_var")
   Mu_g_s_0 <- data.table::data.table(agg_var = character(), V1 = numeric(), key = "agg_var")
 
-  BMRpars <- optifix(initpars, fixstatus, loglikfn, matrixlist= matrixlist, y_g_s_in=Y_g_s_0, mu_g_s_in=Mu_g_s_0, method = "BFGS", control=list(trace=6, fnscale=-1), hessian=T)
+  # Pre-compute gene_y (constant across BFGS iterations)
+  y_g_cached <- gene_y(matrixlist)
+
+  BMRpars <- optifix(initpars, fixstatus, loglikfn, matrixlist= matrixlist, y_g_s_in=Y_g_s_0, mu_g_s_in=Mu_g_s_0, y_g_cache=y_g_cached, method = "BFGS", control=list(trace=6, fnscale=-1), hessian=T)
   names(BMRpars$fullpars) <- c(paste("nttype", 1:totalnttype, sep=""), colnames(matrixlist[[1]][[1]])[-1], "beta_f0", "alpha")
 
   Y_g_s_all <- gene_y(matrixlist)

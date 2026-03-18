@@ -47,41 +47,46 @@ gene_mu_sub <- function(vbetasub, data, gene){
 
 gene_mu <- function(vbeta,matrixlist){
   totalnttype <- length(matrixlist)
-  mu_g <- data.table(agg_var = character(0), V1 = numeric(0))
+  mu_parts <- vector("list", totalnttype)
   for (j in 1:totalnttype){
-    vbetasub <- convertbeta(j, vbeta, totalnttype)
-    ddm <- matrixlist[[j]][[1]]
     gene <- matrixlist[[j]][[3]]
-    if (nrow(gene) >0) {
-      mu_g <- rbind(mu_g, gene_mu_sub(vbetasub, ddm, gene))
+    if (nrow(gene) > 0) {
+      vbetasub <- convertbeta(j, vbeta, totalnttype)
+      ddm <- matrixlist[[j]][[1]]
+      mu_parts[[j]] <- gene_mu_sub(vbetasub, ddm, gene)
     }
   }
+  mu_g <- data.table::rbindlist(mu_parts)
   aggregate_bysum(mu_g)
 }
 
 gene_y <- function(matrixlist){
   totalnttype <- length(matrixlist)
-  # generate y_g
-  y_g <- data.table(agg_var = character(0), y = numeric(0))
+  y_parts <- vector("list", totalnttype)
   for (j in 1:totalnttype){
     y <- matrixlist[[j]][[2]]
     gene <- matrixlist[[j]][[3]]
     if (nrow(gene) > 0) {
-      y<- data.table(y)
-      y$agg_var <- gene
-      y_g <- rbind(y_g, aggregate_bysum(y))
+      y_dt <- data.table(y)
+      y_dt$agg_var <- gene
+      y_parts[[j]] <- y_dt
     }
   }
+  y_g <- data.table::rbindlist(y_parts)
   aggregate_bysum(y_g)
 }
 
 
 # pars in loglikfn: 1-totalnttype are beta_0t, last par is alpha,
 # the second to last is beta_f0
-loglikfn <- function(pars, matrixlist, y_g_s_in, mu_g_s_in){
+loglikfn <- function(pars, matrixlist, y_g_s_in, mu_g_s_in, y_g_cache = NULL){
   vbeta <-pars[1: length(pars)-1]
   alpha <- pars[length(pars)]
-  y_g <- gene_y(matrixlist)
+  if (is.null(y_g_cache)) {
+    y_g <- gene_y(matrixlist)
+  } else {
+    y_g <- y_g_cache
+  }
   mu_g <- gene_mu(vbeta,matrixlist)
   y_g_s <- y_g_s_in[y_g][,1:2, with=F]
   y_g_s[is.na(y_g_s)] <- 0
@@ -93,21 +98,10 @@ loglikfn <- function(pars, matrixlist, y_g_s_in, mu_g_s_in){
 }
 
 aggregate_bysum <- function(dat, xs="agg_var") {
-  # Convert to data.table.
-  # dat <- data.table(dat)
-  # Append the vector of group names as an extra column.
-  # dat$agg_var <- xs
-  # Melt the data.table so all values are in one column called "value".
-  dat <- melt(dat, id.vars = xs)
-  # Cast the data.table back into the original shape, and take the sum.
-  dat <- dcast.data.table(
-    dat, paste(xs, "~ variable", sep=""), value.var = "value",
-    fun.aggregate = sum, na.rm = TRUE
-  )
-  #rownames(dat) <- dat$agg_var
-  # Delete the extra column.
-  #dat[ , agg_var := NULL]
-  dat
+  val_cols <- setdiff(names(dat), xs)
+  result <- dat[, lapply(.SD, sum, na.rm = TRUE), by = xs, .SDcols = val_cols]
+  data.table::setkeyv(result, xs)
+  result
 }
 
 ##' optifix. Optimise with fixed parameters
