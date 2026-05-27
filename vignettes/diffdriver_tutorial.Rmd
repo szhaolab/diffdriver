@@ -1,5 +1,10 @@
 ---
 title: "A tutorial to run diffdriver"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A tutorial to run diffdriver}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
@@ -51,7 +56,7 @@ In addition to these datasets provided by the user, diffdriver also needs annota
 
   * Directory that contains annotation files
 
-```{r}
+```{r, eval=FALSE}
 annodir = "/Volumes/Szhao/library/diffdriver_anno/annodir96"
 list.files(annodir)
 ```
@@ -65,14 +70,14 @@ output_dir <- "/tmp/diffdriver_output"
 ```
 
 With signature adjustment (`BMRmode = "signature"`), which is the default mode, it will need around 15min to estimate parameters in background model. Please use the provided the annotation folder with 96-annotation files when running with the "signature mode".
-```{r}
+```{r, eval=FALSE}
 library(diffdriver)
 res <- diffdriver(gene = gene, mut= mut, pheno = pheno, anno_dir = "/Volumes/Szhao/library/diffdriver_anno/annodir96", k=6, totalnttype = 96, BMRmode = "signature", output_dir = output_dir, output_prefix = "testdiffdriver_sig")
 res
 ```
 
 Without signature adjustment (`BMRmode = "regular"`), it will need around 15min to estimate parameters in background model. You can use the provided the annotation folder with 9-annotation files or 96-annotation files. The example below uses 96-annotation files. When total number of mutations is low, one should use 9-annotation files.
-```{r}
+```{r, eval=FALSE}
 res <- diffdriver(gene = gene, mut= mut, pheno = pheno,  anno_dir = "/Volumes/Szhao/library/diffdriver_anno/annodir96", totalnttype = 96, BMRmode = "regular", output_dir = output_dir, output_prefix = "testdiffdriver_reg")
 res
 ```
@@ -80,7 +85,7 @@ res
 # Plot specific genes
 
 To visualize the data for specific genes, diffdriver has a plotting function: 
-```{r plot}
+```{r plot, eval=FALSE}
 diffdriver::plot_mut(gene_name = "PIK3CA", mut= mut, pheno = pheno, totalnttype = 9, anno_dir = "/Volumes/Szhao/library/diffdriver_anno/annodir9")
 ```
 

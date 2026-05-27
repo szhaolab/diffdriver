@@ -1,0 +1,12 @@
+^docs$
+^before_package$
+^data-raw$
+^_pkgdown[.]yml$
+^.*[.]Rproj$
+^vignettes/.*[.]html$
+^diffdriver_.*[.]tar[.]gz$
+^tests/testthat/test[.]R$
+^tests/testthat/test-simulate_binary[.]R$
+^tests/testthat[.]R$
+^data$
+^cran-comments[.]md$

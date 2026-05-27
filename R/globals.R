@@ -1,0 +1,32 @@
+# Suppress R CMD check notes for data.table/non-standard evaluation variables.
+if (getRversion() >= "2.15.1") {
+  utils::globalVariables(c(
+    ".",
+    "Chromosome",
+    "Position_shifted_left",
+    "Position_shifted_right",
+    "SampleID",
+    "agg_var",
+    "allmu",
+    "allsd",
+    "alt",
+    "baseline",
+    "chrom",
+    "functypecode",
+    "functypecode8",
+    "genename",
+    "i.Position",
+    "i.SampleID",
+    "l",
+    "lambda",
+    "mutpos.e0",
+    "mutpos.e1",
+    "n_match",
+    "npos.e0",
+    "npos.e1",
+    "nttypecode",
+    "posidx",
+    "ref",
+    "y"
+  ))
+}

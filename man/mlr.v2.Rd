@@ -6,6 +6,15 @@
 \usage{
 mlr.v2(mut, e, nmut, covariates = 1)
 }
+\arguments{
+\item{mut}{Mutation data.}
+
+\item{e}{Phenotype or context variable.}
+
+\item{nmut}{Number of mutations.}
+
+\item{covariates}{Optional covariates included in the model.}
+}
 \description{
 gene level multiple linear regression, correcting for total number of mutations
 }

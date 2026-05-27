@@ -6,6 +6,13 @@
 \usage{
 mlr(mut, e, covariates = rep(1, length(e)))
 }
+\arguments{
+\item{mut}{Mutation data.}
+
+\item{e}{Phenotype or context variable.}
+
+\item{covariates}{Optional covariates included in the model.}
+}
 \description{
 gene level multiple linear regression
 }

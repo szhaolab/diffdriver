@@ -17,6 +17,27 @@ optifix(
   hessian = FALSE
 )
 }
+\arguments{
+\item{par}{Initial values for the parameters to be optimized.}
+
+\item{fixed}{Logical or index vector indicating fixed parameters.}
+
+\item{fn}{Function to be minimized.}
+
+\item{gr}{Optional gradient function.}
+
+\item{...}{Additional arguments passed to \code{fn} and \code{gr}.}
+
+\item{method}{Optimization method.}
+
+\item{lower}{Lower bounds for parameters.}
+
+\item{upper}{Upper bounds for parameters.}
+
+\item{control}{Control parameters passed to optimization.}
+
+\item{hessian}{Logical; whether to return the Hessian matrix.}
+}
 \description{
 its like optim, but with fixed parameters.
 }

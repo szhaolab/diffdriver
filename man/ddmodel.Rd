@@ -16,6 +16,10 @@ should match the columns of \code{mut} and \code{mr}}
 
 \item{fe, }{a vector, increased mutation rate at each position, depending on e (log scale),
 should match the rows of \code{mut} and \code{mr}}
+
+\item{label}{A label for the phenotype or context variable.}
+
+\item{...}{Additional arguments passed to internal functions.}
 }
 \description{
 This model is applied on data of a single gene. It will infer effect size for both sample-level variable and positional level functional annotations. We used an EM algorithm to infer parameters.

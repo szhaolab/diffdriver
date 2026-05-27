@@ -6,6 +6,11 @@
 \usage{
 genebinom(mut, e)
 }
+\arguments{
+\item{mut}{Mutation data.}
+
+\item{e}{Phenotype or context variable.}
+}
 \description{
 gene level binomial test
 }

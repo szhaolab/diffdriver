@@ -1,25 +1,24 @@
 Package: diffdriver
 Type: Package
-Title: Identify differential selection
+Title: Identify Differential Selection
 Version: 0.1.7
 Authors@R: c(
-    person("Siming", "Zhao", , "siming.zhao06@gmail.com", role = c("aut", "cre")),
+    person("Siming", "Zhao", , "siming.zhao@dartmouth.edu", role = c("aut", "cre")),
     person("Jie", "Zhou", role = "aut"),
     person("Qirui", "Zhang", role = "aut")
   )
 Maintainer: Siming Zhao <siming.zhao@dartmouth.edu>
-Description: This package implements a statistical method to detect differential selection of somatic mutations under different environments
-License: MIT 
+Description: Implements a statistical method to detect differential selection of somatic mutations under different environments.
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-	Matrix,
-	stats,
-	data.table,
-	plyr,
-	brglm,
-  fastTopics,
-  matrixStats
+    Matrix,
+    stats,
+    data.table,
+    brglm,
+    fastTopics,
+    SQUAREM
 Suggests: 
     knitr,
     rmarkdown,
@@ -28,5 +27,5 @@ Suggests:
 RoxygenNote: 7.2.3
 Config/testthat/edition: 3
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5.0)
 VignetteBuilder: knitr

@@ -8,6 +8,13 @@
 \usage{
 ddmcode(matrixlist, selectvars, functypecodelevel = NULL)
 }
+\arguments{
+\item{matrixlist}{A list of mutation or annotation matrices.}
+
+\item{selectvars}{Variables selected for the model.}
+
+\item{functypecodelevel}{Functional annotation code level.}
+}
 \description{
 Add intercept, if have functtypecode, then code and move to the front.
  different from driverMAPS! only allows

@@ -14,6 +14,21 @@ plot_mut(
   output_dir = "."
 )
 }
+\arguments{
+\item{gene_name}{Gene name to plot.}
+
+\item{mut}{Mutation data.}
+
+\item{pheno}{Phenotype or context data.}
+
+\item{totalnttype}{Total number of nucleotide context types.}
+
+\item{anno_dir}{Directory containing annotation files.}
+
+\item{output_prefix}{Prefix for output files.}
+
+\item{output_dir}{Directory for output files.}
+}
 \description{
 plot phenotype, mutation and annotation for a gene across samples
 }
