@@ -81,7 +81,7 @@ dd_EM_ordinary <- function(beta0 = 0, alpha = c(0,0), rate.n, rate.s0, ll.n, mut
   for (i in 1:maxit){
     ll <- dd_loglik(p, rate.s0, ll.n, mutidx,e)
     ll_rec[i] <- ll
-    cat("iteration ", i,"; loglikelihood:", ll, "\n")
+    message("iteration ", i, "; loglikelihood: ", ll)
     pnew <- dd_EM_update(p, rate.n, rate.s0, ll.n, mutidx, type = type,mut=mut,e=e)
     p_rec <- rbind(p_rec, pnew)
 

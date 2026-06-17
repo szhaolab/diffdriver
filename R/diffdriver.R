@@ -58,7 +58,7 @@ diffdriver= function(gene,
                      k = 6,
                      totalnttype = 96,
                      BMRmode = c("signature", "regular"),
-                     output_dir =".",
+                     output_dir = tempdir(),
                      output_prefix = "diffdriver_results"){
 
   # ------- SET UP ----------
@@ -69,14 +69,14 @@ diffdriver= function(gene,
                       coltype = acoltype,
                       totalntype = totalnttype)
 
-  dir.create(output_dir)
+  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
   outputbase <- paste0(output_dir, "/", output_prefix)
 
   # Read in silent mutation data and infer BMR
   # note silent mutations from all samples in `mut` are used in getting
   # BMR parameter estimates, not just the ones with phenotype info.
-  print("Infer parameters in background mutation rate model")
+  message("Infer parameters in background mutation rate model")
 
   BMRres <- matrixlistToBMR(afileinfo, mut = mut, BMRmode, k=k, outputbase)
 
@@ -90,7 +90,7 @@ diffdriver= function(gene,
   }
 
   # ------- Prep data for target genes----------
-  print("Start to prepare input data for target genes ...")
+  message("Start to prepare input data for target genes ...")
 
   rdata <- prep_positional_data(gene, afileinfo, BMRreg = BMRreg, output_prefix = output_prefix, output_dir =  output_dir)
   fanno <-  rdata$fanno
@@ -137,7 +137,7 @@ diffdriver= function(gene,
   # run diffdriver for each gene
   res <- list()
   for (g in names(bmrallg)) {
-    print(paste0("Start to process gene: ", g))
+    message(paste0("Start to process gene: ", g))
     rig <- riallg[[g]]
     rig$ridx <- 1:dim(rig)[1]
     muti <- na.omit(ci[rig[mut, on = c("chrom"= "Chromosome", "start" = "Position",  "ref" = "Ref",  "alt"= "Alt")], on = "SampleID"])
@@ -193,7 +193,7 @@ diffdriver= function(gene,
   resdf[,c("mut.E1", "mut.E0", "E1", "E0")] <- do.call(rbind, lapply(lapply(res, '[[', "fisher"), '[[',"count"))
   write.table(resdf, file = paste0(outputbase,"_", cdata$phename, "_resdd.txt"), quote = F, col.names = T, row.names = T)
 
-  print("Finished.")
+  message("Finished.")
 
   return(resdf)
 }

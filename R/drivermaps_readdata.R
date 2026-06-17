@@ -65,7 +65,7 @@ ddmread <- function(afileinfo, yfileinfo, selectvars, selectmuttype, readinvars 
 #'  functtypecode =7 ||8 when functypecode is included in selectvars.
 ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
   selectvars <- selectvars[selectvars !="nttypecode"]
-  print("coding...")
+  message("coding...")
   totalnttype <- length(matrixlist)
   for (j in 1:totalnttype){
     anno <- matrixlist[[j]][[1]]
@@ -86,9 +86,9 @@ ddmcode <- function(matrixlist, selectvars, functypecodelevel = NULL){
 ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"),
                        qnvarimpute=c(-1.8), cvarimpute = 0, fixmusd=NULL){
   totalnttype <- length(matrixlist)
-  print("processing ...")
-  print("for qnvars, filling in missing values ...")
-  print("for cvars (0/1 categories), filling in missing values ...")
+  message("processing ...")
+  message("for qnvars, filling in missing values ...")
+  message("for cvars (0/1 categories), filling in missing values ...")
   for (j in 1:totalnttype){
     anno <- matrixlist[[j]][[1]]
     innames <- colnames(anno)
@@ -139,9 +139,9 @@ ddmprocess <- function(matrixlist, qnvars = c("expr","repl","hic"),
   if (!is.null(fixmusd)){
     load(fixmusd)
   } else {
-    print("missing mu and sd")
+    message("missing mu and sd")
   }
-  print("normalizing categorical variables in annotation matrix ...")
+  message("normalizing categorical variables in annotation matrix ...")
   for (j in 1:totalnttype){
     anno <- matrixlist[[j]][[1]]
     for (cvar in cvars) set(anno, j = cvar, value = (anno[[cvar]] - allmu[cvar])/allsd[cvar])

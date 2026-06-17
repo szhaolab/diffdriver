@@ -14,3 +14,29 @@ genefisher(mut, e)
 \description{
 gene level fisher's exact test
 }
+\value{
+A list with the following elements:
+\describe{
+  \item{\code{pvalue}}{The p-value from a gene-level Fisher's exact test.}
+  \item{\code{count}}{A numeric vector \code{c(gmutc, gmutn, mu.c, mu.n)},
+  where \code{gmutc} and \code{gmutn} are mutation counts in the two phenotype
+  groups, and \code{mu.c} and \code{mu.n} are the corresponding numbers of
+  samples.}
+}
+}
+\examples{
+# Synthetic mutation matrix: rows are positions and columns are samples.
+mut <- matrix(
+  c(
+    1, 0, 0, 1, 0, 0,
+    0, 1, 0, 0, 1, 0
+  ),
+  nrow = 2,
+  byrow = TRUE
+)
+e <- c(0, 0, 0, 1, 1, 1)
+
+result <- genefisher(mut, e)
+result$pvalue
+result$count
+}

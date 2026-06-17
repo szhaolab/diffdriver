@@ -11,7 +11,7 @@ plot_mut(
   totalnttype = 96,
   anno_dir = ".",
   output_prefix = "plot",
-  output_dir = "."
+  output_dir = tempdir()
 )
 }
 \arguments{
@@ -27,8 +27,40 @@ plot_mut(
 
 \item{output_prefix}{Prefix for output files.}
 
-\item{output_dir}{Directory for output files.}
+\item{output_dir}{Directory for output files. Defaults to \code{tempdir()}.}
 }
 \description{
 plot phenotype, mutation and annotation for a gene across samples
+}
+\value{
+A numeric vector returned by the final \code{barplot()} call, giving the
+coordinates of the plotted bars. The function is primarily called for its side
+effect of drawing mutation and phenotype summary plots for the selected gene.
+}
+\examples{
+phenof <- system.file(
+  "extdata", "example_phenotypes.txt",
+  package = "diffdriver"
+)
+mutf <- system.file(
+  "extdata", "example_mutations.txt",
+  package = "diffdriver"
+)
+
+pheno <- read.table(phenof, header = TRUE)
+mut <- read.table(mutf, header = TRUE)
+
+\dontrun{
+# Download the annotation files and replace this with their directory.
+annodir <- "/path/to/annodir9"
+
+plot_mut(
+  gene_name = "PIK3CA",
+  mut = mut,
+  pheno = pheno,
+  totalnttype = 9,
+  anno_dir = annodir,
+  output_dir = tempdir()
+)
+}
 }

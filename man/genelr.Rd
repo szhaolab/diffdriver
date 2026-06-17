@@ -16,3 +16,27 @@ genelr(mut, e, covariates = rep(1, length(e)))
 \description{
 gene level logistic regression
 }
+\value{
+A list with the following elements:
+\describe{
+  \item{\code{res}}{The summary object from the fitted logistic regression model
+  \code{glm(e ~ dstatus + covariates, family = binomial(link = "logit"))}.}
+  \item{\code{pvalue}}{The p-value for the mutation-status coefficient
+  \code{dstatus}.}
+}
+}
+\examples{
+# Synthetic mutation matrix: rows are positions and columns are samples.
+mut <- matrix(
+  c(
+    1, 0, 0, 1, 0, 0,
+    0, 1, 0, 0, 1, 0
+  ),
+  nrow = 2,
+  byrow = TRUE
+)
+e <- c(0, 0, 0, 1, 1, 1)
+
+result <- genelr(mut, e)
+result$pvalue
+}

@@ -18,3 +18,30 @@ mlr.v2(mut, e, nmut, covariates = 1)
 \description{
 gene level multiple linear regression, correcting for total number of mutations
 }
+\value{
+A list with the following elements:
+\describe{
+  \item{\code{res}}{The summary object from the fitted linear model
+  \code{lm(e ~ dstatus + nmut + covariates)}.}
+  \item{\code{pvalue}}{The p-value for the mutation-status coefficient
+  \code{dstatus}, after adjusting for total mutation count and covariates.}
+}
+}
+\examples{
+# Synthetic mutation matrix: rows are positions and columns are samples.
+mut <- matrix(
+  c(
+    1, 0, 0, 1, 0, 0,
+    0, 1, 0, 0, 1, 0
+  ),
+  nrow = 2,
+  byrow = TRUE
+)
+e <- c(0, 0, 0, 1, 1, 1)
+
+# Synthetic per-sample mutation counts.
+nmut <- c(3, 4, 5, 6, 7, 8)
+
+result <- mlr.v2(mut, e, nmut)
+result$pvalue
+}

@@ -12,7 +12,7 @@ diffdriver(
   k = 6,
   totalnttype = 96,
   BMRmode = c("signature", "regular"),
-  output_dir = ".",
+  output_dir = tempdir(),
   output_prefix = "diffdriver_results"
 )
 }
@@ -62,10 +62,55 @@ this will model individual level BMR, this is the default. The second one is
 "regular", this assumes BMR is the same across individuals, only models
 position-level difference.}
 
-\item{output_dir}{The path to output directory}
+\item{output_dir}{The path to the output directory. Defaults to \code{tempdir()}.}
 
 \item{output_prefix}{The prefix being added to the output file names.}
 }
 \description{
 This function runs diffDriver.
+}
+\value{
+A data frame with one row per tested gene. The returned columns include
+\code{dd.p}, \code{mlr.p}, \code{mlr.v2.p}, \code{fisher.p}, \code{binom.p},
+and \code{lr.p}, which are p-values from DiffDriver and comparator methods;
+the corresponding \code{.fdr} columns, which contain Benjamini-Hochberg adjusted
+p-values; and \code{mut.E1}, \code{mut.E0}, \code{E1}, and \code{E0}, which
+summarize mutation and sample counts in the two phenotype groups used by the
+Fisher test.
+}
+\examples{
+phenof <- system.file(
+  "extdata", "example_phenotypes.txt",
+  package = "diffdriver"
+)
+genef <- system.file(
+  "extdata", "example_gene.txt",
+  package = "diffdriver"
+)
+mutf <- system.file(
+  "extdata", "example_mutations.txt",
+  package = "diffdriver"
+)
+
+pheno <- read.table(phenof, header = TRUE)
+gene <- read.table(genef, header = FALSE)
+mut <- read.table(mutf, header = TRUE)
+
+\dontrun{
+# Download the annotation files and replace this with their directory.
+annodir <- "/path/to/annodir96"
+
+result <- diffdriver(
+  gene = gene,
+  mut = mut,
+  pheno = pheno,
+  anno_dir = annodir,
+  k = 6,
+  totalnttype = 96,
+  BMRmode = "signature",
+  output_dir = tempdir(),
+  output_prefix = "diffdriver_example"
+)
+result
+}
 }

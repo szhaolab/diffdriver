@@ -1,5 +1,5 @@
 
-prep_positional_data <- function(gene, afileinfo, BMRreg = NULL, output_prefix = NULL, output_dir = "."){
+prep_positional_data <- function(gene, afileinfo, BMRreg = NULL, output_prefix = NULL, output_dir = tempdir()){
   gene <- data.frame(gene)
   fixmusdfile <- system.file("extdata", "colmu_sd_funct78.Rdata", package = "diffdriver")
   genef <- tempfile(output_prefix, tmpdir = output_dir )
@@ -53,12 +53,12 @@ prep_pheno_mut_data <- function(mut, pheno, add_dt = NULL){
   # sample annotation (pheno):data.table, with columns BMR label, No. syn and phenotype.
   pheno <- data.table::data.table(pheno)
   pheno <- pheno[, 1:2]
-  print("Only keeping the first two columns of the phenotype data frame.")
+  message("Only keeping the first two columns of the phenotype data frame.")
 
 
   colnames(pheno)[2] <- gsub(" ", "_", colnames(pheno)[2])
   phename= colnames(pheno)[2]
-  print(paste0("phenotype name is ", phename ))
+  message(paste0("phenotype name is ", phename))
 
   shared=intersect(mut$SampleID,pheno$SampleID)
   if (length(shared) < 10){
@@ -80,7 +80,7 @@ prep_pheno_mut_data <- function(mut, pheno, add_dt = NULL){
     pheno <- pheno[match(ci$SampleID, pheno$SampleID),]
   }
 
-  print(paste0("number of samples shared in phenotype and mutation file: ", dim(pheno)[1]))
+  message(paste0("number of samples shared in phenotype and mutation file: ", dim(pheno)[1]))
 
   return(list("pheno" = pheno,
               "mut"   = mut,

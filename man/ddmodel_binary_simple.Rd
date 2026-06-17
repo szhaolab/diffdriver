@@ -22,3 +22,35 @@ This function uses the model as cmodel.frac,
  but generalizes to take more than 1 functional categories.
  This model is applied on data of a single gene. This should give the same results as ddmodel_binary defined above.
 }
+\value{
+A list with the following elements:
+\describe{
+  \item{\code{pvalue}}{The likelihood-ratio test p-value comparing the null and
+  alternative binary-phenotype models.}
+  \item{\code{null.eta0}}{The fitted null-model parameter.}
+  \item{\code{alt.eta}}{The fitted alternative-model parameters for the two
+  phenotype groups.}
+  \item{\code{null.ll}}{The maximized log-likelihood under the null model.}
+  \item{\code{alt.ll}}{The maximized log-likelihood under the alternative model.}
+}
+}
+\examples{
+# Synthetic mutation matrix: rows are positions and columns are samples.
+mut <- matrix(
+  c(
+    1, 0, 0, 0, 0, 0, 1, 0,
+    0, 0, 0, 1, 0, 0, 0, 0,
+    0, 1, 0, 0, 0, 0, 0, 1
+  ),
+  nrow = 3,
+  byrow = TRUE
+)
+e <- c(0, 0, 0, 0, 1, 1, 1, 1)
+
+# Background mutation rates and functional effects are on the log scale.
+bmr <- matrix(log(0.001), nrow = nrow(mut), ncol = ncol(mut))
+fe <- log(c(2, 2, 2))
+
+result <- ddmodel_binary_simple(mut, e, bmr, fe)
+result$pvalue
+}

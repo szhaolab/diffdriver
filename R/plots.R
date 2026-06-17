@@ -1,7 +1,7 @@
 
 #' @title plot phenotype, mutation and annotation for a gene across samples
 #' @export
-plot_mut <- function(gene_name, mut, pheno, totalnttype =96, anno_dir = ".", output_prefix = "plot", output_dir = "."){
+plot_mut <- function(gene_name, mut, pheno, totalnttype =96, anno_dir = ".", output_prefix = "plot", output_dir = tempdir()){
   mycolorsori <- c("#FF3D2E","#2b8cbe","#fdae61","#41ab5d","pink","#8C2DA6","#a65628")
 
   afileinfo <- list(file = file.path(anno_dir, paste0("anno", totalnttype, "_nttypeXXX_annodata.txt")),
@@ -31,6 +31,8 @@ plot_mut <- function(gene_name, mut, pheno, totalnttype =96, anno_dir = ".", out
   rownames(df) <- c("Phenotype", "Nonsyn", "LoF", "Cons.", "#Mut")
   df <- df[,order(df["#Mut",])]
   df <- df[,order(df["Phenotype",])]
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar), add = TRUE)
   par(mfrow=c(dim(df)[1],1), mar=c(0.5,5,0.5,1))
   if (length(unique(df[1,]))==2) {
     # binary phenotype

@@ -24,3 +24,44 @@ should match the rows of \code{mut} and \code{mr}}
 \description{
 This model is applied on data of a single gene. It will infer effect size for both sample-level variable and positional level functional annotations. We used an EM algorithm to infer parameters.
 }
+\value{
+A list with the following elements:
+\describe{
+  \item{\code{pvalue}}{The likelihood-ratio test p-value comparing the null
+  model without a context effect to the alternative model with a context effect.}
+  \item{\code{res.null}}{A list returned by the null-model fit. It contains
+  \code{loglikelihood}, \code{beta0}, and \code{alpha}.}
+  \item{\code{res.alt}}{A list returned by the alternative-model fit. It contains
+  \code{loglikelihood}, \code{beta0}, and \code{alpha}.}
+}
+}
+\examples{
+# Synthetic mutation matrix: rows are positions and columns are samples.
+mut <- matrix(0, nrow = 6, ncol = 20)
+
+mut[1, 1] <- 1
+mut[2, 5] <- 1
+
+mut[c(1, 2), 11] <- 1
+mut[c(2, 3), 12] <- 1
+mut[c(3, 4), 13] <- 1
+mut[c(4, 5), 14] <- 1
+mut[c(5, 6), 15] <- 1
+mut[c(1, 6), 16] <- 1
+mut[c(1, 3), 17] <- 1
+mut[c(2, 4), 18] <- 1
+mut[c(3, 5), 19] <- 1
+mut[c(4, 6), 20] <- 1
+
+e <- c(rep(0, 10), rep(1, 10))
+
+# Mutation rates and functional effects are on the log scale.
+mr <- matrix(log(0.002), nrow = nrow(mut), ncol = ncol(mut))
+fe <- rep(log(3), nrow(mut))
+
+# Each row represents a separate mutation position.
+label <- factor(seq_len(nrow(mut)))
+
+result <- ddmodel(mut, e, mr, fe, label = label)
+result$pvalue
+}
