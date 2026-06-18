@@ -14,10 +14,11 @@ should match the columns of \code{mut} and \code{mr}}
 
 \item{mr}{a matrix, mutation rate of each sample at each mutation (log scale) that is not dependent on sample level factor}
 
-\item{fe, }{a vector, increased mutation rate at each position, depending on e (log scale),
+\item{fe}{a vector, increased mutation rate at each position, depending on e (log scale),
 should match the rows of \code{mut} and \code{mr}}
 
-\item{label}{A label for the phenotype or context variable.}
+\item{label}{A vector or factor of length \code{nrow(mut)} identifying
+mutation-position rows to be grouped and aggregated.}
 
 \item{...}{Additional arguments passed to internal functions.}
 }
