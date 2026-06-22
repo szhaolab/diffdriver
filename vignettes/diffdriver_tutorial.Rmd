@@ -64,8 +64,11 @@ list.files(annodir)
 
 # Run diffdriver
 
+To ensure that the numerical results are reproducible, this tutorial uses a fixed random seed.
+
 ```{r}
 # library(diffdriver)
+set.seed(0)
 output_dir <- "/tmp/diffdriver_output"
 ```
 
