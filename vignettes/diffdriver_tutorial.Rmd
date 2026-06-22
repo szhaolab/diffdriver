@@ -9,6 +9,7 @@ knitr::opts_chunk$set(
   warning = FALSE, 
   message = FALSE
 )
+set.seed(0)
 ```
 
 # Environmental requirement
@@ -59,22 +60,23 @@ list.files(annodir)
 
 # Run diffdriver
 
+To ensure that the numerical results are reproducible, this tutorial uses a fixed random seed.
+
 ```{r}
 # library(diffdriver)
+set.seed(0)
 output_dir <- "/tmp/diffdriver_output"
 ```
 
 With signature adjustment (`BMRmode = "signature"`), which is the default mode, it will need around 15min to estimate parameters in background model. Please use the provided the annotation folder with 96-annotation files when running with the "signature mode".
 ```{r}
 library(diffdriver)
-set.seed(0)
 res <- diffdriver(gene = gene, mut= mut, pheno = pheno, anno_dir = "/Volumes/Szhao/library/diffdriver_anno/annodir96", k=6, totalnttype = 96, BMRmode = "signature", output_dir = output_dir, output_prefix = "testdiffdriver_sig")
 res
 ```
 
 Without signature adjustment (`BMRmode = "regular"`), it will need around 15min to estimate parameters in background model. You can use the provided the annotation folder with 9-annotation files or 96-annotation files. The example below uses 96-annotation files. When total number of mutations is low, one should use 9-annotation files.
 ```{r}
-set.seed(0)
 res <- diffdriver(gene = gene, mut= mut, pheno = pheno,  anno_dir = "/Volumes/Szhao/library/diffdriver_anno/annodir96", totalnttype = 96, BMRmode = "regular", output_dir = output_dir, output_prefix = "testdiffdriver_reg")
 res
 ```
